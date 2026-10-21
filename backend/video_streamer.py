@@ -32,41 +32,41 @@ class AutonomousVideoStreamer:
         self.running = False
         self.thread: Optional[threading.Thread] = None
 
-        self.venue_name = "METROPOLITAN ARENA & TRANSIT INTERCHANGE"
+        self.venue_name = "GRAND CENTRAL TERMINAL // NYC METROPOLITAN TRANSIT"
         self.base_dir = Path(__file__).resolve().parent.parent / "data"
 
         self.channels = {
             "cam1": {
-                "file": "crowd_sample.mp4",
+                "file": "gct_cam1_main_concourse.mp4",
                 "zone": "gate_a",
                 "tag": "CAM 01",
-                "location": "NORTH PORTICO // GATE A TURNSTILES",
+                "location": "MAIN CONCOURSE // CENTRAL CLOCK & PLATFORMS",
                 "sensor": "PTZ-4K-01",
                 "optical": "FL: 4.8mm | FOV: 84° | ELEV: -24°",
             },
             "cam2": {
-                "file": "crowd_demo.mp4",
+                "file": "gct_cam2_graybar_passage.mp4",
                 "zone": "corridor_b",
                 "tag": "CAM 02",
-                "location": "CENTRAL SPINE // CORRIDOR B CONCOURSE",
+                "location": "GRAYBAR PASSAGE // EAST EGRESS & STAIRS",
                 "sensor": "DOME-4K-02",
                 "optical": "FL: 6.2mm | FOV: 72° | ELEV: -18°",
             },
             "cam3": {
-                "file": "dense_crowd.mp4",
+                "file": "gct_cam3_shuttle_passage.mp4",
                 "zone": "exit_c",
                 "tag": "CAM 03",
-                "location": "SOUTH PORTAL // EMERGENCY EXIT C",
+                "location": "SHUTTLE PASSAGE // LOWER CONCOURSE EGRESS",
                 "sensor": "FIXED-WIDE-03",
-                "optical": "FL: 3.6mm | FOV: 90° | ELEV: -32°",
+                "optical": "FL: 2.8mm | FOV: 110° | ELEV: -12°",
             },
             "cam4": {
-                "file": "crowd_high_angle.webm",
+                "file": "gct_cam4_vanderbilt_hall.mp4",
                 "zone": "ground_e",
                 "tag": "CAM 04",
-                "location": "GRAND ATRIUM // BUFFER CONCOURSE E",
-                "sensor": "HIGHMAST-PTZ-04",
-                "optical": "FL: 12.0mm | FOV: 110° | ELEV: -45°",
+                "location": "VANDERBILT HALL // 42ND ST PASSAGE ARCHWAYS",
+                "sensor": "DOME-360-04",
+                "optical": "FL: 3.6mm | FOV: 96° | ELEV: -30°",
             },
         }
 

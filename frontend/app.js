@@ -110,11 +110,11 @@ class CrowdParticleSystem {
         this.turnstilesOpen = true;
 
         this.zones = {
-            gate_a: { x: 50, y: 45, w: 200, h: 150, count: 2, density: 0.33, state: 'Safe' },
-            corridor_b: { x: 290, y: 75, w: 200, h: 140, count: 1, density: 0.12, state: 'Safe' },
-            exit_c: { x: 540, y: 45, w: 200, h: 150, count: 2, density: 0.33, state: 'Safe' },
-            ground_e: { x: 50, y: 240, w: 440, h: 200, count: 3, density: 0.15, state: 'Safe' },
-            counter_d: { x: 540, y: 240, w: 200, h: 200, count: 2, density: 0.33, state: 'Safe' },
+            gate_a: { x: 230, y: 155, w: 240, h: 150, count: 2, density: 0.33, state: 'Safe' },
+            corridor_b: { x: 490, y: 145, w: 280, h: 115, count: 1, density: 0.12, state: 'Safe' },
+            exit_c: { x: 25, y: 270, w: 185, h: 175, count: 2, density: 0.33, state: 'Safe' },
+            ground_e: { x: 230, y: 325, w: 310, h: 120, count: 3, density: 0.15, state: 'Safe' },
+            counter_d: { x: 25, y: 55, w: 185, h: 200, count: 2, density: 0.33, state: 'Safe' },
         };
 
         if (this.ctx) {
@@ -1374,11 +1374,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const DEFAULT_STEWARD_DISTRIBUTION = {
         total_stewards: 12,
         allocations: [
-            { zone_id: 'gate_a', zone_name: 'Gate A (North Portico)', assigned_stewards: 4, post_instructions: 'Inflow crowd throttling & 8 turnstile lanes' },
-            { zone_id: 'corridor_b', zone_name: 'Concourse Spine B', assigned_stewards: 2, post_instructions: 'Bidirectional pedestrian separation & wayfinding' },
-            { zone_id: 'exit_c', zone_name: 'Emergency Exit C', assigned_stewards: 3, post_instructions: 'Egress unblocking & stairwell safety patrol' },
-            { zone_id: 'counter_d', zone_name: 'Ticketing Concourse D', assigned_stewards: 1, post_instructions: 'Queue serpentine stanchions & ticketing windows' },
-            { zone_id: 'ground_e', zone_name: 'Grand Buffer Atrium E', assigned_stewards: 2, post_instructions: 'Central dispersal plaza & medical triage station' }
+            { zone_id: 'gate_a', zone_name: 'Main Concourse (Central Clock)', assigned_stewards: 4, post_instructions: 'Platform surge management & central information kiosk' },
+            { zone_id: 'corridor_b', zone_name: 'Graybar Passage', assigned_stewards: 2, post_instructions: 'Lexington corridor pedestrian separation & wayfinding' },
+            { zone_id: 'exit_c', zone_name: 'Shuttle Passage & 42nd St', assigned_stewards: 3, post_instructions: 'Subway transfer egress unblocking & stairwell patrol' },
+            { zone_id: 'counter_d', zone_name: 'Biltmore Concourse Gates', assigned_stewards: 1, post_instructions: 'Commuter gate ticket wickets & queue stanchions' },
+            { zone_id: 'ground_e', zone_name: 'Vanderbilt Hall Plaza', assigned_stewards: 2, post_instructions: 'Public assembly buffer & Onassis foyer station' }
         ]
     };
     updateStewardAllocations(DEFAULT_STEWARD_DISTRIBUTION);
@@ -1388,8 +1388,9 @@ document.addEventListener('DOMContentLoaded', () => {
         generated_at: new Date().toISOString(),
         content: `### Executive Operational Summary
 - **Venue Operational Status**: **NORMAL / GREEN**
+- **Venue**: **Grand Central Terminal, NYC (MTA Transit Interchange)**
 - **Sectors Monitored**: 5 Integrated Sectors under active YOLOv8 computer vision & hydrodynamic density calculus.
-- **Egress & Safety Margin**: **100% NFPA 101 Compliant**. Emergency Exit C stairwell clear; free-flow capacity available across all 8 North Portico turnstiles.
+- **Egress & Safety Margin**: **100% NFPA 101 Compliant**. Shuttle Passage & Graybar arteries clear; free-flow capacity across all Main Concourse gates.
 - **Dynamic Stewards**: 12 Active Responders stationed across all key strategic choke points. Zero active critical directives.`
     };
     updateBriefing(DEFAULT_SAFETY_BRIEFING);
@@ -1533,11 +1534,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentChannel = 'cam1';
 
     const CAM_TITLES = {
-        cam1: 'CAM 01 // [SEC-01] NORTH PORTICO & GATE A TURNSTILES',
-        cam2: 'CAM 02 // [SEC-02] CENTRAL CONCOURSE SPINE B',
-        cam3: 'CAM 03 // [SEC-03] SOUTH MEZZANINE EMERGENCY EXIT C',
-        cam4: 'CAM 04 // [SEC-04] GRAND BUFFER PLAZA & ATRIUM E',
-        quad: 'AEGIS C2 // QUAD CCTV MATRIX // 4 SYNCHRONIZED FEEDS',
+        cam1: 'CAM 01 // [SEC-01] MAIN CONCOURSE CENTRAL CLOCK & PLATFORMS',
+        cam2: 'CAM 02 // [SEC-02] GRAYBAR PASSAGE EAST ARTERY',
+        cam3: 'CAM 03 // [SEC-03] SHUTTLE PASSAGE & LOWER EGRESS',
+        cam4: 'CAM 04 // [SEC-04] VANDERBILT HALL & 42ND ST PASSAGE',
+        quad: 'AEGIS C2 // GRAND CENTRAL TERMINAL QUAD CCTV MATRIX // 4 FEEDS',
     };
 
     function selectCameraChannel(camId) {

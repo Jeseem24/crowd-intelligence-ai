@@ -2,58 +2,58 @@
   "zones": [
     {
       "zone_id": "gate_a",
-      "zone_name": "Main Entry Gate A",
-      "zone_type": "Gate",
+      "zone_name": "Main Concourse (Central Clock)",
+      "zone_type": "Concourse",
       "priority_weight": 2.0,
       "floor_area_sqm": 6.0,
       "watch_threshold": 0.35,
       "warning_threshold": 0.60,
       "critical_threshold": 0.85,
-      "polygon": [[100, 50], [300, 50], [300, 200], [100, 200]]
+      "polygon": [[230, 155], [470, 155], [470, 305], [230, 305]]
     },
     {
       "zone_id": "corridor_b",
-      "zone_name": "Connecting Corridor B",
-      "zone_type": "Corridor",
+      "zone_name": "Graybar Passage (East Artery)",
+      "zone_type": "Passage",
       "priority_weight": 1.75,
       "floor_area_sqm": 8.0,
       "watch_threshold": 0.35,
       "warning_threshold": 0.60,
       "critical_threshold": 0.85,
-      "polygon": [[320, 100], [500, 100], [500, 250], [320, 250]]
+      "polygon": [[490, 145], [770, 145], [770, 260], [490, 260]]
     },
     {
       "zone_id": "exit_c",
-      "zone_name": "Emergency Exit C",
-      "zone_type": "Exit",
+      "zone_name": "Shuttle Passage (Subway Egress)",
+      "zone_type": "Egress",
       "priority_weight": 2.0,
       "floor_area_sqm": 6.0,
       "watch_threshold": 0.35,
       "warning_threshold": 0.60,
       "critical_threshold": 0.85,
-      "polygon": [[520, 50], [700, 50], [700, 200], [520, 200]]
+      "polygon": [[25, 270], [210, 270], [210, 445], [25, 445]]
     },
     {
       "zone_id": "counter_d",
-      "zone_name": "Ticket Counter D",
-      "zone_type": "Counter",
+      "zone_name": "Biltmore Concourse Gates",
+      "zone_type": "Gates",
       "priority_weight": 1.5,
       "floor_area_sqm": 6.0,
       "watch_threshold": 0.35,
       "warning_threshold": 0.60,
       "critical_threshold": 0.85,
-      "polygon": [[520, 270], [700, 270], [700, 420], [520, 420]]
+      "polygon": [[25, 55], [210, 55], [210, 255], [25, 255]]
     },
     {
       "zone_id": "ground_e",
-      "zone_name": "Open Ground Plaza E",
-      "zone_type": "General",
+      "zone_name": "Vanderbilt Hall (Public Atrium)",
+      "zone_type": "Atrium",
       "priority_weight": 1.0,
       "floor_area_sqm": 20.0,
       "watch_threshold": 0.35,
       "warning_threshold": 0.60,
       "critical_threshold": 0.85,
-      "polygon": [[100, 270], [500, 270], [500, 450], [100, 450]]
+      "polygon": [[230, 325], [540, 325], [540, 445], [230, 445]]
     }
   ],
   "adjacency": [
