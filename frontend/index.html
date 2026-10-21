@@ -121,9 +121,9 @@
                     
                     <!-- View Mode Toggle -->
                     <div class="view-toggle-group">
-                        <button id="view-map-btn" class="view-btn active" type="button">🗺️ Floor Map</button>
-                        <button id="view-cctv-btn" class="view-btn" type="button">📹 Live CCTV</button>
-                        <button id="view-split-btn" class="view-btn" type="button">⚡ Split Screen</button>
+                        <button id="view-split-btn" class="view-btn active" type="button">⚡ Split Screen</button>
+                        <button id="view-cctv-btn" class="view-btn" type="button">📹 CCTV Only</button>
+                        <button id="view-map-btn" class="view-btn" type="button">🗺️ Map Only</button>
                     </div>
                 </div>
 
@@ -135,7 +135,7 @@
                     <button id="layer-vectors-btn" class="layer-btn active" type="button" title="Wavefront Spillover Vectors">⚡ Flow Vectors</button>
                 </div>
 
-                <div class="spatial-views-wrapper" id="spatial-wrapper">
+                <div class="spatial-views-wrapper split" id="spatial-wrapper">
                     <!-- High-Tech Blueprint SVG + Particle Physics Canvas -->
                     <div class="map-container" id="map-subview">
                         <svg id="venue-map" viewBox="0 0 800 480" xmlns="http://www.w3.org/2000/svg">
@@ -227,16 +227,26 @@
                     </div>
 
                     <!-- Live CCTV Video Stream with Military-Grade HUD -->
-                    <div class="cctv-container hidden" id="cctv-subview">
+                    <div class="cctv-container" id="cctv-subview">
                         <div class="cctv-hud-header">
-                            <span class="cctv-rec-dot"></span>
-                            <span class="cctv-cam-title">CAM 01 // MAIN ENTRY GATE A (YOLOv8 DEEP-FIELD LIVE)</span>
-                            <span class="cctv-badge">25 FPS LIVE</span>
+                            <div class="cctv-header-top">
+                                <span class="cctv-rec-dot"></span>
+                                <span class="cctv-cam-title" id="cctv-cam-title">CAM 01 // MAIN ENTRY GATE A (YOLOv8 DEEP-FIELD LIVE)</span>
+                                <span class="cctv-badge">25 FPS LIVE</span>
+                            </div>
+                            <!-- Multi-Camera Tactical Channel Selector -->
+                            <div class="cctv-cam-selector">
+                                <button class="cctv-cam-btn active" data-cam="cam1" type="button">CAM 01: Gate A</button>
+                                <button class="cctv-cam-btn" data-cam="cam2" type="button">CAM 02: Corridor B</button>
+                                <button class="cctv-cam-btn" data-cam="cam3" type="button">CAM 03: Exit C</button>
+                                <button class="cctv-cam-btn" data-cam="cam4" type="button">CAM 04: Plaza E</button>
+                                <button class="cctv-cam-btn quad" data-cam="quad" type="button">🎛️ QUAD MATRIX</button>
+                            </div>
                         </div>
-                        <img id="cctv-stream-img" src="/api/video/feed" alt="Live CCTV Analytics Stream" class="cctv-stream-img">
+                        <img id="cctv-stream-img" src="/api/video/feed?channel=cam1" alt="Live CCTV Analytics Stream" class="cctv-stream-img">
                         <div class="cctv-hud-footer">
                             <span>ANALYTICS: YOLOv8 NANO + DUAL-STAGE SLICED INFERENCE</span>
-                            <span id="cctv-status-indicator">STATUS: CONNECTED</span>
+                            <span id="cctv-status-indicator">STATUS: CONNECTED (AUTONOMOUS MULTI-CAM)</span>
                         </div>
                     </div>
                 </div>

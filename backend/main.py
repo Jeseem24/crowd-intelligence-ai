@@ -76,6 +76,7 @@ class ConnectionManager:
 manager = ConnectionManager()
 risk_engine: Optional[RiskEngine] = None
 agent_daemon: Optional[SafetyAgentDaemon] = None
+video_streamer = None
 
 
 # --- Background Tasks ---
@@ -92,7 +93,7 @@ async def broadcast_venue_state_periodically():
 # --- App Lifecycle ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global risk_engine, agent_daemon
+    global risk_engine, agent_daemon, video_streamer
 
     # 1. Initialize SQLite Database
     init_db()
@@ -104,7 +105,15 @@ async def lifespan(app: FastAPI):
     agent_daemon = SafetyAgentDaemon(risk_engine, manager.broadcast)
     await agent_daemon.start()
 
-    # 4. Start periodic 1 Hz state broadcast
+    # 4. Initialize & Start Autonomous CCTV Video Streaming Engine
+    try:
+        from backend.video_streamer import AutonomousVideoStreamer
+        video_streamer = AutonomousVideoStreamer(risk_engine)
+        video_streamer.start()
+    except Exception as e:
+        print(f"⚠️ Video streamer init warning: {e}")
+
+    # 5. Start periodic 1 Hz state broadcast
     broadcast_task = asyncio.create_task(broadcast_venue_state_periodically())
 
     print("🚀 AI Crowd Safety & Decision Support Platform ONLINE!")
@@ -118,6 +127,9 @@ async def lifespan(app: FastAPI):
     broadcast_task.cancel()
     if agent_daemon:
         agent_daemon.stop()
+    if video_streamer:
+        video_streamer.stop()
+
 
 
 app = FastAPI(
@@ -438,24 +450,26 @@ async def upload_frame(request: Request):
 
 
 @app.get("/api/video/feed")
-async def video_feed():
-    """Streams MJPEG feed with minimal latency."""
+async def video_feed(channel: str = "cam1"):
+    """Streams live CCTV MJPEG feed with minimal latency."""
     async def frame_generator():
         standby_bytes = generate_standby_frame()
         last_sent_seq = -1
-        last_yield_time = 0.0
         while True:
             now = time.time()
-            if latest_frame_seq != last_sent_seq and latest_frame_jpeg:
-                data = latest_frame_jpeg if (now - last_frame_time) < 3.5 else standby_bytes
+            if latest_frame_seq != last_sent_seq and latest_frame_jpeg and (now - last_frame_time) < 3.0:
+                data = latest_frame_jpeg
                 last_sent_seq = latest_frame_seq
-                last_yield_time = now
                 yield (b"--frame\r\nContent-Type: image/jpeg\r\n\r\n" + data + b"\r\n")
-            elif (now - last_yield_time) > 1.2:
-                data = standby_bytes if (now - last_frame_time) >= 3.5 else (latest_frame_jpeg or standby_bytes)
-                last_yield_time = now
-                yield (b"--frame\r\nContent-Type: image/jpeg\r\n\r\n" + data + b"\r\n")
-            await asyncio.sleep(0.02)
+            elif video_streamer:
+                frame_data = video_streamer.get_latest_frame(channel)
+                if frame_data:
+                    yield (b"--frame\r\nContent-Type: image/jpeg\r\n\r\n" + frame_data + b"\r\n")
+                else:
+                    yield (b"--frame\r\nContent-Type: image/jpeg\r\n\r\n" + standby_bytes + b"\r\n")
+            else:
+                yield (b"--frame\r\nContent-Type: image/jpeg\r\n\r\n" + standby_bytes + b"\r\n")
+            await asyncio.sleep(0.04)
 
     return StreamingResponse(
         frame_generator(),
@@ -467,7 +481,6 @@ async def video_feed():
 # --- QR Code Citizen Access ---
 @app.get("/api/qr")
 async def get_qr_code():
-    import qrcode
     import io
     import socket
 
@@ -482,15 +495,29 @@ async def get_qr_code():
     port = os.getenv("BACKEND_PORT", "8000")
     url = f"http://{local_ip}:{port}/report.html"
 
-    qr = qrcode.QRCode(version=1, box_size=10, border=4)
-    qr.add_data(url)
-    qr.make(fit=True)
-    img = qr.make_image(fill_color="black", back_color="white")
-
-    buf = io.BytesIO()
-    img.save(buf, format="PNG")
-    buf.seek(0)
-    return StreamingResponse(buf, media_type="image/png", headers={"X-QR-URL": url})
+    try:
+        import qrcode
+        qr = qrcode.QRCode(version=1, box_size=10, border=4)
+        qr.add_data(url)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color="black", back_color="white")
+        buf = io.BytesIO()
+        img.save(buf, format="PNG")
+        buf.seek(0)
+        return StreamingResponse(buf, media_type="image/png", headers={"X-QR-URL": url})
+    except Exception:
+        import cv2
+        import numpy as np
+        # Generate clean QR fallback badge with OpenCV
+        badge = np.full((240, 240, 3), 255, dtype=np.uint8)
+        cv2.rectangle(badge, (10, 10), (230, 230), (0, 0, 0), 2)
+        cv2.rectangle(badge, (20, 20), (60, 60), (0, 0, 0), -1)
+        cv2.rectangle(badge, (180, 20), (220, 60), (0, 0, 0), -1)
+        cv2.rectangle(badge, (20, 180), (60, 220), (0, 0, 0), -1)
+        cv2.putText(badge, "CITIZEN BEACON", (35, 115), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 0), 1)
+        cv2.putText(badge, f"/report.html", (45, 140), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (80, 80, 80), 1)
+        _, png_buf = cv2.imencode(".png", badge)
+        return StreamingResponse(io.BytesIO(png_buf.tobytes()), media_type="image/png", headers={"X-QR-URL": url})
 
 
 # ============================================================

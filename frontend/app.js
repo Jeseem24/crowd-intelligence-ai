@@ -1490,6 +1490,36 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    // Multi-Camera Tactical Channel Selector
+    const camButtons = document.querySelectorAll('.cctv-cam-btn');
+    const camTitleEl = document.getElementById('cctv-cam-title');
+    let currentChannel = 'cam1';
+
+    const CAM_TITLES = {
+        cam1: 'CAM 01 // MAIN ENTRY GATE A (YOLOv8 DEEP-FIELD LIVE)',
+        cam2: 'CAM 02 // CONNECTING CORRIDOR B (TRANSIT LINK CHOKEPOINT)',
+        cam3: 'CAM 03 // EMERGENCY EXIT C (PRIMARY EGRESS ARTERY)',
+        cam4: 'CAM 04 // OPEN GROUND PLAZA E (BUFFER SECTOR CONCOURSE)',
+        quad: 'AEGIS QUAD MATRIX // 4-CAMERA SURVEILLANCE GRID',
+    };
+
+    camButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            soundEngine.playClick();
+            camButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const camId = btn.dataset.cam;
+            currentChannel = camId;
+            if (camTitleEl && CAM_TITLES[camId]) {
+                camTitleEl.textContent = CAM_TITLES[camId];
+            }
+            const streamImg = document.getElementById('cctv-stream-img');
+            if (streamImg) {
+                streamImg.src = `/api/video/feed?channel=${camId}&t=${Date.now()}`;
+            }
+        });
+    });
+
     // Spatial Monitoring View Switcher (Map / CCTV / Split Screen)
     const mapSub = document.getElementById('map-subview');
     const cctvSub = document.getElementById('cctv-subview');
@@ -1513,12 +1543,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (mapSub) mapSub.classList.add('hidden');
             if (cctvSub) cctvSub.classList.remove('hidden');
             if (spatialWrap) spatialWrap.classList.remove('split');
-            if (streamImg) streamImg.src = '/api/video/feed?t=' + Date.now();
+            if (streamImg) streamImg.src = `/api/video/feed?channel=${currentChannel}&t=` + Date.now();
         } else if (mode === 'split') {
             if (mapSub) mapSub.classList.remove('hidden');
             if (cctvSub) cctvSub.classList.remove('hidden');
             if (spatialWrap) spatialWrap.classList.add('split');
-            if (streamImg) streamImg.src = '/api/video/feed?t=' + Date.now();
+            if (streamImg) streamImg.src = `/api/video/feed?channel=${currentChannel}&t=` + Date.now();
         }
     }
 
@@ -1526,7 +1556,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (streamImg) {
         streamImg.onerror = () => {
             setTimeout(() => {
-                if (streamImg) streamImg.src = '/api/video/feed?t=' + Date.now();
+                if (streamImg) streamImg.src = `/api/video/feed?channel=${currentChannel}&t=` + Date.now();
             }, 1000);
         };
     }

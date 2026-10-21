@@ -548,14 +548,57 @@ main#main-content {
 }
 
 .cctv-hud-header {
-    background: rgba(10, 12, 18, 0.92);
-    padding: 8px 14px;
+    background: rgba(10, 12, 18, 0.94);
+    padding: 8px 12px;
     display: flex;
-    align-items: center;
-    gap: 10px;
+    flex-direction: column;
+    gap: 6px;
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
     border-bottom: 1px solid var(--border-hairline);
+}
+
+.cctv-header-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.cctv-cam-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.cctv-cam-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--text-secondary);
+    padding: 3px 9px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.cctv-cam-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+}
+
+.cctv-cam-btn.active {
+    background: rgba(0, 240, 255, 0.2);
+    border-color: rgba(0, 240, 255, 0.55);
+    color: #00f0ff;
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.25);
+}
+
+.cctv-cam-btn.quad {
+    border-color: rgba(99, 102, 241, 0.4);
+    color: #a5b4fc;
 }
 
 .cctv-rec-dot {
