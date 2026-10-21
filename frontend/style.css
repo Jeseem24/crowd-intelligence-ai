@@ -526,13 +526,14 @@ main#main-content {
 }
 
 .zone-poly {
-    transition: fill 0.4s var(--spring), stroke 0.4s var(--spring), stroke-width 0.3s ease;
+    transition: fill 0.4s var(--spring), stroke 0.4s var(--spring);
     cursor: pointer;
+    stroke-width: 1.2px;
 }
 
 .zone-poly:hover {
-    stroke-width: 3.5;
-    filter: drop-shadow(0 0 10px currentColor);
+    stroke-width: 1.8px;
+    filter: drop-shadow(0 0 6px currentColor);
 }
 
 /* CCTV Feed Viewport */

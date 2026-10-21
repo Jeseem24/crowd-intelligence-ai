@@ -140,364 +140,246 @@
                     <div class="map-container" id="map-subview">
                         <svg id="venue-map" viewBox="0 0 800 480" xmlns="http://www.w3.org/2000/svg">
                             <defs>
-                                <!-- CAD Blueprint Grid Patterns -->
-                                <pattern id="cad-grid-fine" width="10" height="10" patternUnits="userSpaceOnUse">
-                                    <path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255, 255, 255, 0.025)" stroke-width="0.5"/>
+                                <!-- Clean CAD Blueprint Grid Patterns -->
+                                <pattern id="cad-grid-fine" width="20" height="20" patternUnits="userSpaceOnUse">
+                                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255, 255, 255, 0.025)" stroke-width="0.6"/>
                                 </pattern>
-                                <pattern id="cad-grid-major" width="50" height="50" patternUnits="userSpaceOnUse">
-                                    <path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(99, 102, 241, 0.08)" stroke-width="0.8"/>
+                                <pattern id="cad-grid-major" width="100" height="100" patternUnits="userSpaceOnUse">
+                                    <path d="M 100 0 L 0 0 0 100" fill="none" stroke="rgba(99, 102, 241, 0.06)" stroke-width="0.8"/>
                                 </pattern>
 
                                 <!-- Camera Sightline Frustum Gradients -->
                                 <radialGradient id="cam1-fov-grad" cx="10%" cy="10%" r="90%">
-                                    <stop offset="0%" stop-color="rgba(0, 240, 255, 0.35)"/>
-                                    <stop offset="45%" stop-color="rgba(0, 240, 255, 0.12)"/>
-                                    <stop offset="100%" stop-color="rgba(0, 240, 255, 0.01)"/>
+                                    <stop offset="0%" stop-color="rgba(0, 240, 255, 0.25)"/>
+                                    <stop offset="60%" stop-color="rgba(0, 240, 255, 0.08)"/>
+                                    <stop offset="100%" stop-color="rgba(0, 240, 255, 0.005)"/>
                                 </radialGradient>
                                 <radialGradient id="cam2-fov-grad" cx="10%" cy="15%" r="85%">
-                                    <stop offset="0%" stop-color="rgba(99, 102, 241, 0.38)"/>
-                                    <stop offset="50%" stop-color="rgba(99, 102, 241, 0.14)"/>
-                                    <stop offset="100%" stop-color="rgba(99, 102, 241, 0.01)"/>
+                                    <stop offset="0%" stop-color="rgba(99, 102, 241, 0.25)"/>
+                                    <stop offset="60%" stop-color="rgba(99, 102, 241, 0.08)"/>
+                                    <stop offset="100%" stop-color="rgba(99, 102, 241, 0.005)"/>
                                 </radialGradient>
                                 <radialGradient id="cam3-fov-grad" cx="85%" cy="15%" r="85%">
-                                    <stop offset="0%" stop-color="rgba(244, 63, 94, 0.38)"/>
-                                    <stop offset="50%" stop-color="rgba(244, 63, 94, 0.14)"/>
-                                    <stop offset="100%" stop-color="rgba(244, 63, 94, 0.01)"/>
+                                    <stop offset="0%" stop-color="rgba(244, 63, 94, 0.25)"/>
+                                    <stop offset="60%" stop-color="rgba(244, 63, 94, 0.08)"/>
+                                    <stop offset="100%" stop-color="rgba(244, 63, 94, 0.005)"/>
                                 </radialGradient>
                                 <radialGradient id="cam4-fov-grad" cx="15%" cy="85%" r="85%">
-                                    <stop offset="0%" stop-color="rgba(16, 185, 129, 0.35)"/>
-                                    <stop offset="55%" stop-color="rgba(16, 185, 129, 0.12)"/>
-                                    <stop offset="100%" stop-color="rgba(16, 185, 129, 0.01)"/>
+                                    <stop offset="0%" stop-color="rgba(16, 185, 129, 0.22)"/>
+                                    <stop offset="60%" stop-color="rgba(16, 185, 129, 0.07)"/>
+                                    <stop offset="100%" stop-color="rgba(16, 185, 129, 0.005)"/>
                                 </radialGradient>
 
-                                <!-- Wayfinding Arrow Markers -->
-                                <marker id="arrow-flow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                                    <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#6366f1"/>
+                                <!-- Wayfinding Arrow Marker -->
+                                <marker id="arrow-flow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                                    <path d="M 0 2 L 7 5 L 0 8 z" fill="#6366f1" opacity="0.6"/>
                                 </marker>
                             </defs>
 
                             <!-- Deep Architectural Canvas Background -->
-                            <rect x="0" y="0" width="800" height="480" fill="#06080d"/>
+                            <rect x="0" y="0" width="800" height="480" fill="#07090e"/>
                             <rect x="0" y="0" width="800" height="480" fill="url(#cad-grid-fine)"/>
                             <rect x="0" y="0" width="800" height="480" fill="url(#cad-grid-major)"/>
 
-                            <!-- Architectural Perimeter Border -->
-                            <rect x="36" y="28" width="728" height="424" fill="none" stroke="rgba(255, 255, 255, 0.08)" stroke-width="1"/>
+                            <!-- Architectural Outer Perimeter Border -->
+                            <rect x="36" y="32" width="728" height="416" fill="none" stroke="rgba(255, 255, 255, 0.06)" stroke-width="1.2"/>
 
-                            <!-- Coordinate Datum Grid Bubbles (Top: 1-7, Left: A-D) -->
-                            <g class="cad-grid-bubbles" opacity="0.65" font-family="'JetBrains Mono', monospace" font-size="9" text-anchor="middle" dominant-baseline="middle" fill="#64748b">
-                                <circle cx="50" cy="16" r="8" fill="#0d111a" stroke="rgba(255,255,255,0.15)"/>
-                                <text x="50" y="16">1</text>
-                                <circle cx="150" cy="16" r="8" fill="#0d111a" stroke="rgba(255,255,255,0.15)"/>
-                                <text x="150" y="16">2</text>
-                                <circle cx="270" cy="16" r="8" fill="#0d111a" stroke="rgba(255,255,255,0.15)"/>
-                                <text x="270" y="16">3</text>
-                                <circle cx="390" cy="16" r="8" fill="#0d111a" stroke="rgba(255,255,255,0.15)"/>
-                                <text x="390" y="16">4</text>
-                                <circle cx="510" cy="16" r="8" fill="#0d111a" stroke="rgba(255,255,255,0.15)"/>
-                                <text x="510" y="16">5</text>
-                                <circle cx="640" cy="16" r="8" fill="#0d111a" stroke="rgba(255,255,255,0.15)"/>
-                                <text x="640" y="16">6</text>
-                                <circle cx="740" cy="16" r="8" fill="#0d111a" stroke="rgba(255,255,255,0.15)"/>
-                                <text x="740" y="16">7</text>
-
-                                <circle cx="20" cy="45" r="8" fill="#0d111a" stroke="rgba(255,255,255,0.15)"/>
-                                <text x="20" y="45">A</text>
-                                <circle cx="20" cy="140" r="8" fill="#0d111a" stroke="rgba(255,255,255,0.15)"/>
-                                <text x="20" y="140">B</text>
-                                <circle cx="20" cy="240" r="8" fill="#0d111a" stroke="rgba(255,255,255,0.15)"/>
-                                <text x="20" y="240">C</text>
-                                <circle cx="20" cy="380" r="8" fill="#0d111a" stroke="rgba(255,255,255,0.15)"/>
-                                <text x="20" y="380">D</text>
-                            </g>
-
-                            <!-- CAD Architectural Header Strip -->
+                            <!-- CAD Header (Clear of all rooms, y=20) -->
                             <g class="cad-header-title">
-                                <text x="45" y="40" fill="#94a3b8" font-size="10" font-family="'JetBrains Mono', monospace" font-weight="700" letter-spacing="0.08em">
-                                    METROPOLITAN ARENA &amp; TRANSIT INTERCHANGE // SECTOR 04: GRAND CONCOURSE &amp; EGRESS
+                                <text x="45" y="22" fill="#64748b" font-size="9.5" font-family="'JetBrains Mono', monospace" font-weight="700" letter-spacing="0.08em">
+                                    METROPOLITAN ARENA &amp; TRANSIT INTERCHANGE // SECTOR 04 BLUEPRINT
                                 </text>
-                                <text x="755" y="40" text-anchor="end" fill="#00f0ff" font-size="9.5" font-family="'JetBrains Mono', monospace" font-weight="600">
-                                    CAD SCALE 1:250 // NFPA 101 SAFETY COMPLIANT
+                                <text x="755" y="22" text-anchor="end" fill="#00f0ff" font-size="9" font-family="'JetBrains Mono', monospace" font-weight="600">
+                                    CAD RATIO 1:250 // NFPA 101 COMPLIANT
                                 </text>
                             </g>
 
-                            <!-- Structural Concrete Columns (Pillars) -->
-                            <g class="cad-columns" fill="#131824" stroke="#475569" stroke-width="1.2">
-                                <rect x="270" y="70" width="16" height="16" rx="2"/>
-                                <line x1="270" y1="78" x2="286" y2="78" stroke="#38bdf8" stroke-width="0.8"/>
-                                <line x1="278" y1="70" x2="278" y2="86" stroke="#38bdf8" stroke-width="0.8"/>
-                                <text x="278" y="65" text-anchor="middle" fill="#64748b" font-size="8" font-family="'JetBrains Mono', monospace">COL-1</text>
-
-                                <rect x="500" y="70" width="16" height="16" rx="2"/>
-                                <line x1="500" y1="78" x2="516" y2="78" stroke="#38bdf8" stroke-width="0.8"/>
-                                <line x1="508" y1="70" x2="508" y2="86" stroke="#38bdf8" stroke-width="0.8"/>
-                                <text x="508" y="65" text-anchor="middle" fill="#64748b" font-size="8" font-family="'JetBrains Mono', monospace">COL-2</text>
-
-                                <rect x="270" y="225" width="16" height="16" rx="2"/>
-                                <line x1="270" y1="233" x2="286" y2="233" stroke="#38bdf8" stroke-width="0.8"/>
-                                <line x1="278" y1="225" x2="278" y2="241" stroke="#38bdf8" stroke-width="0.8"/>
-                                <text x="278" y="220" text-anchor="middle" fill="#64748b" font-size="8" font-family="'JetBrains Mono', monospace">COL-3</text>
-
-                                <rect x="500" y="225" width="16" height="16" rx="2"/>
-                                <line x1="500" y1="233" x2="516" y2="233" stroke="#38bdf8" stroke-width="0.8"/>
-                                <line x1="508" y1="225" x2="508" y2="241" stroke="#38bdf8" stroke-width="0.8"/>
-                                <text x="508" y="220" text-anchor="middle" fill="#64748b" font-size="8" font-family="'JetBrains Mono', monospace">COL-4</text>
+                            <!-- ==================== CAMERA FRUSTUM SIGHTLINE CONES ==================== -->
+                            <g id="camera-frustums" class="cctv-frustums">
+                                <g id="cam1-cone-group" class="cam-cone-group active">
+                                    <polygon id="cam1-fov" points="50,45 220,70 220,175 70,175" fill="url(#cam1-fov-grad)" stroke="#00f0ff" stroke-width="0.8" stroke-dasharray="3,3" opacity="0.5"/>
+                                </g>
+                                <g id="cam2-cone-group" class="cam-cone-group">
+                                    <polygon id="cam2-fov" points="280,60 480,70 480,185 300,185" fill="url(#cam2-fov-grad)" stroke="#6366f1" stroke-width="0.8" stroke-dasharray="3,3" opacity="0.1"/>
+                                </g>
+                                <g id="cam3-cone-group" class="cam-cone-group">
+                                    <polygon id="cam3-fov" points="740,45 550,60 550,180 720,180" fill="url(#cam3-fov-grad)" stroke="#f43f5e" stroke-width="0.8" stroke-dasharray="3,3" opacity="0.1"/>
+                                </g>
+                                <g id="cam4-cone-group" class="cam-cone-group">
+                                    <polygon id="cam4-fov" points="55,420 180,240 470,250 470,410" fill="url(#cam4-fov-grad)" stroke="#10b981" stroke-width="0.8" stroke-dasharray="3,3" opacity="0.1"/>
+                                </g>
                             </g>
 
                             <!-- Adjacency Transit Flow Dynamic Vector Curves -->
-                            <g id="flow-transit-lines" stroke="#6366f1" stroke-width="1.8" stroke-dasharray="6,6" fill="none" opacity="0.45">
-                                <path d="M 250 120 C 270 120, 275 145, 290 145" marker-end="url(#arrow-flow)"/>
-                                <path d="M 150 195 C 150 215, 200 240, 200 250" marker-end="url(#arrow-flow)"/>
-                                <path d="M 490 145 C 510 145, 520 120, 540 120" marker-end="url(#arrow-flow)"/>
-                                <path d="M 390 215 C 390 230, 350 245, 350 255" marker-end="url(#arrow-flow)"/>
-                                <path d="M 490 340 L 540 340" marker-end="url(#arrow-flow)"/>
+                            <g id="flow-transit-lines" stroke="#6366f1" stroke-width="1.2" stroke-dasharray="5,5" fill="none" opacity="0.35">
+                                <path d="M 250 120 C 265 120, 270 135, 280 135" marker-end="url(#arrow-flow)"/>
+                                <path d="M 150 195 C 150 210, 180 230, 200 240" marker-end="url(#arrow-flow)"/>
+                                <path d="M 500 135 C 510 135, 520 120, 530 120" marker-end="url(#arrow-flow)"/>
+                                <path d="M 390 200 C 390 215, 360 230, 350 240" marker-end="url(#arrow-flow)"/>
+                                <path d="M 490 340 L 530 340" marker-end="url(#arrow-flow)"/>
                             </g>
 
-                            <!-- GATE A: Architectural Portico & 8 Turnstile Lanes -->
-                            <g class="cad-gate-a-turnstiles">
-                                <rect x="52" y="48" width="196" height="18" fill="rgba(99, 102, 241, 0.08)" stroke="rgba(99, 102, 241, 0.25)" stroke-width="1"/>
-                                <text x="150" y="60" text-anchor="middle" fill="#818cf8" font-size="8" font-family="'JetBrains Mono', monospace" letter-spacing="0.08em">PORTICO CANOPY OVERHANG</text>
+                            <!-- ==================== ARCHITECTURAL SECTORS & TELEMETRY ==================== -->
+                            <g id="zone-polygons">
+                                <!-- SECTOR 1: Gate A (North Turnstiles) -->
+                                <g class="zone-group" data-zone="gate_a">
+                                    <rect x="50" y="42" width="200" height="155" rx="8" class="zone-poly" id="poly-gate_a" fill="rgba(16, 185, 129, 0.05)" stroke="#10b981" stroke-width="1.2"/>
+                                    <!-- Header -->
+                                    <text x="150" y="62" text-anchor="middle" fill="#ffffff" font-size="11" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700">GATE A // NORTH ENTRY</text>
+                                    <text x="150" y="76" text-anchor="middle" fill="#818cf8" font-size="8.5" font-family="'JetBrains Mono', monospace">CAM 01 · 8 TURNSTILE LANES</text>
 
-                                <!-- Turnstile Array (TS 01 - 08) -->
-                                <g class="turnstile-bank" transform="translate(56, 96)">
-                                    <rect x="0" y="0" width="188" height="12" fill="#0e1320" stroke="#334155" stroke-width="1"/>
-                                    <line x1="23.5" y1="-3" x2="23.5" y2="15" stroke="#475569" stroke-width="1"/>
-                                    <line x1="47.0" y1="-3" x2="47.0" y2="15" stroke="#475569" stroke-width="1"/>
-                                    <line x1="70.5" y1="-3" x2="70.5" y2="15" stroke="#475569" stroke-width="1"/>
-                                    <line x1="94.0" y1="-3" x2="94.0" y2="15" stroke="#475569" stroke-width="1"/>
-                                    <line x1="117.5" y1="-3" x2="117.5" y2="15" stroke="#475569" stroke-width="1"/>
-                                    <line x1="141.0" y1="-3" x2="141.0" y2="15" stroke="#475569" stroke-width="1"/>
-                                    <line x1="164.5" y1="-3" x2="164.5" y2="15" stroke="#475569" stroke-width="1"/>
-                                    <!-- Ingress teeth -->
-                                    <path d="M 11 2 L 11 10 M 8 6 L 11 10 L 14 6" stroke="#10b981" stroke-width="1.2" fill="none"/>
-                                    <path d="M 35 2 L 35 10 M 32 6 L 35 10 L 38 6" stroke="#10b981" stroke-width="1.2" fill="none"/>
-                                    <path d="M 58 2 L 58 10 M 55 6 L 58 10 L 61 6" stroke="#10b981" stroke-width="1.2" fill="none"/>
-                                    <path d="M 82 2 L 82 10 M 79 6 L 82 10 L 85 6" stroke="#10b981" stroke-width="1.2" fill="none"/>
-                                    <path d="M 105 2 L 105 10 M 102 6 L 105 10 L 108 6" stroke="#10b981" stroke-width="1.2" fill="none"/>
-                                    <path d="M 129 2 L 129 10 M 126 6 L 129 10 L 132 6" stroke="#10b981" stroke-width="1.2" fill="none"/>
-                                    <path d="M 152 2 L 152 10 M 149 6 L 152 10 L 155 6" stroke="#10b981" stroke-width="1.2" fill="none"/>
-                                    <path d="M 176 2 L 176 10 M 173 6 L 176 10 L 179 6" stroke="#10b981" stroke-width="1.2" fill="none"/>
+                                    <!-- Turnstile Array Graphics (Clean, uncollided) -->
+                                    <g class="turnstile-bank" transform="translate(62, 88)">
+                                        <rect x="0" y="0" width="176" height="10" fill="#0d111a" stroke="#334155" stroke-width="0.8" rx="2"/>
+                                        <line x1="22" y1="-2" x2="22" y2="12" stroke="#475569" stroke-width="0.8"/>
+                                        <line x1="44" y1="-2" x2="44" y2="12" stroke="#475569" stroke-width="0.8"/>
+                                        <line x1="66" y1="-2" x2="66" y2="12" stroke="#475569" stroke-width="0.8"/>
+                                        <line x1="88" y1="-2" x2="88" y2="12" stroke="#475569" stroke-width="0.8"/>
+                                        <line x1="110" y1="-2" x2="110" y2="12" stroke="#475569" stroke-width="0.8"/>
+                                        <line x1="132" y1="-2" x2="132" y2="12" stroke="#475569" stroke-width="0.8"/>
+                                        <line x1="154" y1="-2" x2="154" y2="12" stroke="#475569" stroke-width="0.8"/>
+                                        <!-- Directional teeth -->
+                                        <path d="M 11 1 L 11 9 M 8 5 L 11 9 L 14 5" stroke="#10b981" stroke-width="1" fill="none"/>
+                                        <path d="M 33 1 L 33 9 M 30 5 L 33 9 L 36 5" stroke="#10b981" stroke-width="1" fill="none"/>
+                                        <path d="M 55 1 L 55 9 M 52 5 L 55 9 L 58 5" stroke="#10b981" stroke-width="1" fill="none"/>
+                                        <path d="M 77 1 L 77 9 M 74 5 L 77 9 L 80 5" stroke="#10b981" stroke-width="1" fill="none"/>
+                                        <path d="M 99 1 L 99 9 M 96 5 L 99 9 L 102 5" stroke="#10b981" stroke-width="1" fill="none"/>
+                                        <path d="M 121 1 L 121 9 M 118 5 L 121 9 L 124 5" stroke="#10b981" stroke-width="1" fill="none"/>
+                                        <path d="M 143 1 L 143 9 M 140 5 L 143 9 L 146 5" stroke="#10b981" stroke-width="1" fill="none"/>
+                                        <path d="M 165 1 L 165 9 M 162 5 L 165 9 L 168 5" stroke="#10b981" stroke-width="1" fill="none"/>
+                                    </g>
+
+                                    <!-- Telemetry Badge (Dedicated lower space) -->
+                                    <rect x="85" y="130" width="130" height="48" rx="6" fill="rgba(10, 14, 22, 0.85)" stroke="rgba(255, 255, 255, 0.08)"/>
+                                    <text x="150" y="152" text-anchor="middle" fill="#ffffff" font-size="18" font-family="'JetBrains Mono', monospace" font-weight="800" id="map-count-gate_a">0</text>
+                                    <text x="150" y="168" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="'JetBrains Mono', monospace" id="map-density-gate_a">0.00 p/m²</text>
+                                    <text x="150" y="186" text-anchor="middle" fill="#f59e0b" font-size="8.5" font-family="'JetBrains Mono', monospace" font-weight="700" id="map-ttc-gate_a"></text>
                                 </g>
 
-                                <!-- Metal Detectors (WTMD) -->
-                                <rect x="90" y="72" width="18" height="12" fill="#1e293b" stroke="#64748b" stroke-width="1"/>
-                                <text x="99" y="81" text-anchor="middle" fill="#94a3b8" font-size="6" font-family="'JetBrains Mono', monospace">WTMD</text>
-                                <rect x="185" y="72" width="18" height="12" fill="#1e293b" stroke="#64748b" stroke-width="1"/>
-                                <text x="194" y="81" text-anchor="middle" fill="#94a3b8" font-size="6" font-family="'JetBrains Mono', monospace">WTMD</text>
-                            </g>
+                                <!-- SECTOR 2: Corridor B (Central Concourse Spine) -->
+                                <g class="zone-group" data-zone="corridor_b">
+                                    <rect x="280" y="52" width="220" height="145" rx="8" class="zone-poly" id="poly-corridor_b" fill="rgba(16, 185, 129, 0.05)" stroke="#10b981" stroke-width="1.2"/>
+                                    <text x="390" y="72" text-anchor="middle" fill="#ffffff" font-size="11" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700">CONCOURSE B // TRANSIT SPINE</text>
+                                    <text x="390" y="86" text-anchor="middle" fill="#818cf8" font-size="8.5" font-family="'JetBrains Mono', monospace">CAM 02 · LINK ARTERY (w=1.75)</text>
 
-                            <!-- CORRIDOR B: Central Spine Architectural Floor Inlays & Safety Gear -->
-                            <g class="cad-corridor-features">
-                                <rect x="476" y="80" width="12" height="16" fill="#450a0a" stroke="#ef4444" stroke-width="1"/>
-                                <text x="482" y="91" text-anchor="middle" fill="#fca5a5" font-size="6" font-family="'JetBrains Mono', monospace" font-weight="700">FHC</text>
-                                <rect x="300" y="80" width="12" height="16" fill="#064e3b" stroke="#10b981" stroke-width="1"/>
-                                <text x="306" y="91" text-anchor="middle" fill="#6ee7b7" font-size="6" font-family="'JetBrains Mono', monospace" font-weight="700">AED</text>
-                            </g>
+                                    <!-- Two Concrete Structural Columns -->
+                                    <rect x="310" y="102" width="14" height="14" rx="2" fill="#131824" stroke="#475569" stroke-width="1"/>
+                                    <rect x="456" y="102" width="14" height="14" rx="2" fill="#131824" stroke="#475569" stroke-width="1"/>
 
-                            <!-- EXIT C: Architectural Outward Swinging Doors & Egress Stairwell -->
-                            <g class="cad-exit-c-features">
-                                <!-- Egress Stairwell -->
-                                <g class="stairwell-treads" stroke="rgba(148, 163, 184, 0.3)" stroke-width="1">
-                                    <line x1="550" y1="75" x2="610" y2="75"/>
-                                    <line x1="550" y1="83" x2="610" y2="83"/>
-                                    <line x1="550" y1="91" x2="610" y2="91"/>
-                                    <line x1="550" y1="99" x2="610" y2="99"/>
-                                    <line x1="550" y1="107" x2="610" y2="107"/>
-                                    <line x1="550" y1="115" x2="610" y2="115"/>
-                                    <line x1="550" y1="123" x2="610" y2="123"/>
-                                    <line x1="550" y1="131" x2="610" y2="131"/>
-                                    <path d="M 580 70 L 580 138 M 576 132 L 580 138 L 584 132" stroke="#60a5fa" stroke-width="1.2" fill="none"/>
-                                    <text x="580" y="66" text-anchor="middle" fill="#94a3b8" font-size="7" font-family="'JetBrains Mono', monospace">STAIR DN 10R</text>
+                                    <!-- Telemetry Badge -->
+                                    <rect x="325" y="130" width="130" height="48" rx="6" fill="rgba(10, 14, 22, 0.85)" stroke="rgba(255, 255, 255, 0.08)"/>
+                                    <text x="390" y="152" text-anchor="middle" fill="#ffffff" font-size="18" font-family="'JetBrains Mono', monospace" font-weight="800" id="map-count-corridor_b">0</text>
+                                    <text x="390" y="168" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="'JetBrains Mono', monospace" id="map-density-corridor_b">0.00 p/m²</text>
+                                    <text x="390" y="186" text-anchor="middle" fill="#f59e0b" font-size="8.5" font-family="'JetBrains Mono', monospace" font-weight="700" id="map-ttc-corridor_b"></text>
                                 </g>
 
-                                <!-- Outward Double Swing Doors with 90° Swing Arcs -->
-                                <g class="fire-doors">
-                                    <line x1="680" y1="45" x2="680" y2="15" stroke="#ef4444" stroke-width="2"/>
-                                    <path d="M 680 15 A 30 30 0 0 1 710 45" stroke="#ef4444" stroke-width="1" stroke-dasharray="3,3" fill="none"/>
-                                    <line x1="720" y1="45" x2="720" y2="15" stroke="#ef4444" stroke-width="2"/>
-                                    <path d="M 720 15 A 30 30 0 0 0 690 45" stroke="#ef4444" stroke-width="1" stroke-dasharray="3,3" fill="none"/>
-                                    <rect x="675" y="32" width="50" height="12" fill="#064e3b" stroke="#10b981" stroke-width="1"/>
-                                    <text x="700" y="41" text-anchor="middle" fill="#6ee7b7" font-size="7.5" font-family="'JetBrains Mono', monospace" font-weight="700">➔ EXIT C</text>
-                                </g>
-                            </g>
+                                <!-- SECTOR 3: Exit C (Emergency Egress) -->
+                                <g class="zone-group" data-zone="exit_c">
+                                    <rect x="530" y="42" width="220" height="155" rx="8" class="zone-poly" id="poly-exit_c" fill="rgba(16, 185, 129, 0.05)" stroke="#10b981" stroke-width="1.2"/>
+                                    <!-- Double Emergency Outward Doors (top edge, no overlap) -->
+                                    <line x1="680" y1="42" x2="680" y2="24" stroke="#ef4444" stroke-width="1.8"/>
+                                    <path d="M 680 24 A 18 18 0 0 1 698 42" stroke="#ef4444" stroke-width="0.8" stroke-dasharray="2,2" fill="none"/>
+                                    <line x1="716" y1="42" x2="716" y2="24" stroke="#ef4444" stroke-width="1.8"/>
+                                    <path d="M 716 24 A 18 18 0 0 0 698 42" stroke="#ef4444" stroke-width="0.8" stroke-dasharray="2,2" fill="none"/>
+                                    <text x="698" y="36" text-anchor="middle" fill="#ef4444" font-size="6.5" font-family="'JetBrains Mono', monospace" font-weight="700">EGRESS</text>
 
-                            <!-- PLAZA E: Concentric Pavement Rings, Medical Triage, Crash Bollards -->
-                            <g class="cad-plaza-features">
-                                <g fill="none" stroke="rgba(255, 255, 255, 0.035)" stroke-width="1">
-                                    <circle cx="270" cy="340" r="30"/>
-                                    <circle cx="270" cy="340" r="60"/>
-                                    <circle cx="270" cy="340" r="95"/>
-                                    <circle cx="270" cy="340" r="130"/>
-                                </g>
-                                <circle cx="270" cy="340" r="8" fill="#131824" stroke="rgba(99, 102, 241, 0.4)" stroke-width="1.2"/>
-                                <line x1="270" y1="326" x2="270" y2="354" stroke="rgba(99, 102, 241, 0.5)" stroke-width="1"/>
-                                <line x1="256" y1="340" x2="284" y2="340" stroke="rgba(99, 102, 241, 0.5)" stroke-width="1"/>
+                                    <text x="615" y="62" text-anchor="middle" fill="#ffffff" font-size="11" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700">EXIT C // EMERGENCY EGRESS</text>
+                                    <text x="615" y="76" text-anchor="middle" fill="#818cf8" font-size="8.5" font-family="'JetBrains Mono', monospace">CAM 03 · EGRESS STAIRWELL (w=2.0)</text>
 
-                                <!-- Medical Triage Post -->
-                                <g transform="translate(68, 255)">
-                                    <rect x="0" y="0" width="70" height="26" rx="4" fill="#064e3b" stroke="#10b981" stroke-width="1.2"/>
-                                    <rect x="8" y="6" width="14" height="14" fill="#ffffff" rx="2"/>
-                                    <path d="M 15 8 L 15 18 M 10 13 L 20 13" stroke="#ef4444" stroke-width="2.5"/>
-                                    <text x="26" y="14" fill="#6ee7b7" font-size="7" font-family="'JetBrains Mono', monospace" font-weight="700">MED-POST 01</text>
-                                    <text x="26" y="22" fill="#a7f3d0" font-size="6" font-family="'JetBrains Mono', monospace">TRIAGE ALPHA</text>
+                                    <!-- Stair Treads -->
+                                    <g stroke="rgba(148, 163, 184, 0.25)" stroke-width="0.8">
+                                        <line x1="550" y1="92" x2="595" y2="92"/>
+                                        <line x1="550" y1="98" x2="595" y2="98"/>
+                                        <line x1="550" y1="104" x2="595" y2="104"/>
+                                        <line x1="550" y1="110" x2="595" y2="110"/>
+                                        <line x1="550" y1="116" x2="595" y2="116"/>
+                                        <line x1="550" y1="122" x2="595" y2="122"/>
+                                    </g>
+
+                                    <!-- Telemetry Badge -->
+                                    <rect x="580" y="130" width="130" height="48" rx="6" fill="rgba(10, 14, 22, 0.85)" stroke="rgba(255, 255, 255, 0.08)"/>
+                                    <text x="645" y="152" text-anchor="middle" fill="#ffffff" font-size="18" font-family="'JetBrains Mono', monospace" font-weight="800" id="map-count-exit_c">0</text>
+                                    <text x="645" y="168" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="'JetBrains Mono', monospace" id="map-density-exit_c">0.00 p/m²</text>
+                                    <text x="645" y="186" text-anchor="middle" fill="#f59e0b" font-size="8.5" font-family="'JetBrains Mono', monospace" font-weight="700" id="map-ttc-exit_c"></text>
                                 </g>
 
-                                <!-- Info Kiosk -->
-                                <circle cx="430" cy="270" r="16" fill="#111827" stroke="#3b82f6" stroke-width="1.2"/>
-                                <text x="430" y="273" text-anchor="middle" fill="#60a5fa" font-size="10" font-family="'JetBrains Mono', monospace" font-weight="700">ℹ</text>
-                                <text x="430" y="294" text-anchor="middle" fill="#94a3b8" font-size="6.5" font-family="'JetBrains Mono', monospace">INFO DESK</text>
-                            </g>
+                                <!-- SECTOR 4: Grand Plaza E (Buffer Atrium) -->
+                                <g class="zone-group" data-zone="ground_e">
+                                    <rect x="50" y="225" width="450" height="215" rx="8" class="zone-poly" id="poly-ground_e" fill="rgba(16, 185, 129, 0.05)" stroke="#10b981" stroke-width="1.2"/>
+                                    <text x="275" y="248" text-anchor="middle" fill="#ffffff" font-size="12" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700">GRAND PLAZA E // BUFFER ATRIUM</text>
+                                    <text x="275" y="262" text-anchor="middle" fill="#818cf8" font-size="9" font-family="'JetBrains Mono', monospace">CAM 04 · DISPERSAL BUFFER (w=1.0)</text>
 
-                            <!-- COUNTER D: Box Office Wickets & Serpentine Stanchion Queue Maze -->
-                            <g class="cad-counter-features">
-                                <rect x="548" y="248" width="184" height="14" fill="#0e1320" stroke="#3b82f6" stroke-width="1"/>
-                                <g font-family="'JetBrains Mono', monospace" font-size="7" fill="#93c5fd" text-anchor="middle">
-                                    <rect x="556" y="250" width="18" height="10" rx="2" fill="#1e293b"/>
-                                    <text x="565" y="258">W1</text>
-                                    <rect x="586" y="250" width="18" height="10" rx="2" fill="#1e293b"/>
-                                    <text x="595" y="258">W2</text>
-                                    <rect x="616" y="250" width="18" height="10" rx="2" fill="#1e293b"/>
-                                    <text x="625" y="258">W3</text>
-                                    <rect x="646" y="250" width="18" height="10" rx="2" fill="#1e293b"/>
-                                    <text x="655" y="258">W4</text>
-                                    <rect x="676" y="250" width="18" height="10" rx="2" fill="#1e293b"/>
-                                    <text x="685" y="258">W5</text>
-                                    <rect x="706" y="250" width="18" height="10" rx="2" fill="#1e293b"/>
-                                    <text x="715" y="258">W6</text>
+                                    <!-- Concentric Radial Floor Rings (Clean in open floor area) -->
+                                    <circle cx="275" cy="335" r="30" fill="none" stroke="rgba(255, 255, 255, 0.025)" stroke-width="0.8"/>
+                                    <circle cx="275" cy="335" r="60" fill="none" stroke="rgba(255, 255, 255, 0.025)" stroke-width="0.8"/>
+                                    <circle cx="275" cy="335" r="95" fill="none" stroke="rgba(255, 255, 255, 0.025)" stroke-width="0.8"/>
+
+                                    <!-- Medical Station (Corner placement, no collision) -->
+                                    <g transform="translate(65, 285)">
+                                        <rect x="0" y="0" width="18" height="18" rx="3" fill="#064e3b" stroke="#10b981" stroke-width="0.8"/>
+                                        <path d="M 9 4 L 9 14 M 4 9 L 14 9" stroke="#ffffff" stroke-width="1.8"/>
+                                    </g>
+
+                                    <!-- Telemetry Badge -->
+                                    <rect x="210" y="365" width="130" height="48" rx="6" fill="rgba(10, 14, 22, 0.85)" stroke="rgba(255, 255, 255, 0.08)"/>
+                                    <text x="275" y="387" text-anchor="middle" fill="#ffffff" font-size="20" font-family="'JetBrains Mono', monospace" font-weight="800" id="map-count-ground_e">0</text>
+                                    <text x="275" y="403" text-anchor="middle" fill="#94a3b8" font-size="10.5" font-family="'JetBrains Mono', monospace" id="map-density-ground_e">0.00 p/m²</text>
+                                    <text x="275" y="420" text-anchor="middle" fill="#f59e0b" font-size="9" font-family="'JetBrains Mono', monospace" font-weight="700" id="map-ttc-ground_e"></text>
                                 </g>
 
-                                <!-- Stanchion Queue Lines -->
-                                <g stroke="rgba(245, 158, 11, 0.4)" stroke-width="1.2" stroke-dasharray="3,3" fill="none">
-                                    <path d="M 565 270 L 565 315 L 610 315 L 610 270 L 655 270 L 655 315 L 700 315 L 700 270"/>
-                                    <circle cx="565" cy="270" r="2.5" fill="#f59e0b"/>
-                                    <circle cx="565" cy="315" r="2.5" fill="#f59e0b"/>
-                                    <circle cx="610" cy="315" r="2.5" fill="#f59e0b"/>
-                                    <circle cx="610" cy="270" r="2.5" fill="#f59e0b"/>
-                                    <circle cx="655" cy="270" r="2.5" fill="#f59e0b"/>
-                                    <circle cx="655" cy="315" r="2.5" fill="#f59e0b"/>
-                                    <circle cx="700" cy="315" r="2.5" fill="#f59e0b"/>
-                                    <circle cx="700" cy="270" r="2.5" fill="#f59e0b"/>
-                                </g>
-                            </g>
+                                <!-- SECTOR 5: Counter D (Box Office Concourse) -->
+                                <g class="zone-group" data-zone="counter_d">
+                                    <rect x="530" y="225" width="220" height="215" rx="8" class="zone-poly" id="poly-counter_d" fill="rgba(16, 185, 129, 0.05)" stroke="#10b981" stroke-width="1.2"/>
+                                    <text x="640" y="248" text-anchor="middle" fill="#ffffff" font-size="11.5" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700">TICKETING CONCOURSE D</text>
+                                    <text x="640" y="262" text-anchor="middle" fill="#818cf8" font-size="9" font-family="'JetBrains Mono', monospace">BOX OFFICE &amp; SERVICE (w=1.5)</text>
 
-                            <!-- ==================== CAMERA SIGHTLINE CONES (CCTV FOV) ==================== -->
-                            <g id="camera-frustums" class="cctv-frustums">
-                                <g id="cam1-cone-group" class="cam-cone-group active">
-                                    <polygon id="cam1-fov" points="55,55 240,80 240,190 75,190" fill="url(#cam1-fov-grad)" stroke="#00f0ff" stroke-width="1.2" stroke-dasharray="4,3" opacity="0.8"/>
-                                </g>
-                                <g id="cam2-cone-group" class="cam-cone-group">
-                                    <polygon id="cam2-fov" points="295,85 490,95 490,210 320,210" fill="url(#cam2-fov-grad)" stroke="#6366f1" stroke-width="1.2" stroke-dasharray="4,3" opacity="0.15"/>
-                                </g>
-                                <g id="cam3-cone-group" class="cam-cone-group">
-                                    <polygon id="cam3-fov" points="730,55 545,55 545,185 710,190" fill="url(#cam3-fov-grad)" stroke="#f43f5e" stroke-width="1.2" stroke-dasharray="4,3" opacity="0.15"/>
-                                </g>
-                                <g id="cam4-cone-group" class="cam-cone-group">
-                                    <polygon id="cam4-fov" points="60,420 180,245 460,255 470,410" fill="url(#cam4-fov-grad)" stroke="#10b981" stroke-width="1.2" stroke-dasharray="4,3" opacity="0.15"/>
+                                    <!-- Clean Service Wickets Bar -->
+                                    <rect x="548" y="280" width="184" height="10" fill="#0d111a" stroke="#334155" stroke-width="0.8" rx="2"/>
+                                    <!-- Queue Stanchion Lines (Clean, no overlap) -->
+                                    <g stroke="rgba(245, 158, 11, 0.3)" stroke-width="0.8" stroke-dasharray="2,2" fill="none">
+                                        <path d="M 570 300 L 570 335 L 610 335 L 610 300 L 650 300 L 650 335 L 690 335 L 690 300"/>
+                                    </g>
+
+                                    <!-- Telemetry Badge -->
+                                    <rect x="575" y="365" width="130" height="48" rx="6" fill="rgba(10, 14, 22, 0.85)" stroke="rgba(255, 255, 255, 0.08)"/>
+                                    <text x="640" y="387" text-anchor="middle" fill="#ffffff" font-size="18" font-family="'JetBrains Mono', monospace" font-weight="800" id="map-count-counter_d">0</text>
+                                    <text x="640" y="403" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="'JetBrains Mono', monospace" id="map-density-counter_d">0.00 p/m²</text>
+                                    <text x="640" y="420" text-anchor="middle" fill="#f59e0b" font-size="9" font-family="'JetBrains Mono', monospace" font-weight="700" id="map-ttc-counter_d"></text>
                                 </g>
                             </g>
 
                             <!-- ==================== INTERACTIVE CCTV CAMERA GLYPHS ==================== -->
                             <g id="camera-glyphs" class="cctv-camera-icons" cursor="pointer">
-                                <g class="cam-glyph active" id="glyph-cam1" data-cam="cam1" transform="translate(45, 45)">
-                                    <circle cx="10" cy="10" r="9" fill="#0d1527" stroke="#00f0ff" stroke-width="1.8"/>
-                                    <circle cx="10" cy="10" r="3.5" fill="#00f0ff"/>
-                                    <circle cx="14" cy="6" r="1.5" fill="#ef4444"/>
-                                    <text x="10" y="25" text-anchor="middle" fill="#00f0ff" font-size="8" font-family="'JetBrains Mono', monospace" font-weight="700">CAM-01</text>
+                                <g class="cam-glyph active" id="glyph-cam1" data-cam="cam1" transform="translate(42, 34)">
+                                    <circle cx="8" cy="8" r="7" fill="#0d1527" stroke="#00f0ff" stroke-width="1.2"/>
+                                    <circle cx="8" cy="8" r="2.5" fill="#00f0ff"/>
+                                    <text x="8" y="21" text-anchor="middle" fill="#00f0ff" font-size="7" font-family="'JetBrains Mono', monospace" font-weight="700">CAM-01</text>
                                 </g>
 
-                                <g class="cam-glyph" id="glyph-cam2" data-cam="cam2" transform="translate(285, 75)">
-                                    <circle cx="10" cy="10" r="9" fill="#0d1527" stroke="#6366f1" stroke-width="1.5"/>
-                                    <circle cx="10" cy="10" r="3.5" fill="#6366f1"/>
-                                    <circle cx="14" cy="6" r="1.5" fill="#ef4444"/>
-                                    <text x="10" y="25" text-anchor="middle" fill="#a5b4fc" font-size="8" font-family="'JetBrains Mono', monospace" font-weight="700">CAM-02</text>
+                                <g class="cam-glyph" id="glyph-cam2" data-cam="cam2" transform="translate(272, 44)">
+                                    <circle cx="8" cy="8" r="7" fill="#0d1527" stroke="#6366f1" stroke-width="1.2"/>
+                                    <circle cx="8" cy="8" r="2.5" fill="#6366f1"/>
+                                    <text x="8" y="21" text-anchor="middle" fill="#a5b4fc" font-size="7" font-family="'JetBrains Mono', monospace" font-weight="700">CAM-02</text>
                                 </g>
 
-                                <g class="cam-glyph" id="glyph-cam3" data-cam="cam3" transform="translate(720, 45)">
-                                    <circle cx="10" cy="10" r="9" fill="#0d1527" stroke="#f43f5e" stroke-width="1.5"/>
-                                    <circle cx="10" cy="10" r="3.5" fill="#f43f5e"/>
-                                    <circle cx="14" cy="6" r="1.5" fill="#ef4444"/>
-                                    <text x="10" y="25" text-anchor="middle" fill="#fda4af" font-size="8" font-family="'JetBrains Mono', monospace" font-weight="700">CAM-03</text>
+                                <g class="cam-glyph" id="glyph-cam3" data-cam="cam3" transform="translate(738, 34)">
+                                    <circle cx="8" cy="8" r="7" fill="#0d1527" stroke="#f43f5e" stroke-width="1.2"/>
+                                    <circle cx="8" cy="8" r="2.5" fill="#f43f5e"/>
+                                    <text x="8" y="21" text-anchor="middle" fill="#fda4af" font-size="7" font-family="'JetBrains Mono', monospace" font-weight="700">CAM-03</text>
                                 </g>
 
-                                <g class="cam-glyph" id="glyph-cam4" data-cam="cam4" transform="translate(50, 410)">
-                                    <circle cx="10" cy="10" r="9" fill="#0d1527" stroke="#10b981" stroke-width="1.5"/>
-                                    <circle cx="10" cy="10" r="3.5" fill="#10b981"/>
-                                    <circle cx="14" cy="6" r="1.5" fill="#ef4444"/>
-                                    <text x="10" y="25" text-anchor="middle" fill="#6ee7b7" font-size="8" font-family="'JetBrains Mono', monospace" font-weight="700">CAM-04</text>
+                                <g class="cam-glyph" id="glyph-cam4" data-cam="cam4" transform="translate(42, 422)">
+                                    <circle cx="8" cy="8" r="7" fill="#0d1527" stroke="#10b981" stroke-width="1.2"/>
+                                    <circle cx="8" cy="8" r="2.5" fill="#10b981"/>
+                                    <text x="8" y="21" text-anchor="middle" fill="#6ee7b7" font-size="7" font-family="'JetBrains Mono', monospace" font-weight="700">CAM-04</text>
                                 </g>
                             </g>
 
-                            <!-- ==================== ACTIVE ZONE BOUNDARIES & REAL-TIME COUNTERS ==================== -->
-                            <g id="zone-polygons">
-                                <!-- Gate A -->
-                                <g class="zone-group" data-zone="gate_a">
-                                    <rect x="50" y="45" width="200" height="150" rx="6" class="zone-poly" id="poly-gate_a" fill="rgba(16, 185, 129, 0.08)" stroke="#10b981" stroke-width="1.8"/>
-                                    <text x="150" y="78" text-anchor="middle" fill="#ffffff" font-size="12" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700">North Portico Gate A [CAM 01]</text>
-                                    <rect x="85" y="86" width="130" height="16" rx="8" fill="rgba(99, 102, 241, 0.22)" stroke="rgba(99, 102, 241, 0.4)" stroke-width="1"/>
-                                    <text x="150" y="98" text-anchor="middle" fill="#a5b4fc" font-size="8.5" font-family="'JetBrains Mono', monospace" font-weight="700">⚡ PRIMARY ACCESS CHOKEPOINT</text>
-                                    <text x="150" y="142" text-anchor="middle" fill="#ffffff" font-size="24" font-family="'JetBrains Mono', monospace" font-weight="800" id="map-count-gate_a">0</text>
-                                    <text x="150" y="164" text-anchor="middle" fill="#94a3b8" font-size="10.5" font-family="'JetBrains Mono', monospace" id="map-density-gate_a">0.00 p/m²</text>
-                                    <text x="150" y="182" text-anchor="middle" fill="#f59e0b" font-size="9.5" font-family="'JetBrains Mono', monospace" font-weight="700" id="map-ttc-gate_a"></text>
-                                </g>
-
-                                <!-- Corridor B -->
-                                <g class="zone-group" data-zone="corridor_b">
-                                    <rect x="290" y="75" width="200" height="140" rx="6" class="zone-poly" id="poly-corridor_b" fill="rgba(16, 185, 129, 0.08)" stroke="#10b981" stroke-width="1.8"/>
-                                    <text x="390" y="108" text-anchor="middle" fill="#ffffff" font-size="12" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700">Concourse Spine B [CAM 02]</text>
-                                    <text x="390" y="126" text-anchor="middle" fill="#64748b" font-size="9" font-family="'JetBrains Mono', monospace" font-weight="600">TRANSIT ARTERY (w=1.75)</text>
-                                    <text x="390" y="160" text-anchor="middle" fill="#ffffff" font-size="22" font-family="'JetBrains Mono', monospace" font-weight="800" id="map-count-corridor_b">0</text>
-                                    <text x="390" y="180" text-anchor="middle" fill="#94a3b8" font-size="10.5" font-family="'JetBrains Mono', monospace" id="map-density-corridor_b">0.00 p/m²</text>
-                                    <text x="390" y="198" text-anchor="middle" fill="#f59e0b" font-size="9.5" font-family="'JetBrains Mono', monospace" font-weight="700" id="map-ttc-corridor_b"></text>
-                                </g>
-
-                                <!-- Exit C -->
-                                <g class="zone-group" data-zone="exit_c">
-                                    <rect x="540" y="45" width="200" height="150" rx="6" class="zone-poly" id="poly-exit_c" fill="rgba(16, 185, 129, 0.08)" stroke="#10b981" stroke-width="1.8"/>
-                                    <text x="640" y="78" text-anchor="middle" fill="#ffffff" font-size="12" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700">Emergency Exit C [CAM 03]</text>
-                                    <text x="640" y="98" text-anchor="middle" fill="#64748b" font-size="9" font-family="'JetBrains Mono', monospace" font-weight="600">PRIMARY EGRESS (w=2.0)</text>
-                                    <text x="640" y="142" text-anchor="middle" fill="#ffffff" font-size="24" font-family="'JetBrains Mono', monospace" font-weight="800" id="map-count-exit_c">0</text>
-                                    <text x="640" y="164" text-anchor="middle" fill="#94a3b8" font-size="10.5" font-family="'JetBrains Mono', monospace" id="map-density-exit_c">0.00 p/m²</text>
-                                    <text x="640" y="182" text-anchor="middle" fill="#f59e0b" font-size="9.5" font-family="'JetBrains Mono', monospace" font-weight="700" id="map-ttc-exit_c"></text>
-                                </g>
-
-                                <!-- Ground E -->
-                                <g class="zone-group" data-zone="ground_e">
-                                    <rect x="50" y="240" width="440" height="200" rx="6" class="zone-poly" id="poly-ground_e" fill="rgba(16, 185, 129, 0.08)" stroke="#10b981" stroke-width="1.8"/>
-                                    <text x="270" y="278" text-anchor="middle" fill="#ffffff" font-size="13" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700">Grand Public Plaza &amp; Buffer Atrium E [CAM 04]</text>
-                                    <text x="270" y="296" text-anchor="middle" fill="#64748b" font-size="9" font-family="'JetBrains Mono', monospace" font-weight="600">PRIMARY DISPERSAL BUFFER (w=1.0)</text>
-                                    <text x="270" y="348" text-anchor="middle" fill="#ffffff" font-size="32" font-family="'JetBrains Mono', monospace" font-weight="800" id="map-count-ground_e">0</text>
-                                    <text x="270" y="376" text-anchor="middle" fill="#94a3b8" font-size="11" font-family="'JetBrains Mono', monospace" id="map-density-ground_e">0.00 p/m²</text>
-                                    <text x="270" y="398" text-anchor="middle" fill="#f59e0b" font-size="10" font-family="'JetBrains Mono', monospace" font-weight="700" id="map-ttc-ground_e"></text>
-                                </g>
-
-                                <!-- Counter D -->
-                                <g class="zone-group" data-zone="counter_d">
-                                    <rect x="540" y="240" width="200" height="200" rx="6" class="zone-poly" id="poly-counter_d" fill="rgba(16, 185, 129, 0.08)" stroke="#10b981" stroke-width="1.8"/>
-                                    <text x="640" y="278" text-anchor="middle" fill="#ffffff" font-size="12" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700">Box Office Concourse D</text>
-                                    <text x="640" y="296" text-anchor="middle" fill="#64748b" font-size="9" font-family="'JetBrains Mono', monospace" font-weight="600">SERPENTINE QUEUE ZONE (w=1.5)</text>
-                                    <text x="640" y="348" text-anchor="middle" fill="#ffffff" font-size="24" font-family="'JetBrains Mono', monospace" font-weight="800" id="map-count-counter_d">0</text>
-                                    <text x="640" y="376" text-anchor="middle" fill="#94a3b8" font-size="10.5" font-family="'JetBrains Mono', monospace" id="map-density-counter_d">0.00 p/m²</text>
-                                    <text x="640" y="398" text-anchor="middle" fill="#f59e0b" font-size="9.5" font-family="'JetBrains Mono', monospace" font-weight="700" id="map-ttc-counter_d"></text>
-                                </g>
-                            </g>
-
-                            <!-- True North Compass Rose & Graphic Metric Scale -->
-                            <g class="cad-cartography" transform="translate(710, 395)">
-                                <circle cx="25" cy="20" r="16" fill="#0d111a" stroke="rgba(255,255,255,0.18)" stroke-width="1"/>
-                                <path d="M 25 6 L 29 20 L 25 17 L 21 20 z" fill="#00f0ff"/>
-                                <path d="M 25 34 L 29 20 L 25 23 L 21 20 z" fill="#334155"/>
-                                <text x="25" y="4" text-anchor="middle" fill="#00f0ff" font-size="8" font-family="'JetBrains Mono', monospace" font-weight="800">N</text>
-                                <g transform="translate(-160, 42)">
-                                    <line x1="0" y1="0" x2="140" y2="0" stroke="#94a3b8" stroke-width="1.5"/>
-                                    <line x1="0" y1="-3" x2="0" y2="3" stroke="#94a3b8" stroke-width="1.5"/>
-                                    <line x1="46.6" y1="-2" x2="46.6" y2="2" stroke="#94a3b8" stroke-width="1"/>
-                                    <line x1="93.3" y1="-2" x2="93.3" y2="2" stroke="#94a3b8" stroke-width="1"/>
-                                    <line x1="140" y1="-3" x2="140" y2="3" stroke="#94a3b8" stroke-width="1.5"/>
-                                    <text x="0" y="-5" fill="#64748b" font-size="7" font-family="'JetBrains Mono', monospace">0m</text>
-                                    <text x="46.6" y="-5" text-anchor="middle" fill="#64748b" font-size="7" font-family="'JetBrains Mono', monospace">10m</text>
-                                    <text x="93.3" y="-5" text-anchor="middle" fill="#64748b" font-size="7" font-family="'JetBrains Mono', monospace">20m</text>
-                                    <text x="140" y="-5" text-anchor="end" fill="#64748b" font-size="7" font-family="'JetBrains Mono', monospace">30m</text>
-                                </g>
+                            <!-- Clean Bottom Scale & Compass -->
+                            <g class="cad-cartography" transform="translate(720, 435)">
+                                <circle cx="16" cy="14" r="10" fill="#0d111a" stroke="rgba(255,255,255,0.12)" stroke-width="0.8"/>
+                                <path d="M 16 6 L 19 14 L 16 12 L 13 14 z" fill="#00f0ff"/>
+                                <text x="16" y="4" text-anchor="middle" fill="#00f0ff" font-size="6.5" font-family="'JetBrains Mono', monospace" font-weight="800">N</text>
                             </g>
                         </svg>
 
