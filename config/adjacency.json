@@ -1,0 +1,46 @@
+{
+  "graph_version": "1.0",
+  "description": "Topological spatial adjacency graph for predictive cross-zone crowd flow propagation",
+  "connections": [
+    {
+      "source": "gate_a",
+      "target": "corridor_b",
+      "distance_meters": 45.0,
+      "walk_time_seconds": 45,
+      "flow_capacity_rate": 2.5,
+      "chokepoint_risk": "high"
+    },
+    {
+      "source": "gate_a",
+      "target": "ground_e",
+      "distance_meters": 60.0,
+      "walk_time_seconds": 60,
+      "flow_capacity_rate": 5.0,
+      "chokepoint_risk": "medium"
+    },
+    {
+      "source": "corridor_b",
+      "target": "exit_c",
+      "distance_meters": 30.0,
+      "walk_time_seconds": 30,
+      "flow_capacity_rate": 2.0,
+      "chokepoint_risk": "critical"
+    },
+    {
+      "source": "corridor_b",
+      "target": "ground_e",
+      "distance_meters": 40.0,
+      "walk_time_seconds": 40,
+      "flow_capacity_rate": 4.0,
+      "chokepoint_risk": "low"
+    },
+    {
+      "source": "ground_e",
+      "target": "counter_d",
+      "distance_meters": 50.0,
+      "walk_time_seconds": 50,
+      "flow_capacity_rate": 3.0,
+      "chokepoint_risk": "medium"
+    }
+  ]
+}

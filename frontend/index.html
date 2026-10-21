@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Crowd Safety — Command Operations Center</title>
+    <meta name="description" content="AI-Powered Real-time Autonomous Crowd Safety & Decision Support Command Center">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css?v=3.0">
+</head>
+<body>
+    <!-- ====== TOP COMMAND BAR ====== -->
+    <header id="header">
+        <div class="header-left">
+            <div class="logo">
+                <span class="logo-badge">🛡️</span>
+                <span class="logo-text">AI CROWD SAFETY</span>
+                <span class="logo-subtitle">COMMAND OS</span>
+            </div>
+            <div id="venue-status" class="venue-badge safe">SAFE</div>
+        </div>
+        <div class="header-center">
+            <span id="clock">Connecting telemetry...</span>
+        </div>
+        <div class="header-right">
+            <div id="connection-status" class="conn-badge offline">⚫ Offline</div>
+            <button id="mute-btn" class="btn-icon" title="Toggle Audio Alert Synthesizer">🔊</button>
+            <button id="qr-btn" class="btn-icon" title="Open Citizen Report QR Code">📱</button>
+        </div>
+    </header>
+
+    <!-- ====== DEMO SCENARIO EVALUATION DOCK ====== -->
+    <div id="demo-bar" class="demo-toolbar">
+        <div class="demo-title">
+            <span class="demo-pill">TACTICAL SIM</span>
+            <span class="demo-label">Live Evaluation Scenarios:</span>
+        </div>
+        <div class="demo-buttons">
+            <button id="demo-normal" class="demo-btn btn-normal" type="button" title="S01: Safe baseline crowd density">🟢 S01: Safe</button>
+            <button id="demo-surge" class="demo-btn btn-surge" type="button" title="S02: Rapid Inflow Rush at Gate A">⚠️ S02: Gate A Surge</button>
+            <button id="demo-running" class="demo-btn btn-surge" type="button" title="S03: Running Panic in Corridor B">🏃 S03: Running Panic</button>
+            <button id="demo-reverse" class="demo-btn btn-surge" type="button" title="S04: Counter-flow at Exit C">🔄 S04: Reverse Flow</button>
+            <button id="demo-citizen" class="demo-btn btn-citizen" type="button" title="S05: Citizen QR hazard report">📱 S05: Citizen Report</button>
+            <button id="demo-spillover" class="demo-btn btn-critical" type="button" title="S06: Cross-Zone Spillover Propagation">🌊 S06: Spillover ETA</button>
+            <button id="demo-weather" class="demo-btn btn-normal" type="button" title="S07: Adverse Weather (+15% outdoor risk)">🌧️ S07: Rain Weather</button>
+            <button id="demo-disconnect" class="demo-btn btn-reset" type="button" title="S10: Camera Sensor Drop / Disconnect">🔌 S10: Sensor Drop</button>
+            <button id="demo-critical" class="demo-btn btn-critical" type="button" title="Direct Critical Hazard + 5-Part XAI Directive">🚨 Critical Directive</button>
+            <button id="demo-reset" class="demo-btn btn-reset" type="button" title="Reset all zones to baseline">🔄 Reset</button>
+        </div>
+        <div id="demo-toast" class="demo-toast hidden"></div>
+    </div>
+
+    <!-- ====== CRITICAL ALERT BANNER ====== -->
+    <div id="alert-banner" class="alert-banner hidden">
+        <span id="alert-icon">🚨</span>
+        <span id="alert-text">ALERT ACTIVE</span>
+        <button id="alert-dismiss" class="btn-sm">Acknowledge</button>
+    </div>
+
+    <!-- ====== MAIN COMMAND WORKSPACE ====== -->
+    <main id="main-content">
+        <!-- LEFT STAGE: Spatial Monitoring + Zone Matrix -->
+        <div class="col-left">
+            <!-- Spatial Monitoring: Architectural Blueprint + Live CCTV -->
+            <section class="panel" id="map-panel">
+                <div class="panel-header-tabs">
+                    <h2 class="panel-title">🗺️ Venue Spatial Intelligence</h2>
+                    <div class="view-toggle-group">
+                        <button id="view-map-btn" class="view-btn active" type="button">🗺️ Floor Map</button>
+                        <button id="view-cctv-btn" class="view-btn" type="button">📹 Live CCTV</button>
+                        <button id="view-split-btn" class="view-btn" type="button">⚡ Split Screen</button>
+                    </div>
+                </div>
+
+                <div class="spatial-views-wrapper" id="spatial-wrapper">
+                    <!-- High-Tech Blueprint SVG -->
+                    <div class="map-container" id="map-subview">
+                        <svg id="venue-map" viewBox="0 0 800 480" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <pattern id="blueprint-grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255, 255, 255, 0.035)" stroke-width="0.8"/>
+                                </pattern>
+                                <linearGradient id="grad-gate" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="rgba(16, 185, 129, 0.22)"/>
+                                    <stop offset="100%" stop-color="rgba(16, 185, 129, 0.05)"/>
+                                </linearGradient>
+                            </defs>
+
+                            <!-- Blueprint Dark Canvas -->
+                            <rect x="0" y="0" width="800" height="480" fill="#080a0f"/>
+                            <rect x="0" y="0" width="800" height="480" fill="url(#blueprint-grid)"/>
+
+                            <!-- Architectural Header Grid Line -->
+                            <line x1="40" y1="28" x2="760" y2="28" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+                            <text x="50" y="20" fill="#64748b" font-size="10" font-family="'JetBrains Mono', monospace" font-weight="600" letter-spacing="0.1em">VENUE SPATIAL BLUEPRINT // REAL-TIME RISK GEOMETRY</text>
+                            <text x="750" y="20" text-anchor="end" fill="#6366f1" font-size="10" font-family="'JetBrains Mono', monospace" font-weight="600">LIVE SENSOR TELEMETRY</text>
+
+                            <!-- Adjacency Transit Flow Lines -->
+                            <g stroke="#6366f1" stroke-width="1.5" stroke-dasharray="6,6" fill="none" opacity="0.35">
+                                <path d="M 250 125 L 310 145" />
+                                <path d="M 160 195 L 200 250" />
+                                <path d="M 490 150 L 550 125" />
+                                <path d="M 400 215 L 350 255" />
+                                <path d="M 490 345 L 550 345" />
+                            </g>
+
+                            <!-- Zone Geometries -->
+                            <g id="zone-polygons">
+                                <!-- Gate A (Chokepoint) -->
+                                <g class="zone-group" data-zone="gate_a">
+                                    <rect x="50" y="45" width="200" height="150" rx="10" class="zone-poly" id="poly-gate_a" fill="rgba(16, 185, 129, 0.12)" stroke="#10b981" stroke-width="1.8"/>
+                                    <text x="150" y="78" text-anchor="middle" fill="#ffffff" font-size="12.5" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700">Main Gate A [CAM 01]</text>
+                                    <rect x="85" y="90" width="130" height="18" rx="9" fill="rgba(99, 102, 241, 0.18)" stroke="rgba(99, 102, 241, 0.35)" stroke-width="1"/>
+                                    <text x="150" y="103" text-anchor="middle" fill="#a5b4fc" font-size="9" font-family="'JetBrains Mono', monospace" font-weight="700">⚡ PRIORITY 2.0 CHOKEPOINT</text>
+                                    <text x="150" y="142" text-anchor="middle" fill="#ffffff" font-size="24" font-family="'JetBrains Mono', monospace" font-weight="800" id="map-count-gate_a">0</text>
+                                    <text x="150" y="164" text-anchor="middle" fill="#94a3b8" font-size="10.5" font-family="'JetBrains Mono', monospace" id="map-density-gate_a">0.00 p/m²</text>
+                                    <text x="150" y="182" text-anchor="middle" fill="#f59e0b" font-size="9.5" font-family="'JetBrains Mono', monospace" font-weight="700" id="map-ttc-gate_a"></text>
+                                </g>
+
+                                <!-- Corridor B -->
+                                <g class="zone-group" data-zone="corridor_b">
+                                    <rect x="290" y="75" width="200" height="140" rx="10" class="zone-poly" id="poly-corridor_b" fill="rgba(16, 185, 129, 0.12)" stroke="#10b981" stroke-width="1.8"/>
+                                    <text x="390" y="108" text-anchor="middle" fill="#ffffff" font-size="12.5" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700">Corridor B</text>
+                                    <text x="390" y="126" text-anchor="middle" fill="#64748b" font-size="9.5" font-family="'JetBrains Mono', monospace" font-weight="600">TRANSIT LINK (w=1.75)</text>
+                                    <text x="390" y="160" text-anchor="middle" fill="#ffffff" font-size="22" font-family="'JetBrains Mono', monospace" font-weight="800" id="map-count-corridor_b">0</text>
+                                    <text x="390" y="180" text-anchor="middle" fill="#94a3b8" font-size="10.5" font-family="'JetBrains Mono', monospace" id="map-density-corridor_b">0.00 p/m²</text>
+                                    <text x="390" y="198" text-anchor="middle" fill="#f59e0b" font-size="9.5" font-family="'JetBrains Mono', monospace" font-weight="700" id="map-ttc-corridor_b"></text>
+                                </g>
+
+                                <!-- Exit C -->
+                                <g class="zone-group" data-zone="exit_c">
+                                    <rect x="540" y="45" width="200" height="150" rx="10" class="zone-poly" id="poly-exit_c" fill="rgba(16, 185, 129, 0.12)" stroke="#10b981" stroke-width="1.8"/>
+                                    <text x="640" y="78" text-anchor="middle" fill="#ffffff" font-size="12.5" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700">Emergency Exit C</text>
+                                    <text x="640" y="98" text-anchor="middle" fill="#64748b" font-size="9.5" font-family="'JetBrains Mono', monospace" font-weight="600">EGRESS PATH (w=2.0)</text>
+                                    <text x="640" y="142" text-anchor="middle" fill="#ffffff" font-size="24" font-family="'JetBrains Mono', monospace" font-weight="800" id="map-count-exit_c">0</text>
+                                    <text x="640" y="164" text-anchor="middle" fill="#94a3b8" font-size="10.5" font-family="'JetBrains Mono', monospace" id="map-density-exit_c">0.00 p/m²</text>
+                                    <text x="640" y="182" text-anchor="middle" fill="#f59e0b" font-size="9.5" font-family="'JetBrains Mono', monospace" font-weight="700" id="map-ttc-exit_c"></text>
+                                </g>
+
+                                <!-- Ground E (Open Ground Plaza) -->
+                                <g class="zone-group" data-zone="ground_e">
+                                    <rect x="50" y="240" width="440" height="200" rx="10" class="zone-poly" id="poly-ground_e" fill="rgba(16, 185, 129, 0.12)" stroke="#10b981" stroke-width="1.8"/>
+                                    <text x="270" y="280" text-anchor="middle" fill="#ffffff" font-size="13.5" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700">Open Ground Plaza E</text>
+                                    <text x="270" y="300" text-anchor="middle" fill="#64748b" font-size="9.5" font-family="'JetBrains Mono', monospace" font-weight="600">PRIMARY BUFFER ZONE (w=1.0)</text>
+                                    <text x="270" y="350" text-anchor="middle" fill="#ffffff" font-size="32" font-family="'JetBrains Mono', monospace" font-weight="800" id="map-count-ground_e">0</text>
+                                    <text x="270" y="378" text-anchor="middle" fill="#94a3b8" font-size="11" font-family="'JetBrains Mono', monospace" id="map-density-ground_e">0.00 p/m²</text>
+                                    <text x="270" y="400" text-anchor="middle" fill="#f59e0b" font-size="10" font-family="'JetBrains Mono', monospace" font-weight="700" id="map-ttc-ground_e"></text>
+                                </g>
+
+                                <!-- Counter D -->
+                                <g class="zone-group" data-zone="counter_d">
+                                    <rect x="540" y="240" width="200" height="200" rx="10" class="zone-poly" id="poly-counter_d" fill="rgba(16, 185, 129, 0.12)" stroke="#10b981" stroke-width="1.8"/>
+                                    <text x="640" y="280" text-anchor="middle" fill="#ffffff" font-size="12.5" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700">Ticket Counter D</text>
+                                    <text x="640" y="300" text-anchor="middle" fill="#64748b" font-size="9.5" font-family="'JetBrains Mono', monospace" font-weight="600">QUEUE AREA (w=1.5)</text>
+                                    <text x="640" y="350" text-anchor="middle" fill="#ffffff" font-size="24" font-family="'JetBrains Mono', monospace" font-weight="800" id="map-count-counter_d">0</text>
+                                    <text x="640" y="378" text-anchor="middle" fill="#94a3b8" font-size="10.5" font-family="'JetBrains Mono', monospace" id="map-density-counter_d">0.00 p/m²</text>
+                                    <text x="640" y="400" text-anchor="middle" fill="#f59e0b" font-size="9.5" font-family="'JetBrains Mono', monospace" font-weight="700" id="map-ttc-counter_d"></text>
+                                </g>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <!-- Live CCTV Video Stream with Military-Grade HUD -->
+                    <div class="cctv-container hidden" id="cctv-subview">
+                        <div class="cctv-hud-header">
+                            <span class="cctv-rec-dot"></span>
+                            <span class="cctv-cam-title">CAM 01 // MAIN ENTRY GATE A (YOLOv8 DEEP-FIELD LIVE)</span>
+                            <span class="cctv-badge">25 FPS LIVE</span>
+                        </div>
+                        <img id="cctv-stream-img" src="/api/video/feed" alt="Live CCTV Analytics Stream" class="cctv-stream-img">
+                        <div class="cctv-hud-footer">
+                            <span>ANALYTICS: YOLOv8 NANO + DUAL-STAGE SLICED INFERENCE</span>
+                            <span id="cctv-status-indicator">STATUS: CONNECTED</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Zone Status Tiles -->
+            <section class="panel" id="tiles-panel">
+                <h2 class="panel-title">📊 Real-Time Zone Telemetry Matrix</h2>
+                <div id="zone-tiles" class="zone-tiles-grid">
+                    <!-- Populated dynamically by app.js with rich density meters -->
+                </div>
+            </section>
+        </div>
+
+        <!-- RIGHT STAGE: AI Decision Copilot + Executive Briefings + Chat -->
+        <div class="col-right">
+            <!-- AI Recommendations (Autonomous Interventions) -->
+            <section class="panel" id="rec-panel">
+                <h2 class="panel-title">🤖 AI Tactical Recommendations</h2>
+                <div id="recommendations" class="rec-list">
+                    <div class="empty-state">Awaiting real-time telemetry from active vision feed...</div>
+                </div>
+            </section>
+
+            <!-- Safety Briefings -->
+            <section class="panel" id="briefing-panel">
+                <div class="panel-header-tabs">
+                    <h2 class="panel-title">📋 Executive Safety Briefings</h2>
+                    <button id="force-briefing-btn" class="btn-sm" title="Synthesize Incident Briefing Now">⚡ Generate</button>
+                </div>
+                <div id="briefings" class="briefing-content">
+                    <div class="empty-state">Autonomous briefing synthesizer active. Reports generate upon critical state shift.</div>
+                </div>
+            </section>
+
+            <!-- Operator Copilot Chat -->
+            <section class="panel" id="chat-panel">
+                <h2 class="panel-title">💬 Operator Command Copilot</h2>
+                <div id="chat-messages" class="chat-messages">
+                    <div class="chat-msg agent">
+                        <div class="chat-msg-header">
+                            <span class="chat-sender-name">AI Command Copilot</span>
+                            <span class="chat-source-tag tag-llm">⚡ Active</span>
+                        </div>
+                        <div class="chat-msg-body">
+                            <div class="chat-line">Ready, Operator. Continuous monitoring is active across all venue zones. Ask me about zone safety, risk factors, or tactical egress recommendations.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="chat-input-row">
+                    <input type="text" id="chat-input" placeholder="Ask: Which gate is safest right now?" autocomplete="off">
+                    <button id="chat-send" class="btn-primary">Send</button>
+                </div>
+                <div class="chat-suggestions">
+                    <button class="btn-suggestion" data-q="Which gate is safest right now?">Safest gate?</button>
+                    <button class="btn-suggestion" data-q="Give me a venue status summary">Status summary</button>
+                    <button class="btn-suggestion" data-q="Why is Gate A in its current state?">Why Gate A?</button>
+                </div>
+            </section>
+
+            <!-- Agent Activity Feed -->
+            <section class="panel" id="activity-panel">
+                <h2 class="panel-title">📡 Autonomous Loop Telemetry</h2>
+                <div id="agent-feed" class="agent-feed">
+                    <div class="empty-state">Agent perception loop initializing...</div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Citizen Report QR Code Modal -->
+    <div id="qr-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3>📱 Citizen Incident Reporting</h3>
+            <p>Scan QR with mobile device to submit geotagged crowd density reports:</p>
+            <img id="qr-image" src="/api/qr" alt="QR Code" style="width:230px;height:230px;image-rendering:pixelated">
+            <p id="qr-url" class="qr-url"></p>
+            <button id="qr-close" class="btn-primary">Dismiss</button>
+        </div>
+    </div>
+
+    <!-- Audio Alert Tone Generator -->
+    <audio id="alert-sound" preload="auto">
+        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgipausJFkN0JolqyymWk0NlmJpq6xmGk0PFmHpKqwmXE7RF6JpKqsj2IzQF+Pp66wlGQ0O1eDoaiummo3RF+Pp7GymmY0OFaAnaWslWo6S2eVr7m2o3RAOlWBnaSlkmo9UG6ctr67p3c9OVF6lp2ek3VJW3ukwMO9qnY2MUlxiZKShIFzaHaXr7q5saBwRjhQbIKMj4qEfnl+jaOyuLiupXxMOE5sgIuRkIuFgH6Bj6CsuLe1rp1+WEFNa36Lk5SSjomHhoyXo62ztbGql39dS1Bte42UlpSRjYqJjZSdprCzs7Glj3VZTVRwgI2Wm5qXko6Lh4iNk5ukrLS0sKiWg2xYUlhxg46Xm5uYlJCOj42PkZWcoaqxtLKtpJZ/amFYWm+Bi5SXl5WUko+Oj5GTmJ2jq7K1tLGspJR+bGRiY3GBi5OVlZSTko+Oj5OXm6CmrbO1trSvqp2NfnJtbnV/" type="audio/wav">
+    </audio>
+
+    <script src="/static/app.js?v=3.0"></script>
+</body>
+</html>

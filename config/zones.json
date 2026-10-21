@@ -1,0 +1,72 @@
+{
+  "zones": [
+    {
+      "zone_id": "gate_a",
+      "zone_name": "Main Entry Gate A",
+      "zone_type": "Gate",
+      "priority_weight": 2.0,
+      "floor_area_sqm": 6.0,
+      "watch_threshold": 0.35,
+      "warning_threshold": 0.60,
+      "critical_threshold": 0.85,
+      "polygon": [[100, 50], [300, 50], [300, 200], [100, 200]]
+    },
+    {
+      "zone_id": "corridor_b",
+      "zone_name": "Connecting Corridor B",
+      "zone_type": "Corridor",
+      "priority_weight": 1.75,
+      "floor_area_sqm": 8.0,
+      "watch_threshold": 0.35,
+      "warning_threshold": 0.60,
+      "critical_threshold": 0.85,
+      "polygon": [[320, 100], [500, 100], [500, 250], [320, 250]]
+    },
+    {
+      "zone_id": "exit_c",
+      "zone_name": "Emergency Exit C",
+      "zone_type": "Exit",
+      "priority_weight": 2.0,
+      "floor_area_sqm": 6.0,
+      "watch_threshold": 0.35,
+      "warning_threshold": 0.60,
+      "critical_threshold": 0.85,
+      "polygon": [[520, 50], [700, 50], [700, 200], [520, 200]]
+    },
+    {
+      "zone_id": "counter_d",
+      "zone_name": "Ticket Counter D",
+      "zone_type": "Counter",
+      "priority_weight": 1.5,
+      "floor_area_sqm": 6.0,
+      "watch_threshold": 0.35,
+      "warning_threshold": 0.60,
+      "critical_threshold": 0.85,
+      "polygon": [[520, 270], [700, 270], [700, 420], [520, 420]]
+    },
+    {
+      "zone_id": "ground_e",
+      "zone_name": "Open Ground Plaza E",
+      "zone_type": "General",
+      "priority_weight": 1.0,
+      "floor_area_sqm": 20.0,
+      "watch_threshold": 0.35,
+      "warning_threshold": 0.60,
+      "critical_threshold": 0.85,
+      "polygon": [[100, 270], [500, 270], [500, 450], [100, 450]]
+    }
+  ],
+  "adjacency": [
+    {"from": "gate_a", "to": "corridor_b", "walk_time_s": 45},
+    {"from": "gate_a", "to": "ground_e", "walk_time_s": 60},
+    {"from": "corridor_b", "to": "exit_c", "walk_time_s": 30},
+    {"from": "corridor_b", "to": "ground_e", "walk_time_s": 40},
+    {"from": "ground_e", "to": "counter_d", "walk_time_s": 50}
+  ],
+  "risk_weights": {
+    "density": 0.45,
+    "trend": 0.20,
+    "behaviour": 0.25,
+    "reports": 0.10
+  }
+}

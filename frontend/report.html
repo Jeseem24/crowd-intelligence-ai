@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Citizen Safety Report</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%);
+            color: #e8e8f0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: #16213e;
+            border: 1px solid #2a2a4a;
+            border-radius: 16px;
+            padding: 32px 24px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .logo { font-size: 48px; margin-bottom: 8px; }
+        h1 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            background: linear-gradient(135deg, #6366f1, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .subtitle { font-size: 13px; color: #9ca3af; margin-bottom: 24px; }
+        .info-box {
+            background: #1e2a4a;
+            border: 1px solid #2a2a4a;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 20px;
+            font-size: 12px;
+            color: #9ca3af;
+            line-height: 1.5;
+        }
+        .info-box strong { color: #6366f1; }
+        label {
+            display: block;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #d1d5db;
+        }
+        select, textarea {
+            width: 100%;
+            background: #1e2a4a;
+            border: 1px solid #2a2a4a;
+            color: #e8e8f0;
+            padding: 12px;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            margin-bottom: 16px;
+            outline: none;
+        }
+        select:focus, textarea:focus { border-color: #6366f1; }
+        textarea { resize: vertical; min-height: 80px; }
+        .btn-report {
+            width: 100%;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+        .btn-report:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(239, 68, 68, 0.3); }
+        .btn-report:active { transform: translateY(0); }
+        .btn-report:disabled { opacity: 0.5; cursor: not-allowed; }
+        .success-msg {
+            display: none;
+            background: #14532d;
+            color: #4ade80;
+            border: 1px solid #22c55e;
+            padding: 14px;
+            border-radius: 8px;
+            margin-top: 16px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .error-msg {
+            display: none;
+            background: #7f1d1d;
+            color: #ef4444;
+            border: 1px solid #ef4444;
+            padding: 14px;
+            border-radius: 8px;
+            margin-top: 16px;
+            font-size: 14px;
+        }
+        .privacy-note {
+            font-size: 10px;
+            color: #6b7280;
+            margin-top: 20px;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🛡️</div>
+        <h1>Citizen Safety Report</h1>
+        <p class="subtitle">Help keep everyone safe — report crowding concerns</p>
+
+        <div class="info-box">
+            <strong>📢 Anonymous & Instant</strong><br>
+            Your report is completely anonymous. No personal information is collected or stored.
+            Reports are immediately integrated into the venue's safety monitoring system.
+        </div>
+
+        <form id="report-form">
+            <label for="zone-select">📍 Select the zone you're in:</label>
+            <select id="zone-select" required>
+                <option value="">— Choose a zone —</option>
+                <option value="gate_a">Main Entry Gate A</option>
+                <option value="corridor_b">Connecting Corridor B</option>
+                <option value="exit_c">Emergency Exit C</option>
+                <option value="counter_d">Ticket Counter D</option>
+                <option value="ground_e">Open Ground Plaza E</option>
+            </select>
+
+            <label for="message">💬 What's happening? (optional)</label>
+            <textarea id="message" placeholder="e.g., Heavy pushing near the entrance, people falling down..."></textarea>
+
+            <button type="submit" class="btn-report" id="submit-btn">
+                🚨 Report Unsafe Crowding
+            </button>
+        </form>
+
+        <div id="success-msg" class="success-msg">
+            ✅ Report submitted successfully! Thank you for helping keep everyone safe.
+        </div>
+
+        <div id="error-msg" class="error-msg">
+            ❌ Failed to submit report. Please try again.
+        </div>
+
+        <p class="privacy-note">
+            🔒 Privacy: No personal data, phone numbers, or device identifiers are collected.
+            This system is purely advisory and helps event managers monitor crowd safety.
+        </p>
+    </div>
+
+    <script>
+        document.getElementById('report-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const zoneId = document.getElementById('zone-select').value;
+            const message = document.getElementById('message').value.trim() || 'This area feels unsafe';
+            const btn = document.getElementById('submit-btn');
+            const successEl = document.getElementById('success-msg');
+            const errorEl = document.getElementById('error-msg');
+
+            if (!zoneId) {
+                alert('Please select a zone');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Submitting...';
+            successEl.style.display = 'none';
+            errorEl.style.display = 'none';
+
+            try {
+                const resp = await fetch('/api/reports/citizen', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ zone_id: zoneId, message }),
+                });
+
+                if (resp.ok) {
+                    successEl.style.display = 'block';
+                    document.getElementById('message').value = '';
+                    setTimeout(() => {
+                        btn.disabled = false;
+                        btn.textContent = '🚨 Report Unsafe Crowding';
+                    }, 3000);
+                } else {
+                    throw new Error('Server error');
+                }
+            } catch (err) {
+                errorEl.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = '🚨 Report Unsafe Crowding';
+            }
+        });
+    </script>
+</body>
+</html>

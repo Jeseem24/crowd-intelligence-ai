@@ -1,0 +1,27 @@
+# Python & Virtualenv
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment variables
+.env.local
+
+# Databases
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Graphify Knowledge Graph
+graphify-out/
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Scratch temporary files
+scratch/

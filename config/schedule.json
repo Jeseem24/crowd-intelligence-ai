@@ -1,0 +1,36 @@
+{
+  "event_name": "7th Semester Grand Engineering Symposium & Exhibition",
+  "venue": "Campus Central Concourse & Multi-Purpose Grounds",
+  "date": "2026-10-21",
+  "timezone": "IST",
+  "schedule_markers": [
+    {
+      "time": "09:00",
+      "phase": "Attendee Gate Inflow & Registration",
+      "expected_influx": "high",
+      "focus_zones": ["gate_a", "counter_d"],
+      "surge_probability": 0.75
+    },
+    {
+      "time": "11:30",
+      "phase": "Keynote Address Transition",
+      "expected_influx": "moderate",
+      "focus_zones": ["corridor_b", "ground_e"],
+      "surge_probability": 0.45
+    },
+    {
+      "time": "13:00",
+      "phase": "Lunch Intermission & Concourse Movement",
+      "expected_influx": "very_high",
+      "focus_zones": ["corridor_b", "ground_e"],
+      "surge_probability": 0.85
+    },
+    {
+      "time": "16:30",
+      "phase": "Valedictory & Venue Egress Rush",
+      "expected_influx": "critical",
+      "focus_zones": ["exit_c", "gate_a"],
+      "surge_probability": 0.90
+    }
+  ]
+}
