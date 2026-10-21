@@ -1680,6 +1680,251 @@ main#main-content {
 }
 
 /* ============================================================
+   ROLE SWITCHER (CHIEF / POLICE / VOLUNTEER)
+   ============================================================ */
+.role-switcher {
+    display: flex;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid var(--border-hairline);
+    border-radius: var(--radius-pill);
+    padding: 3px;
+    gap: 4px;
+}
+
+.role-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.role-btn:hover {
+    color: var(--text-main);
+}
+
+.role-btn.active {
+    background: #6366f1;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+}
+
+/* ============================================================
+   VERIFIED INTERVENTION FEEDBACK BANNER
+   ============================================================ */
+.feedback-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 20px;
+    background: rgba(16, 185, 129, 0.14);
+    border-bottom: 1px solid #10b981;
+    color: #34d399;
+    font-size: 12.5px;
+    font-weight: 600;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.feedback-badge {
+    background: #059669;
+    color: #ffffff;
+    padding: 2.5px 8px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+}
+
+/* ============================================================
+   DYNAMIC STEWARD DEPLOYMENT OPTIMIZER WIDGET
+   ============================================================ */
+.steward-pool-badge {
+    background: rgba(99, 102, 241, 0.18);
+    border: 1px solid rgba(99, 102, 241, 0.35);
+    color: #a5b4fc;
+    padding: 3px 10px;
+    border-radius: var(--radius-pill);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.steward-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.steward-card {
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 12px;
+    transition: all 0.2s ease;
+}
+
+.steward-card:hover {
+    border-color: rgba(99, 102, 241, 0.4);
+    background: rgba(99, 102, 241, 0.05);
+}
+
+.steward-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.steward-zone-title {
+    font-weight: 700;
+    font-size: 12.5px;
+    color: #ffffff;
+}
+
+.steward-count-badge {
+    background: #1e1b4b;
+    border: 1px solid #6366f1;
+    color: #c7d2fe;
+    padding: 2px 7px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.steward-instruc {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+/* ============================================================
+   EDIT DIRECTIVE MODAL
+   ============================================================ */
+.edit-modal-content {
+    background: #0f172a;
+    border: 1px solid rgba(99, 102, 241, 0.4);
+    border-radius: 20px;
+    max-width: 480px;
+    padding: 24px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+    text-align: left;
+}
+
+.edit-zone-badge {
+    display: inline-block;
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid #ef4444;
+    color: #fca5a5;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 800;
+    margin-bottom: 14px;
+}
+
+.edit-label {
+    display: block;
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+}
+
+.slider-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.slider-row input[type="range"] {
+    flex: 1;
+    accent-color: #6366f1;
+    cursor: pointer;
+}
+
+.slider-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: #a5b4fc;
+    min-width: 70px;
+}
+
+.stepper-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.btn-step {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border-subtle);
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 16px;
+    cursor: pointer;
+}
+.btn-step:hover {
+    background: rgba(99, 102, 241, 0.3);
+}
+
+.stepper-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.edit-textarea {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 13px;
+    padding: 10px;
+    resize: none;
+    min-height: 60px;
+    margin-bottom: 18px;
+    outline: none;
+}
+.edit-textarea:focus {
+    border-color: #6366f1;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* Dynamic Animated Flow Vectors */
+.flow-wave {
+    stroke-dasharray: 8, 8;
+    animation: flow-dash 1.2s linear infinite;
+}
+
+@keyframes flow-dash {
+    to { stroke-dashoffset: -32; }
+}
+
+/* ============================================================
    RESPONSIVE LAYOUT
    ============================================================ */
 @media (max-width: 1200px) {

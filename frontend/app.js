@@ -80,6 +80,9 @@ function handleMessage(data) {
         case 'alert_action':
             updateAlertAction(data);
             break;
+        case 'intervention_outcome':
+            handleInterventionOutcome(data);
+            break;
         case 'heartbeat':
         case 'pong':
             break;
@@ -94,6 +97,12 @@ function updateDashboard(venueState) {
     updateZoneTiles(venueState.zones);
     updateMap(venueState.zones);
     checkAlerts(venueState);
+    if (venueState.steward_distribution) {
+        updateStewardAllocations(venueState.steward_distribution);
+    }
+    if (venueState.spillover_predictions) {
+        updateFlowArrows(venueState.spillover_predictions);
+    }
 }
 
 function updateVenueStatus(status) {
@@ -217,10 +226,11 @@ function checkAlerts(venueState) {
         alertText.textContent = `🚨 CRITICAL ALERT: ${names} — Immediate attention required!`;
         banner.classList.remove('hidden');
 
-        // Play sound for new Critical zones
+        // Play sound and speak advisory for new Critical zones
         for (const z of criticalZones) {
             if (lastAlertState[z.zone_id] !== 'Critical') {
                 playAlertSound();
+                speakTacticalAdvisory(`Critical alert at ${z.zone_name}. Time to critical projected at ${Math.round(z.time_to_critical_s || 30)} seconds.`);
             }
         }
     } else if (warningZones.length > 0) {
@@ -235,6 +245,19 @@ function checkAlerts(venueState) {
     for (const z of venueState.zones) {
         lastAlertState[z.zone_id] = z.state;
     }
+}
+
+let lastSpokenTime = 0;
+function speakTacticalAdvisory(msg) {
+    if (state.muted || !('speechSynthesis' in window)) return;
+    if (Date.now() - lastSpokenTime < 18000) return;
+    lastSpokenTime = Date.now();
+    try {
+        const u = new SpeechSynthesisUtterance(msg);
+        u.rate = 1.05;
+        u.pitch = 1.0;
+        window.speechSynthesis.speak(u);
+    } catch (e) {}
 }
 
 function playAlertSound() {
@@ -382,6 +405,9 @@ function renderRecommendations() {
                         <span class="action-icon">✓</span>
                         <span>AUTHORIZE DIRECTIVE</span>
                     </button>
+                    <button class="btn-edit-action" style="background:#b45309;color:#ffffff;border:none;border-radius:8px;padding:8px 14px;font-size:11.5px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;" onclick="openEditModal(${rec.alert_id}, '${rec.zone_id}')">
+                        <span>✏️ EDIT DIRECTIVE</span>
+                    </button>
                     <button class="btn-dismiss-action" onclick="handleAlertAction(${rec.alert_id}, 'rejected')">
                         <span class="action-icon">✕</span>
                         <span>DISMISS</span>
@@ -390,12 +416,80 @@ function renderRecommendations() {
             ` : `
                 <div class="rec-actions resolved">
                     <span class="rec-status-resolved ${rec.status}">
-                        ${rec.status === 'approved' ? '✓ DIRECTIVE AUTHORIZED BY OPERATOR (LOGGED TO AUDIT TRAIL)' : '✕ DISMISSED BY OPERATOR'}
+                        ${rec.status === 'approved' ? '✓ DIRECTIVE AUTHORIZED BY OPERATOR (LOGGED TO AUDIT TRAIL)' : (rec.status === 'edited' ? '✏️ CUSTOM DIRECTIVE OVERRIDE AUTHORIZED (AUDIT LOGGED)' : '✕ DISMISSED BY OPERATOR')}
                     </span>
                 </div>
             `}
         `;
         container.appendChild(card);
+    }
+}
+
+// Global modal variables
+let currentEditAlertId = null;
+let currentEditZoneId = null;
+let editStewardCount = 3;
+
+window.openEditModal = function(alertId, zoneId) {
+    currentEditAlertId = alertId;
+    currentEditZoneId = zoneId;
+    const modal = document.getElementById('edit-directive-modal');
+    const badge = document.getElementById('edit-target-zone');
+    if (badge) badge.textContent = `TARGET SECTOR: ${zoneId.toUpperCase()}`;
+    if (modal) modal.classList.remove('hidden');
+};
+
+function handleInterventionOutcome(data) {
+    const banner = document.getElementById('feedback-banner');
+    const text = document.getElementById('feedback-text');
+    if (banner && text) {
+        text.textContent = data.message;
+        banner.classList.remove('hidden');
+        setTimeout(() => banner.classList.add('hidden'), 9000);
+    }
+}
+
+function updateStewardAllocations(dist) {
+    const container = document.getElementById('steward-allocations');
+    if (!container || !dist || !dist.allocations) return;
+    container.innerHTML = dist.allocations.map(a => `
+        <div class="steward-card">
+            <div class="steward-card-header">
+                <span class="steward-zone-title">${a.zone_name}</span>
+                <span class="steward-count-badge">${a.assigned_stewards} Stewards</span>
+            </div>
+            <p class="steward-instruc">${a.post_instructions}</p>
+        </div>
+    `).join('');
+}
+
+function updateFlowArrows(predictions) {
+    if (!predictions) return;
+    const svgMap = document.getElementById('venue-map');
+    if (!svgMap) return;
+    // Highlight active wavefront arrows
+    predictions.forEach(p => {
+        const poly = document.getElementById(`poly-${p.source_id}`);
+        if (poly && p.surge_severity === 'Critical') {
+            poly.style.stroke = '#ef4444';
+            poly.style.strokeWidth = '2.5';
+        }
+    });
+}
+
+function setRole(roleName) {
+    state.currentRole = roleName;
+    document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(`role-${roleName}`)?.classList.add('active');
+
+    const tilesPanel = document.getElementById('tiles-panel');
+    const mapPanel = document.getElementById('map-panel');
+    const stewardPanel = document.getElementById('steward-panel');
+
+    if (roleName === 'police') {
+        if (stewardPanel) stewardPanel.scrollIntoView({ behavior: 'smooth' });
+    } else if (roleName === 'volunteer') {
+        if (tilesPanel) tilesPanel.scrollIntoView({ behavior: 'smooth' });
     }
 }
 
@@ -815,6 +909,55 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnDisconnect) btnDisconnect.addEventListener('click', () => triggerScenario('disconnect'));
     if (btnCritical) btnCritical.addEventListener('click', () => triggerScenario('critical'));
     if (btnReset) btnReset.addEventListener('click', () => triggerScenario('reset'));
+
+    // Role Switcher Bindings
+    document.getElementById('role-chief')?.addEventListener('click', () => setRole('chief'));
+    document.getElementById('role-police')?.addEventListener('click', () => setRole('police'));
+    document.getElementById('role-volunteer')?.addEventListener('click', () => setRole('volunteer'));
+
+    // Edit Directive Modal Bindings
+    const editModal = document.getElementById('edit-directive-modal');
+    const closeEdit = () => editModal?.classList.add('hidden');
+    document.getElementById('edit-modal-close')?.addEventListener('click', closeEdit);
+    document.getElementById('btn-cancel-edit')?.addEventListener('click', closeEdit);
+
+    const throttleSlider = document.getElementById('edit-throttle-slider');
+    const throttleVal = document.getElementById('edit-throttle-val');
+    if (throttleSlider && throttleVal) {
+        throttleSlider.addEventListener('input', (e) => {
+            throttleVal.textContent = `${e.target.value}% Hold`;
+        });
+    }
+
+    const stewardCountEl = document.getElementById('steward-count-val');
+    document.getElementById('steward-minus')?.addEventListener('click', () => {
+        editStewardCount = Math.max(1, editStewardCount - 1);
+        if (stewardCountEl) stewardCountEl.textContent = `${editStewardCount} Stewards`;
+    });
+    document.getElementById('steward-plus')?.addEventListener('click', () => {
+        editStewardCount = Math.min(8, editStewardCount + 1);
+        if (stewardCountEl) stewardCountEl.textContent = `${editStewardCount} Stewards`;
+    });
+
+    document.getElementById('btn-save-edit')?.addEventListener('click', async () => {
+        if (!currentEditAlertId) return;
+        const notes = document.getElementById('edit-notes-input')?.value.trim() || `Throttled intake by ${throttleSlider?.value || 50}%, deployed ${editStewardCount} stewards`;
+        try {
+            await fetch(`/api/alerts/${currentEditAlertId}/action`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'edited', directive_notes: notes })
+            });
+            const rec = state.recommendations.find(r => r.alert_id === currentEditAlertId);
+            if (rec) {
+                rec.status = 'edited';
+                renderRecommendations();
+            }
+            closeEdit();
+        } catch (e) {
+            console.error('Failed to submit custom directive:', e);
+        }
+    });
 
     // Spatial Monitoring View Switcher (Map / CCTV / Split Screen)
     const mapSub = document.getElementById('map-subview');

@@ -22,6 +22,11 @@
             <div id="venue-status" class="venue-badge safe">SAFE</div>
         </div>
         <div class="header-center">
+            <div class="role-switcher">
+                <button id="role-chief" class="role-btn active" type="button" title="Chief Commander Master View">🛡️ Commander</button>
+                <button id="role-police" class="role-btn" type="button" title="Police & Security Tactical Egress">🚓 Police Tactical</button>
+                <button id="role-volunteer" class="role-btn" type="button" title="Field Stewards Wayfinding View">👷 Field Stewards</button>
+            </div>
             <span id="clock">Connecting telemetry...</span>
         </div>
         <div class="header-right">
@@ -30,6 +35,12 @@
             <button id="qr-btn" class="btn-icon" title="Open Citizen Report QR Code">📱</button>
         </div>
     </header>
+
+    <!-- ====== VERIFIED INTERVENTION FEEDBACK BANNER ====== -->
+    <div id="feedback-banner" class="feedback-banner hidden">
+        <span class="feedback-badge">✓ AGENTIC VERIFICATION</span>
+        <span id="feedback-text">Evaluating operator directive outcome...</span>
+    </div>
 
     <!-- ====== DEMO SCENARIO EVALUATION DOCK ====== -->
     <div id="demo-bar" class="demo-toolbar">
@@ -185,6 +196,17 @@
                     <!-- Populated dynamically by app.js with rich density meters -->
                 </div>
             </section>
+
+            <!-- Dynamic Steward & Security Optimizer (Phase 2 F15) -->
+            <section class="panel" id="steward-panel">
+                <div class="panel-header-tabs">
+                    <h2 class="panel-title">👮‍♂️ Dynamic Steward Deployment Optimization</h2>
+                    <span class="steward-pool-badge">Pool: 12 Active Responders</span>
+                </div>
+                <div id="steward-allocations" class="steward-grid">
+                    <!-- Populated dynamically by app.js -->
+                </div>
+            </section>
         </div>
 
         <!-- RIGHT STAGE: AI Decision Copilot + Executive Briefings + Chat -->
@@ -229,7 +251,8 @@
                 <div class="chat-suggestions">
                     <button class="btn-suggestion" data-q="Which gate is safest right now?">Safest gate?</button>
                     <button class="btn-suggestion" data-q="Give me a venue status summary">Status summary</button>
-                    <button class="btn-suggestion" data-q="Why is Gate A in its current state?">Why Gate A?</button>
+                    <button class="btn-suggestion" data-q="How should we deploy our 12 stewards right now?">Steward deployment?</button>
+                    <button class="btn-suggestion" data-q="Show emergency evacuation route for Gate A">Evacuation plan?</button>
                 </div>
             </section>
 
@@ -251,6 +274,38 @@
             <img id="qr-image" src="/api/qr" alt="QR Code" style="width:230px;height:230px;image-rendering:pixelated">
             <p id="qr-url" class="qr-url"></p>
             <button id="qr-close" class="btn-primary">Dismiss</button>
+        </div>
+    </div>
+
+    <!-- Edit Directive Modal (Human-in-the-Loop Override) -->
+    <div id="edit-directive-modal" class="modal hidden">
+        <div class="modal-content edit-modal-content">
+            <div class="modal-header">
+                <span class="modal-title">✏️ Edit Tactical AI Directive (Human-in-the-Loop)</span>
+                <button id="edit-modal-close" class="btn-icon">✕</button>
+            </div>
+            <div class="modal-body">
+                <div id="edit-target-zone" class="edit-zone-badge">GATE_A</div>
+                <label class="edit-label">Turnstile Intake Rate Throttling (%):</label>
+                <div class="slider-row">
+                    <input type="range" id="edit-throttle-slider" min="0" max="100" value="50" step="5">
+                    <span id="edit-throttle-val" class="slider-val">50% Hold</span>
+                </div>
+
+                <label class="edit-label">Deploy Stewards from Reserve Pool:</label>
+                <div class="stepper-row">
+                    <button type="button" id="steward-minus" class="btn-step">-</button>
+                    <span id="steward-count-val" class="stepper-val">3 Stewards</span>
+                    <button type="button" id="steward-plus" class="btn-step">+</button>
+                </div>
+
+                <label class="edit-label">Custom Operational Order / Directives:</label>
+                <textarea id="edit-notes-input" class="edit-textarea" placeholder="e.g. Unlatch secondary panic bolts at east archway; bilateral flow diversion."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button id="btn-cancel-edit" class="btn-secondary">Cancel</button>
+                <button id="btn-save-edit" class="btn-primary">✓ Authorize Custom Directive</button>
+            </div>
         </div>
     </div>
 

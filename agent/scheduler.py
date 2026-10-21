@@ -59,3 +59,6 @@ class SafetyAgentDaemon:
 
     async def handle_chat(self, user_message):
         return await self.chat_handler.answer(user_message)
+
+    def record_operator_approval(self, alert_id, zone_id, current_density):
+        self.cognitive_engine.record_operator_approval(alert_id, zone_id, current_density)

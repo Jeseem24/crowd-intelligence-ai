@@ -276,15 +276,86 @@ async def record_alert_action(alert_id: int, action: AlertAction):
 
     update_alert_action(alert_id, action.action)
 
+    # Inform agentic cognitive memory to track post-intervention density drops
+    if action.action == "approved" and agent_daemon and risk_engine:
+        alerts = get_alerts(30)
+        matched = next((a for a in alerts if a["alert_id"] == alert_id), None)
+        if matched:
+            z_id = matched["zone_id"]
+            z = risk_engine.get_zone_state(z_id)
+            if z:
+                agent_daemon.record_operator_approval(alert_id, z_id, z["density"])
+
     await manager.broadcast({
         "type": "alert_action",
         "alert_id": alert_id,
         "action": action.action,
+        "notes": action.directive_notes,
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     })
 
     print(f"👨‍✈️ [OPERATOR ACTION]: Alert #{alert_id} marked as '{action.action.upper()}'")
     return {"status": "ok", "alert_id": alert_id, "action": action.action}
+
+
+# ============================================================
+# PHASE 2 EXTENSIONS: FLOW PREDICTION, SOPS & STEWARD OPTIMIZATION
+# ============================================================
+
+from backend.flow_engine import CrossZoneFlowEngine
+from backend.sop_engine import SOPEngine
+from backend.resource_engine import ResourceOptimizationEngine
+
+flow_engine = CrossZoneFlowEngine()
+sop_engine = SOPEngine()
+resource_engine = ResourceOptimizationEngine()
+
+
+@app.get("/api/flow/predict")
+async def get_flow_predictions():
+    """Predicts wavefront spillover propagation across adjacent zones (Phase 2 F13)."""
+    if not risk_engine:
+        raise HTTPException(status_code=503, detail="Risk Engine not initialized")
+    state = risk_engine.get_venue_state()
+    return flow_engine.predict_spillovers(state.get("zones", []))
+
+
+@app.get("/api/flow/evacuation/{zone_id}")
+async def get_evacuation_route(zone_id: str):
+    """Calculates step-by-step egress evacuation route from zone to Emergency Exit C."""
+    return flow_engine.get_evacuation_routes(zone_id)
+
+
+@app.get("/api/resources/optimize")
+async def get_steward_optimization(pool: int = 12):
+    """Calculates optimal steward deployment based on priority-weighted risk deficits (Phase 2 F15)."""
+    if not risk_engine:
+        raise HTTPException(status_code=503, detail="Risk Engine not initialized")
+    state = risk_engine.get_venue_state()
+    return resource_engine.optimize_allocation(state.get("zones", []), total_pool=pool)
+
+
+@app.get("/api/sops/{zone_id}")
+async def get_zone_sop(zone_id: str):
+    """Generates standard operating procedure (SOP) based on real-time zone status (Phase 2 F16)."""
+    if not risk_engine:
+        raise HTTPException(status_code=503, detail="Risk Engine not initialized")
+    z = risk_engine.get_zone_state(zone_id)
+    if not z:
+        raise HTTPException(status_code=404, detail="Zone not found")
+    return sop_engine.get_sop_for_state(zone_id, z["zone_name"], z["state"], z["behaviour_flag"])
+
+
+@app.get("/api/roles")
+async def get_roles():
+    """Returns available operational command views (Chief, Police, Volunteer - Phase 2 F14)."""
+    return {
+        "roles": [
+            {"id": "chief", "name": "Chief Operations Commander", "access": "full_iccc", "focus": "all_sectors"},
+            {"id": "police", "name": "Police Tactical Units", "access": "security_tactical", "focus": "chokepoints_and_egress"},
+            {"id": "volunteer", "name": "Field Stewards & Volunteers", "access": "field_responder", "focus": "steward_posts_and_wayfinding"}
+        ]
+    }
 
 
 # --- Briefings ---

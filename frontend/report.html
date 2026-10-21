@@ -2,204 +2,361 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Citizen Safety Report</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI Crowd Safety — Citizen Incident Beacon</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-dark: #080a11;
+            --surface-card: #0f172a;
+            --surface-elevated: #1e293b;
+            --primary-indigo: #6366f1;
+            --danger-red: #ef4444;
+            --emerald-safe: #10b981;
+            --amber-warn: #f59e0b;
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%);
-            color: #e8e8f0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-main);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 16px;
         }
-        .container {
-            background: #16213e;
-            border: 1px solid #2a2a4a;
-            border-radius: 16px;
-            padding: 32px 24px;
+
+        .portal-card {
+            background: var(--surface-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 24px;
             width: 100%;
-            max-width: 400px;
-            text-align: center;
+            max-width: 440px;
+            padding: 28px 22px;
+            box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7);
+            position: relative;
+            overflow: hidden;
         }
-        .logo { font-size: 48px; margin-bottom: 8px; }
-        h1 {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 4px;
-            background: linear-gradient(135deg, #6366f1, #06b6d4);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+
+        .portal-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #6366f1, #ef4444, #10b981);
         }
-        .subtitle { font-size: 13px; color: #9ca3af; margin-bottom: 24px; }
-        .info-box {
-            background: #1e2a4a;
-            border: 1px solid #2a2a4a;
-            border-radius: 8px;
-            padding: 12px;
+
+        .brand-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             margin-bottom: 20px;
-            font-size: 12px;
-            color: #9ca3af;
-            line-height: 1.5;
         }
-        .info-box strong { color: #6366f1; }
-        label {
+
+        .brand-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.35);
+            color: #a5b4fc;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+
+        .live-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #ef4444;
+            animation: pulse-dot 1.5s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(1.3); }
+        }
+
+        h1 {
+            font-size: 21px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin-bottom: 4px;
+        }
+
+        .tagline {
+            font-size: 12.5px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            line-height: 1.45;
+        }
+
+        .section-label {
             display: block;
-            text-align: left;
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 6px;
-            color: #d1d5db;
+            font-size: 11.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            margin-bottom: 8px;
         }
-        select, textarea {
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .cat-chip {
+            background: rgba(255, 255, 255, 0.035);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 10px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            text-align: left;
+        }
+
+        .cat-chip.selected {
+            background: rgba(99, 102, 241, 0.22);
+            border-color: #6366f1;
+            color: #c7d2fe;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.25);
+        }
+
+        .input-control {
             width: 100%;
-            background: #1e2a4a;
-            border: 1px solid #2a2a4a;
-            color: #e8e8f0;
-            padding: 12px;
-            border-radius: 8px;
-            font-family: 'Inter', sans-serif;
-            font-size: 14px;
+            background: var(--surface-elevated);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 12px 14px;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 13.5px;
             margin-bottom: 16px;
             outline: none;
+            transition: border-color 0.2s;
         }
-        select:focus, textarea:focus { border-color: #6366f1; }
-        textarea { resize: vertical; min-height: 80px; }
-        .btn-report {
+
+        .input-control:focus {
+            border-color: #6366f1;
+        }
+
+        textarea.input-control {
+            resize: none;
+            min-height: 72px;
+        }
+
+        .btn-submit {
             width: 100%;
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            color: white;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: #ffffff;
             border: none;
+            border-radius: 14px;
             padding: 14px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 700;
+            font-size: 14.5px;
+            font-weight: 800;
+            letter-spacing: 0.02em;
             cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            box-shadow: 0 10px 25px -5px rgba(239, 68, 68, 0.45);
         }
-        .btn-report:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(239, 68, 68, 0.3); }
-        .btn-report:active { transform: translateY(0); }
-        .btn-report:disabled { opacity: 0.5; cursor: not-allowed; }
-        .success-msg {
+
+        .btn-submit:active {
+            transform: scale(0.98);
+        }
+
+        /* Success & Guidance Screen */
+        .response-panel {
             display: none;
-            background: #14532d;
-            color: #4ade80;
-            border: 1px solid #22c55e;
-            padding: 14px;
-            border-radius: 8px;
-            margin-top: 16px;
-            font-size: 14px;
-            font-weight: 600;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 16px;
+            padding: 18px;
+            margin-top: 18px;
+            animation: fadeIn 0.3s ease-out;
         }
-        .error-msg {
-            display: none;
-            background: #7f1d1d;
-            color: #ef4444;
-            border: 1px solid #ef4444;
-            padding: 14px;
-            border-radius: 8px;
-            margin-top: 16px;
+
+        .response-title {
+            color: #34d399;
+            font-weight: 800;
             font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 8px;
         }
-        .privacy-note {
-            font-size: 10px;
-            color: #6b7280;
-            margin-top: 20px;
+
+        .response-body {
+            font-size: 12.5px;
+            color: #e2e8f0;
+            line-height: 1.5;
+        }
+
+        .guidance-box {
+            margin-top: 12px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: 10px;
+            border-left: 3px solid #6366f1;
+        }
+
+        .guidance-box strong {
+            color: #a5b4fc;
+            display: block;
+            margin-bottom: 4px;
+            font-size: 11.5px;
+            text-transform: uppercase;
+        }
+
+        .footer-note {
+            margin-top: 18px;
+            font-size: 10.5px;
+            color: #64748b;
+            text-align: center;
             line-height: 1.4;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="logo">🛡️</div>
-        <h1>Citizen Safety Report</h1>
-        <p class="subtitle">Help keep everyone safe — report crowding concerns</p>
-
-        <div class="info-box">
-            <strong>📢 Anonymous & Instant</strong><br>
-            Your report is completely anonymous. No personal information is collected or stored.
-            Reports are immediately integrated into the venue's safety monitoring system.
+    <div class="portal-card">
+        <div class="brand-header">
+            <span class="brand-pill">
+                <span class="live-dot"></span>
+                ICCC CITIZEN BEACON
+            </span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#64748b;">LATENCY: &lt;1s</span>
         </div>
 
-        <form id="report-form">
-            <label for="zone-select">📍 Select the zone you're in:</label>
-            <select id="zone-select" required>
-                <option value="">— Choose a zone —</option>
-                <option value="gate_a">Main Entry Gate A</option>
-                <option value="corridor_b">Connecting Corridor B</option>
-                <option value="exit_c">Emergency Exit C</option>
-                <option value="counter_d">Ticket Counter D</option>
-                <option value="ground_e">Open Ground Plaza E</option>
+        <h1>Crowd Hazard Reporting</h1>
+        <p class="tagline">Direct telemetry injection into the Autonomous AI Decision Center. Completely anonymous.</p>
+
+        <form id="hazard-form">
+            <label class="section-label">1. Select Observed Hazard</label>
+            <div class="category-grid" id="category-grid">
+                <div class="cat-chip selected" data-cat="Severe Crowd Compression">🚨 Crowd Crush Risk</div>
+                <div class="cat-chip" data-cat="Turnstile Gate Stoppage">🚧 Gate Chokepoint</div>
+                <div class="cat-chip" data-cat="Barrier Distortion">💥 Barrier Stress</div>
+                <div class="cat-chip" data-cat="Medical / Fallen Attendee">🚑 Fallen Person</div>
+                <div class="cat-chip" data-cat="Wet Slippery Ground">🌧️ Slippery Ground</div>
+                <div class="cat-chip" data-cat="Sudden Directional Surge">⚡ Panic Wavefront</div>
+            </div>
+
+            <label class="section-label" for="zone-select">2. Your Monitored Sector / Zone</label>
+            <select id="zone-select" class="input-control" required>
+                <option value="gate_a">Main Entry Gate A (Chokepoint 2.0x)</option>
+                <option value="corridor_b">Connecting Corridor B (Transit 1.75x)</option>
+                <option value="exit_c">Emergency Exit C (Egress 2.0x)</option>
+                <option value="counter_d">Ticket Counter D (Queue Area 1.5x)</option>
+                <option value="ground_e">Open Ground Plaza E (Central Concourse)</option>
             </select>
 
-            <label for="message">💬 What's happening? (optional)</label>
-            <textarea id="message" placeholder="e.g., Heavy pushing near the entrance, people falling down..."></textarea>
+            <label class="section-label" for="notes">3. Contextual Notes (Optional)</label>
+            <textarea id="notes" class="input-control" placeholder="e.g. Turnstile halted; crowd pushing from behind, barrier flex detected..."></textarea>
 
-            <button type="submit" class="btn-report" id="submit-btn">
-                🚨 Report Unsafe Crowding
+            <button type="submit" class="btn-submit" id="submit-btn">
+                <span>🚨 Transmit Immediate Incident Alert</span>
             </button>
         </form>
 
-        <div id="success-msg" class="success-msg">
-            ✅ Report submitted successfully! Thank you for helping keep everyone safe.
+        <div id="response-panel" class="response-panel">
+            <div class="response-title">
+                <span>✓ TELEMETRY INJECTED INTO ICCC SYSTEM</span>
+            </div>
+            <div class="response-body">
+                Your report has elevated the spatial risk weighting for <strong id="reported-zone-name">this zone</strong>. AI decision loops have been notified.
+                <div class="guidance-box">
+                    <strong>🛡️ Life Safety Egress Directive:</strong>
+                    Do not fight the crowd wave directly. Move diagonally across the flow towards the nearest marked perimeter. Maintain a wide defensive foot stance.
+                </div>
+            </div>
         </div>
 
-        <div id="error-msg" class="error-msg">
-            ❌ Failed to submit report. Please try again.
-        </div>
-
-        <p class="privacy-note">
-            🔒 Privacy: No personal data, phone numbers, or device identifiers are collected.
-            This system is purely advisory and helps event managers monitor crowd safety.
+        <p class="footer-note">
+            🔒 Privacy Protocol: Zero device identifiers or phone numbers logged. Monitored under 7th Semester B.Tech IT Crowd Safety Standard.
         </p>
     </div>
 
     <script>
-        document.getElementById('report-form').addEventListener('submit', async (e) => {
+        let selectedCategory = "Severe Crowd Compression";
+
+        // Category chip selector
+        document.querySelectorAll('.cat-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('selected'));
+                chip.classList.add('selected');
+                selectedCategory = chip.dataset.cat;
+            });
+        });
+
+        // Form Submission
+        document.getElementById('hazard-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-
             const zoneId = document.getElementById('zone-select').value;
-            const message = document.getElementById('message').value.trim() || 'This area feels unsafe';
+            const zoneName = document.getElementById('zone-select').options[document.getElementById('zone-select').selectedIndex].text;
+            const notes = document.getElementById('notes').value.trim();
+            const fullMessage = `${selectedCategory}: ${notes || 'Hazardous crowd congestion detected'}`;
             const btn = document.getElementById('submit-btn');
-            const successEl = document.getElementById('success-msg');
-            const errorEl = document.getElementById('error-msg');
-
-            if (!zoneId) {
-                alert('Please select a zone');
-                return;
-            }
+            const resPanel = document.getElementById('response-panel');
 
             btn.disabled = true;
-            btn.textContent = 'Submitting...';
-            successEl.style.display = 'none';
-            errorEl.style.display = 'none';
+            btn.innerHTML = '<span>⚡ Transmitting to ICCC Hub...</span>';
+
+            // Haptic feedback if available on mobile
+            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
 
             try {
                 const resp = await fetch('/api/reports/citizen', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ zone_id: zoneId, message }),
+                    body: JSON.stringify({ zone_id: zoneId, message: fullMessage })
                 });
 
                 if (resp.ok) {
-                    successEl.style.display = 'block';
-                    document.getElementById('message').value = '';
+                    document.getElementById('reported-zone-name').textContent = zoneName;
+                    resPanel.style.display = 'block';
+                    document.getElementById('notes').value = '';
+                    btn.innerHTML = '<span>✓ Report Logged by Safety AI</span>';
+                    btn.style.background = '#059669';
                     setTimeout(() => {
                         btn.disabled = false;
-                        btn.textContent = '🚨 Report Unsafe Crowding';
-                    }, 3000);
+                        btn.innerHTML = '<span>🚨 Transmit Additional Alert</span>';
+                        btn.style.background = '';
+                    }, 4000);
                 } else {
                     throw new Error('Server error');
                 }
             } catch (err) {
-                errorEl.style.display = 'block';
+                alert('Connection error. Please check Wi-Fi or try again.');
                 btn.disabled = false;
-                btn.textContent = '🚨 Report Unsafe Crowding';
+                btn.innerHTML = '<span>🚨 Transmit Immediate Incident Alert</span>';
             }
         });
     </script>
