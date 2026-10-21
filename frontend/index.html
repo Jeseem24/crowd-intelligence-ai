@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/style.css?v=4.0">
+    <link rel="stylesheet" href="/static/style.css?v=5.1">
 </head>
 <body>
     <!-- Ambient Viewport Edge Vignette (Dynamic Red/Amber/Cyan Glow) -->
@@ -51,25 +51,46 @@
         </div>
     </div>
 
-    <!-- ====== DEMO SCENARIO EVALUATION DOCK ====== -->
-    <div id="demo-bar" class="demo-toolbar">
-        <div class="demo-title">
-            <span class="demo-pill">TACTICAL EVAL</span>
-            <span class="demo-label">Master Scenarios (S01 - S10):</span>
+    <!-- ====== UNIFIED TACTICAL COMMAND RIBBON ====== -->
+    <div id="command-toolbar" class="command-toolbar">
+        <div class="cmd-group cmd-scenarios">
+            <span class="cmd-pill">TACTICAL EVAL</span>
+            <div class="cmd-scenario-buttons">
+                <button id="demo-normal" class="cmd-btn btn-normal active" type="button" title="S01: Safe baseline">🟢 S01: Safe</button>
+                <button id="demo-surge" class="cmd-btn btn-surge" type="button" title="S02: Rapid Inflow Rush at Gate A">⚠️ S02: Surge</button>
+                <button id="demo-running" class="cmd-btn btn-surge" type="button" title="S03: Running Panic in Corridor B">🏃 S03: Panic</button>
+                <button id="demo-reverse" class="cmd-btn btn-surge" type="button" title="S04: Counter-flow at Exit C">🔄 S04: Reverse</button>
+                <button id="demo-citizen" class="cmd-btn btn-citizen" type="button" title="S05: Citizen QR hazard report">📱 S05: Citizen</button>
+                <button id="demo-spillover" class="cmd-btn btn-critical" type="button" title="S06: Spillover Wave">🌊 S06: Spillover</button>
+                <button id="demo-weather" class="cmd-btn btn-normal" type="button" title="S07: Rain Storm (+15% risk)">🌧️ S07: Rain</button>
+                <button id="demo-disconnect" class="cmd-btn btn-reset" type="button" title="S10: Camera Sensor Drop">🔌 S10: Drop</button>
+                <button id="demo-critical" class="cmd-btn btn-critical" type="button" title="Direct Critical Hazard + 5-Part XAI Directive">🚨 Critical</button>
+                <button id="demo-reset" class="cmd-btn btn-reset" type="button" title="Reset all zones to baseline">🔄 Reset</button>
+            </div>
+            <div id="demo-toast" class="demo-toast hidden"></div>
         </div>
-        <div class="demo-buttons">
-            <button id="demo-normal" class="demo-btn btn-normal" type="button" title="S01: Safe baseline crowd density">🟢 S01: Safe</button>
-            <button id="demo-surge" class="demo-btn btn-surge" type="button" title="S02: Rapid Inflow Rush at Gate A">⚠️ S02: Gate A Surge</button>
-            <button id="demo-running" class="demo-btn btn-surge" type="button" title="S03: Running Panic in Corridor B">🏃 S03: Running Panic</button>
-            <button id="demo-reverse" class="demo-btn btn-surge" type="button" title="S04: Counter-flow at Exit C">🔄 S04: Reverse Flow</button>
-            <button id="demo-citizen" class="demo-btn btn-citizen" type="button" title="S05: Citizen QR hazard report">📱 S05: Citizen Report</button>
-            <button id="demo-spillover" class="demo-btn btn-critical" type="button" title="S06: Cross-Zone Spillover Propagation">🌊 S06: Spillover Wave</button>
-            <button id="demo-weather" class="demo-btn btn-normal" type="button" title="S07: Adverse Weather (+15% outdoor risk)">🌧️ S07: Rain Storm</button>
-            <button id="demo-disconnect" class="demo-btn btn-reset" type="button" title="S10: Camera Sensor Drop / Disconnect">🔌 S10: Sensor Drop</button>
-            <button id="demo-critical" class="demo-btn btn-critical" type="button" title="Direct Critical Hazard + 5-Part XAI Directive">🚨 Critical Directive</button>
-            <button id="demo-reset" class="demo-btn btn-reset" type="button" title="Reset all zones to baseline">🔄 Reset</button>
+
+        <div class="cmd-divider"></div>
+
+        <div class="cmd-group cmd-sandbox">
+            <span class="cmd-pill pill-sandbox">SANDBOX</span>
+            <div class="cmd-slider-wrap">
+                <label for="sandbox-slider">Gate A:</label>
+                <input type="range" id="sandbox-slider" min="1" max="25" value="2" step="1">
+                <span id="sandbox-slider-val" class="cmd-val-pill">2 Pers (0.33 p/m²)</span>
+            </div>
+            <div class="cmd-toggle-wrap">
+                <button id="sandbox-turnstile-btn" class="cmd-btn btn-toggle" type="button" title="Toggle Turnstiles">
+                    <span class="sandbox-btn-dot"></span> Turnstiles: OPEN
+                </button>
+                <button id="sandbox-weather-btn" class="cmd-btn btn-toggle" type="button" title="Toggle Rain Factor">
+                    🌧️ Rain: OFF
+                </button>
+                <button id="sandbox-panic-btn" class="cmd-btn btn-panic" type="button" title="Inject Panic Crowd Run">
+                    ⚡ Panic
+                </button>
+            </div>
         </div>
-        <div id="demo-toast" class="demo-toast hidden"></div>
     </div>
 
     <!-- ====== CRITICAL ALERT BANNER ====== -->
@@ -78,34 +99,6 @@
         <span id="alert-text">ALERT ACTIVE</span>
         <button id="alert-dismiss" class="btn-sm">Acknowledge</button>
     </div>
-
-    <!-- ====== INTERACTIVE VENUE SANDBOX CONTROLLER ====== -->
-    <section class="sandbox-strip">
-        <div class="sandbox-inner">
-            <div class="sandbox-label-group">
-                <span class="sandbox-pill">LIVE SANDBOX</span>
-                <span class="sandbox-sub">Tactile Stress Testing:</span>
-            </div>
-            
-            <div class="sandbox-control">
-                <label for="sandbox-slider">Gate A Crowd Influx:</label>
-                <input type="range" id="sandbox-slider" min="1" max="25" value="2" step="1">
-                <span id="sandbox-slider-val" class="sandbox-val">2 Persons (0.33 p/m²)</span>
-            </div>
-
-            <div class="sandbox-toggles">
-                <button id="sandbox-turnstile-btn" class="sandbox-btn" type="button">
-                    <span class="sandbox-btn-dot"></span> Turnstiles: OPEN
-                </button>
-                <button id="sandbox-weather-btn" class="sandbox-btn" type="button">
-                    🌧️ Rain Factor: OFF
-                </button>
-                <button id="sandbox-panic-btn" class="sandbox-btn panic" type="button">
-                    ⚡ Inject Panic
-                </button>
-            </div>
-        </div>
-    </section>
 
     <!-- ====== MAIN COMMAND WORKSPACE ====== -->
     <main id="main-content">
@@ -581,6 +574,6 @@
         </div>
     </div>
 
-    <script src="/static/app.js?v=4.0"></script>
+    <script src="/static/app.js?v=5.0"></script>
 </body>
 </html>

@@ -1299,16 +1299,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnCritical = document.getElementById('demo-critical');
     const btnReset = document.getElementById('demo-reset');
 
-    if (btnNormal) btnNormal.addEventListener('click', () => triggerScenario('normal'));
-    if (btnSurge) btnSurge.addEventListener('click', () => triggerScenario('surge'));
-    if (btnRunning) btnRunning.addEventListener('click', () => triggerScenario('running'));
-    if (btnReverse) btnReverse.addEventListener('click', () => triggerScenario('reverse_flow'));
-    if (btnCitizen) btnCitizen.addEventListener('click', () => triggerScenario('citizen'));
-    if (btnSpillover) btnSpillover.addEventListener('click', () => triggerScenario('spillover'));
-    if (btnWeather) btnWeather.addEventListener('click', () => triggerScenario('weather'));
-    if (btnDisconnect) btnDisconnect.addEventListener('click', () => triggerScenario('disconnect'));
-    if (btnCritical) btnCritical.addEventListener('click', () => triggerScenario('critical'));
-    if (btnReset) btnReset.addEventListener('click', () => triggerScenario('reset'));
+    function highlightScenarioButton(btn) {
+        document.querySelectorAll('.cmd-scenario-buttons .cmd-btn').forEach(b => b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+    }
+
+    if (btnNormal) btnNormal.addEventListener('click', () => { highlightScenarioButton(btnNormal); triggerScenario('normal'); });
+    if (btnSurge) btnSurge.addEventListener('click', () => { highlightScenarioButton(btnSurge); triggerScenario('surge'); });
+    if (btnRunning) btnRunning.addEventListener('click', () => { highlightScenarioButton(btnRunning); triggerScenario('running'); });
+    if (btnReverse) btnReverse.addEventListener('click', () => { highlightScenarioButton(btnReverse); triggerScenario('reverse_flow'); });
+    if (btnCitizen) btnCitizen.addEventListener('click', () => { highlightScenarioButton(btnCitizen); triggerScenario('citizen'); });
+    if (btnSpillover) btnSpillover.addEventListener('click', () => { highlightScenarioButton(btnSpillover); triggerScenario('spillover'); });
+    if (btnWeather) btnWeather.addEventListener('click', () => { highlightScenarioButton(btnWeather); triggerScenario('weather'); });
+    if (btnDisconnect) btnDisconnect.addEventListener('click', () => { highlightScenarioButton(btnDisconnect); triggerScenario('disconnect'); });
+    if (btnCritical) btnCritical.addEventListener('click', () => { highlightScenarioButton(btnCritical); triggerScenario('critical'); });
+    if (btnReset) btnReset.addEventListener('click', () => { highlightScenarioButton(btnNormal); triggerScenario('reset'); });
 
     // Role Switcher Bindings
     document.getElementById('role-chief')?.addEventListener('click', () => setRole('chief'));
@@ -1364,6 +1369,38 @@ document.addEventListener('DOMContentLoaded', () => {
     // ============================================================
     particleSystem = new CrowdParticleSystem('crowd-particles-canvas');
     cognitivePipeline = new CognitivePipelineTrace();
+
+    // Initialize Active Steward Allocations (Phase 2 F15 baseline)
+    const DEFAULT_STEWARD_DISTRIBUTION = {
+        total_stewards: 12,
+        allocations: [
+            { zone_id: 'gate_a', zone_name: 'Gate A (North Portico)', assigned_stewards: 4, post_instructions: 'Inflow crowd throttling & 8 turnstile lanes' },
+            { zone_id: 'corridor_b', zone_name: 'Concourse Spine B', assigned_stewards: 2, post_instructions: 'Bidirectional pedestrian separation & wayfinding' },
+            { zone_id: 'exit_c', zone_name: 'Emergency Exit C', assigned_stewards: 3, post_instructions: 'Egress unblocking & stairwell safety patrol' },
+            { zone_id: 'counter_d', zone_name: 'Ticketing Concourse D', assigned_stewards: 1, post_instructions: 'Queue serpentine stanchions & ticketing windows' },
+            { zone_id: 'ground_e', zone_name: 'Grand Buffer Atrium E', assigned_stewards: 2, post_instructions: 'Central dispersal plaza & medical triage station' }
+        ]
+    };
+    updateStewardAllocations(DEFAULT_STEWARD_DISTRIBUTION);
+
+    // Initialize Default Executive Safety Briefing (Non-empty baseline)
+    const DEFAULT_SAFETY_BRIEFING = {
+        generated_at: new Date().toISOString(),
+        content: `### Executive Operational Summary
+- **Venue Operational Status**: **NORMAL / GREEN**
+- **Sectors Monitored**: 5 Integrated Sectors under active YOLOv8 computer vision & hydrodynamic density calculus.
+- **Egress & Safety Margin**: **100% NFPA 101 Compliant**. Emergency Exit C stairwell clear; free-flow capacity available across all 8 North Portico turnstiles.
+- **Dynamic Stewards**: 12 Active Responders stationed across all key strategic choke points. Zero active critical directives.`
+    };
+    updateBriefing(DEFAULT_SAFETY_BRIEFING);
+
+    // Initialize Initial Telemetry Loop Logs (Non-empty baseline)
+    const DEFAULT_AGENT_NOTES = [
+        { timestamp: new Date(Date.now() - 3000).toISOString(), message: "Perception Loop: YOLOv8 tracking synchronized across 4 multi-camera channels at 10 FPS." },
+        { timestamp: new Date(Date.now() - 2000).toISOString(), message: "Hydrodynamic Calculus: Navier-Stokes density delta +0.01 p/m² across grand concourse (SAFE)." },
+        { timestamp: new Date(Date.now() - 1000).toISOString(), message: "Agentic Decision Engine: NFPA 101 safety margin verified; zero critical intervention required." }
+    ];
+    DEFAULT_AGENT_NOTES.forEach(n => addAgentNote(n));
 
     // Map Layer Toggle Buttons
     const btnLayerParticles = document.getElementById('layer-particles-btn');

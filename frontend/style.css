@@ -271,55 +271,65 @@ header#header {
 }
 
 /* ============================================================
-   DEMO SCENARIO EVALUATION DOCK
+   UNIFIED TACTICAL COMMAND RIBBON
    ============================================================ */
-.demo-toolbar {
+.command-toolbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 8px 24px;
-    background: rgba(12, 14, 20, 0.95);
+    padding: 6px 20px;
+    background: rgba(9, 11, 16, 0.95);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--border-hairline);
-    gap: 16px;
-    flex-wrap: wrap;
+    gap: 14px;
+    z-index: 100;
+    min-height: 44px;
 }
 
-.demo-title {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.demo-pill {
-    background: linear-gradient(135deg, #4f46e5, #7c3aed);
-    color: #ffffff;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    font-weight: 800;
-    padding: 3px 9px;
-    border-radius: var(--radius-pill);
-    letter-spacing: 0.08em;
-    box-shadow: 0 0 12px rgba(79, 70, 229, 0.35);
-}
-
-.demo-label {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-secondary);
-}
-
-.demo-buttons {
+.cmd-group {
     display: flex;
     align-items: center;
     gap: 8px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
 }
 
-.demo-btn {
+.cmd-scenarios {
+    flex: 1;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.cmd-scenarios::-webkit-scrollbar { display: none; }
+
+.cmd-pill {
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: #ffffff;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: var(--radius-pill);
+    letter-spacing: 0.08em;
+    box-shadow: 0 0 10px rgba(79, 70, 229, 0.35);
+    white-space: nowrap;
+}
+
+.cmd-pill.pill-sandbox {
+    background: linear-gradient(135deg, #0284c7, #06b6d4);
+    box-shadow: 0 0 10px rgba(2, 132, 199, 0.35);
+}
+
+.cmd-scenario-buttons {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.cmd-btn {
     font-family: 'Plus Jakarta Sans', sans-serif;
     font-size: 11px;
     font-weight: 600;
-    padding: 6px 14px;
+    padding: 4px 10px;
     border-radius: var(--radius-pill);
     cursor: pointer;
     border: 1px solid var(--border-hairline);
@@ -327,37 +337,113 @@ header#header {
     color: var(--text-secondary);
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    transition: all 0.25s var(--spring);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    gap: 5px;
+    transition: all 0.2s var(--spring);
+    white-space: nowrap;
 }
 
-.demo-btn:hover {
+.cmd-btn:hover {
     transform: translateY(-1px);
     color: var(--text-primary);
     background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.16);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
-.demo-btn:active {
+.cmd-btn:active {
     transform: scale(0.97);
 }
 
-.btn-normal:hover { border-color: var(--safe-border); background: var(--safe-surface); color: var(--safe); }
-.btn-surge:hover { border-color: var(--warning-border); background: var(--warning-surface); color: var(--warning); }
-.btn-critical:hover { border-color: var(--critical-border); background: var(--critical-surface); color: var(--critical); }
-.btn-citizen:hover { border-color: rgba(168, 85, 247, 0.4); background: rgba(168, 85, 247, 0.12); color: #c084fc; }
-.btn-reset:hover { border-color: var(--border-hairline); background: rgba(255, 255, 255, 0.08); color: #cbd5e1; }
+.cmd-btn.btn-normal:hover, .cmd-btn.btn-normal.active { border-color: var(--safe-border); background: var(--safe-surface); color: var(--safe); }
+.cmd-btn.btn-surge:hover { border-color: var(--warning-border); background: var(--warning-surface); color: var(--warning); }
+.cmd-btn.btn-critical:hover { border-color: var(--critical-border); background: var(--critical-surface); color: var(--critical); }
+.cmd-btn.btn-citizen:hover { border-color: rgba(168, 85, 247, 0.4); background: rgba(168, 85, 247, 0.12); color: #c084fc; }
+.cmd-btn.btn-reset:hover { border-color: var(--border-hairline); background: rgba(255, 255, 255, 0.08); color: #cbd5e1; }
+
+.cmd-divider {
+    width: 1px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+}
+
+.cmd-sandbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.cmd-slider-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.cmd-slider-wrap input[type="range"] {
+    width: 80px;
+    height: 4px;
+    accent-color: #00f0ff;
+    cursor: pointer;
+}
+
+.cmd-val-pill {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    color: #00f0ff;
+    background: rgba(0, 240, 255, 0.1);
+    border: 1px solid rgba(0, 240, 255, 0.25);
+    padding: 2px 7px;
+    border-radius: var(--radius-pill);
+    white-space: nowrap;
+}
+
+.cmd-toggle-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.cmd-btn.btn-toggle {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.sandbox-btn-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--safe);
+    box-shadow: 0 0 6px var(--safe);
+    display: inline-block;
+}
+
+.cmd-btn.btn-panic {
+    background: rgba(244, 63, 94, 0.15);
+    border-color: rgba(244, 63, 94, 0.4);
+    color: #fda4af;
+    font-weight: 700;
+}
+.cmd-btn.btn-panic:hover {
+    background: rgba(244, 63, 94, 0.3);
+    border-color: var(--critical);
+    color: #ffffff;
+    box-shadow: 0 0 12px rgba(244, 63, 94, 0.35);
+}
 
 .demo-toast {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
+    font-size: 10.5px;
     font-weight: 600;
-    padding: 4px 12px;
+    padding: 3px 10px;
     border-radius: var(--radius-pill);
     background: var(--accent-surface);
     color: var(--accent-light);
     border: 1px solid rgba(99, 102, 241, 0.35);
+    animation: fadeIn 0.3s ease;
+    white-space: nowrap;
+}
     animation: fadeIn 0.3s ease;
 }
 
@@ -653,9 +739,86 @@ main#main-content {
    ============================================================ */
 .zone-tiles-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-    gap: 12px;
-    padding: 14px;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    padding: 12px;
+}
+
+@media (max-width: 1050px) {
+    .zone-tiles-grid {
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    }
+}
+
+/* ============================================================
+   DYNAMIC STEWARD ALLOCATION ENGINE (PHASE 2 F15)
+   ============================================================ */
+.steward-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    padding: 12px;
+}
+
+@media (max-width: 1050px) {
+    .steward-grid {
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    }
+}
+
+.steward-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-hairline);
+    border-radius: var(--radius-inner);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    position: relative;
+    border-left: 3px solid var(--accent);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    transition: all 0.25s var(--spring);
+}
+
+.steward-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(99, 102, 241, 0.45);
+    background: var(--bg-card-hover);
+}
+
+.steward-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.steward-zone-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.steward-count-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    font-weight: 700;
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.14);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    padding: 2px 7px;
+    border-radius: var(--radius-pill);
+    white-space: nowrap;
+}
+
+.steward-instruc {
+    font-size: 10px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    margin: 0;
 }
 
 .zone-tile {
