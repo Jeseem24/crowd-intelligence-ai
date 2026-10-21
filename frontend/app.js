@@ -1490,34 +1490,75 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Multi-Camera Tactical Channel Selector
+    // Multi-Camera Tactical Channel Selector & Blueprint FOV Frustum Synchronizer
     const camButtons = document.querySelectorAll('.cctv-cam-btn');
     const camTitleEl = document.getElementById('cctv-cam-title');
     let currentChannel = 'cam1';
 
     const CAM_TITLES = {
-        cam1: 'CAM 01 // MAIN ENTRY GATE A (YOLOv8 DEEP-FIELD LIVE)',
-        cam2: 'CAM 02 // CONNECTING CORRIDOR B (TRANSIT LINK CHOKEPOINT)',
-        cam3: 'CAM 03 // EMERGENCY EXIT C (PRIMARY EGRESS ARTERY)',
-        cam4: 'CAM 04 // OPEN GROUND PLAZA E (BUFFER SECTOR CONCOURSE)',
-        quad: 'AEGIS QUAD MATRIX // 4-CAMERA SURVEILLANCE GRID',
+        cam1: 'CAM 01 // [SEC-01] NORTH PORTICO & GATE A TURNSTILES',
+        cam2: 'CAM 02 // [SEC-02] CENTRAL CONCOURSE SPINE B',
+        cam3: 'CAM 03 // [SEC-03] SOUTH MEZZANINE EMERGENCY EXIT C',
+        cam4: 'CAM 04 // [SEC-04] GRAND BUFFER PLAZA & ATRIUM E',
+        quad: 'AEGIS C2 // QUAD CCTV MATRIX // 4 SYNCHRONIZED FEEDS',
     };
 
+    function selectCameraChannel(camId) {
+        soundEngine.playClick();
+        currentChannel = camId;
+
+        // Update CCTV button states
+        camButtons.forEach(b => b.classList.toggle('active', b.dataset.cam === camId));
+
+        // Update Title
+        if (camTitleEl && CAM_TITLES[camId]) {
+            camTitleEl.textContent = CAM_TITLES[camId];
+        }
+
+        // Update Video Stream
+        const streamImg = document.getElementById('cctv-stream-img');
+        if (streamImg) {
+            streamImg.src = `/api/video/feed?channel=${camId}&t=${Date.now()}`;
+        }
+
+        // Synchronize Map Camera FOV Frustums & Glyphs
+        const allCones = {
+            cam1: document.getElementById('cam1-cone-group'),
+            cam2: document.getElementById('cam2-cone-group'),
+            cam3: document.getElementById('cam3-cone-group'),
+            cam4: document.getElementById('cam4-cone-group'),
+        };
+        const allGlyphs = {
+            cam1: document.getElementById('glyph-cam1'),
+            cam2: document.getElementById('glyph-cam2'),
+            cam3: document.getElementById('glyph-cam3'),
+            cam4: document.getElementById('glyph-cam4'),
+        };
+
+        if (camId === 'quad') {
+            // In Quad mode, light up all 4 sightlines simultaneously!
+            Object.values(allCones).forEach(c => c && c.classList.add('active'));
+            Object.values(allGlyphs).forEach(g => g && g.classList.add('active'));
+        } else {
+            Object.entries(allCones).forEach(([cid, el]) => {
+                if (el) el.classList.toggle('active', cid === camId);
+            });
+            Object.entries(allGlyphs).forEach(([cid, el]) => {
+                if (el) el.classList.toggle('active', cid === camId);
+            });
+        }
+    }
+
     camButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            soundEngine.playClick();
-            camButtons.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            const camId = btn.dataset.cam;
-            currentChannel = camId;
-            if (camTitleEl && CAM_TITLES[camId]) {
-                camTitleEl.textContent = CAM_TITLES[camId];
-            }
-            const streamImg = document.getElementById('cctv-stream-img');
-            if (streamImg) {
-                streamImg.src = `/api/video/feed?channel=${camId}&t=${Date.now()}`;
-            }
-        });
+        btn.addEventListener('click', () => selectCameraChannel(btn.dataset.cam));
+    });
+
+    // Also bind camera glyphs on the architectural map
+    ['cam1', 'cam2', 'cam3', 'cam4'].forEach(cid => {
+        const glyph = document.getElementById(`glyph-${cid}`);
+        if (glyph) {
+            glyph.addEventListener('click', () => selectCameraChannel(cid));
+        }
     });
 
     // Spatial Monitoring View Switcher (Map / CCTV / Split Screen)
