@@ -1,7 +1,372 @@
-/**
- * AI Crowd Safety — Command Dashboard JavaScript
- * Handles: WebSocket connection, real-time UI updates, alerts, chat, recommendations
- */
+// ============================================================
+// TACTICAL SOUND ENGINE (Web Audio API — Zero-Latency Native FX)
+// ============================================================
+class TacticalSoundEngine {
+    constructor() {
+        this.ctx = null;
+        this.enabled = true;
+    }
+    init() {
+        if (!this.ctx) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (AudioCtx) this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume();
+        }
+    }
+    playClick() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(1200, this.ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(300, this.ctx.currentTime + 0.04);
+            gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.04);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start();
+            osc.stop(this.ctx.currentTime + 0.04);
+        } catch (e) {}
+    }
+    playTelemetryPing() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(880, this.ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(440, this.ctx.currentTime + 0.06);
+            gain.gain.setValueAtTime(0.03, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.06);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start();
+            osc.stop(this.ctx.currentTime + 0.06);
+        } catch (e) {}
+    }
+    playAlertAlarm() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+            const now = this.ctx.currentTime;
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(520, now);
+            osc.frequency.linearRampToValueAtTime(880, now + 0.15);
+            osc.frequency.linearRampToValueAtTime(520, now + 0.3);
+            gain.gain.setValueAtTime(0.12, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start();
+            osc.stop(now + 0.32);
+        } catch (e) {}
+    }
+    playAuthorizeChime() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+            const freqs = [523.25, 659.25, 783.99, 1046.50];
+            freqs.forEach((f, i) => {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                const startTime = this.ctx.currentTime + (i * 0.04);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(f, startTime);
+                gain.gain.setValueAtTime(0.06, startTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.3);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(startTime);
+                osc.stop(startTime + 0.3);
+            });
+        } catch (e) {}
+    }
+}
+const soundEngine = new TacticalSoundEngine();
+
+// ============================================================
+// CROWD PARTICLE PHYSICS SIMULATOR (Canvas 2D HUD Engine)
+// ============================================================
+class CrowdParticleSystem {
+    constructor(canvasId) {
+        this.canvas = document.getElementById(canvasId);
+        this.ctx = this.canvas ? this.canvas.getContext('2d') : null;
+        this.particles = [];
+        this.activeLayer = 'particles'; // 'particles', 'heatmap', 'none'
+        this.showVectors = true;
+        this.rainActive = false;
+        this.rainDrops = [];
+        this.turnstilesOpen = true;
+
+        this.zones = {
+            gate_a: { x: 50, y: 45, w: 200, h: 150, count: 2, density: 0.33, state: 'Safe' },
+            corridor_b: { x: 290, y: 75, w: 200, h: 140, count: 1, density: 0.12, state: 'Safe' },
+            exit_c: { x: 540, y: 45, w: 200, h: 150, count: 2, density: 0.33, state: 'Safe' },
+            ground_e: { x: 50, y: 240, w: 440, h: 200, count: 3, density: 0.15, state: 'Safe' },
+            counter_d: { x: 540, y: 240, w: 200, h: 200, count: 2, density: 0.33, state: 'Safe' },
+        };
+
+        if (this.ctx) {
+            this.initParticles();
+            this.animate = this.animate.bind(this);
+            requestAnimationFrame(this.animate);
+        }
+    }
+
+    initParticles() {
+        this.particles = [];
+        for (const [zid, z] of Object.entries(this.zones)) {
+            const num = Math.max(3, z.count * 3);
+            for (let i = 0; i < num; i++) {
+                this.particles.push(this.createParticle(zid, z));
+            }
+        }
+    }
+
+    createParticle(zoneId, z) {
+        return {
+            zoneId,
+            x: z.x + 15 + Math.random() * (z.w - 30),
+            y: z.y + 20 + Math.random() * (z.h - 40),
+            vx: (Math.random() - 0.5) * 0.8,
+            vy: (Math.random() - 0.5) * 0.8,
+            radius: 2.2 + Math.random() * 1.5,
+            baseAlpha: 0.7 + Math.random() * 0.3,
+            phase: Math.random() * Math.PI * 2,
+        };
+    }
+
+    updateZones(zonesList) {
+        if (!Array.isArray(zonesList)) return;
+        for (const z of zonesList) {
+            if (this.zones[z.zone_id]) {
+                this.zones[z.zone_id].count = z.person_count;
+                this.zones[z.zone_id].density = z.density;
+                this.zones[z.zone_id].state = z.state;
+                this.zones[z.zone_id].flag = z.behaviour_flag;
+            }
+        }
+
+        // Adjust particle population to match live counts dynamically
+        for (const [zid, z] of Object.entries(this.zones)) {
+            const targetCount = Math.max(2, Math.min(60, z.count * 3));
+            const current = this.particles.filter(p => p.zoneId === zid);
+            if (current.length < targetCount) {
+                const diff = targetCount - current.length;
+                for (let i = 0; i < diff; i++) {
+                    this.particles.push(this.createParticle(zid, z));
+                }
+            } else if (current.length > targetCount) {
+                const diff = current.length - targetCount;
+                let removed = 0;
+                this.particles = this.particles.filter(p => {
+                    if (p.zoneId === zid && removed < diff) {
+                        removed++;
+                        return false;
+                    }
+                    return true;
+                });
+            }
+        }
+    }
+
+    animate() {
+        if (!this.ctx) return;
+        this.ctx.clearRect(0, 0, 800, 480);
+
+        // 1. Thermal Infrared Heatmap Layer (if selected)
+        if (this.activeLayer === 'heatmap') {
+            this.renderHeatmap();
+        }
+
+        // 2. Kinetic Crowd Particles Layer (if selected)
+        if (this.activeLayer === 'particles' || this.activeLayer === 'heatmap') {
+            this.renderParticles();
+        }
+
+        // 3. Rain streaks if adverse weather active
+        if (this.rainActive) {
+            this.renderRain();
+        }
+
+        requestAnimationFrame(this.animate);
+    }
+
+    renderHeatmap() {
+        this.ctx.save();
+        this.ctx.globalCompositeOperation = 'screen';
+        for (const [zid, z] of Object.entries(this.zones)) {
+            const cx = z.x + z.w / 2;
+            const cy = z.y + z.h / 2;
+            const maxRadius = Math.max(z.w, z.h) * 0.7;
+            const grad = this.ctx.createRadialGradient(cx, cy, 5, cx, cy, maxRadius);
+
+            let colorCore = 'rgba(16, 185, 129, 0.4)';
+            if (z.density >= 1.5 || z.state === 'Critical') {
+                colorCore = 'rgba(244, 63, 94, 0.65)';
+            } else if (z.density >= 1.0 || z.state === 'Warning') {
+                colorCore = 'rgba(249, 115, 22, 0.55)';
+            } else if (z.state === 'Watch') {
+                colorCore = 'rgba(245, 158, 11, 0.45)';
+            }
+
+            grad.addColorStop(0, colorCore);
+            grad.addColorStop(0.5, colorCore.replace(/[\d\.]+\)$/, '0.2)'));
+            grad.addColorStop(1, 'rgba(0,0,0,0)');
+
+            this.ctx.fillStyle = grad;
+            this.ctx.fillRect(z.x - 20, z.y - 20, z.w + 40, z.h + 40);
+        }
+        this.ctx.restore();
+    }
+
+    renderParticles() {
+        const now = Date.now() * 0.003;
+        for (const p of this.particles) {
+            const z = this.zones[p.zoneId];
+            if (!z) continue;
+
+            // Speed factor depends on density & behaviour
+            let speedMul = 1.0;
+            if (z.flag === 'running') speedMul = 2.4;
+            else if (z.flag === 'surge') speedMul = 1.6;
+            else if (z.density > 1.8) speedMul = 0.4; // severe congestion slowdown
+
+            // Transit Flow Drift (Gate A flows toward Corridor B, Corridor B flows toward Exit C)
+            if (p.zoneId === 'gate_a' && this.turnstilesOpen) {
+                p.vx += 0.03 * speedMul;
+                if (p.x > z.x + z.w - 10) {
+                    p.x = z.x + 10;
+                    p.y = z.y + 20 + Math.random() * (z.h - 40);
+                }
+            } else if (p.zoneId === 'corridor_b') {
+                p.vx += 0.04 * speedMul;
+                if (p.x > z.x + z.w - 10) {
+                    p.x = z.x + 10;
+                    p.y = z.y + 20 + Math.random() * (z.h - 40);
+                }
+            }
+
+            p.x += p.vx * speedMul;
+            p.y += p.vy * speedMul;
+
+            // Contain within zone boundaries
+            const pad = 12;
+            if (p.x < z.x + pad) { p.x = z.x + pad; p.vx *= -1; }
+            if (p.x > z.x + z.w - pad) { p.x = z.x + z.w - pad; p.vx *= -1; }
+            if (p.y < z.y + pad) { p.y = z.y + pad; p.vy *= -1; }
+            if (p.y > z.y + z.h - pad) { p.y = z.y + z.h - pad; p.vy *= -1; }
+
+            // Color coding based on zone density
+            let fill = '#10b981';
+            let glow = 'rgba(16, 185, 129, 0.4)';
+            if (z.density >= 1.5 || z.state === 'Critical') {
+                fill = '#f43f5e';
+                glow = 'rgba(244, 63, 94, 0.7)';
+            } else if (z.density >= 1.0 || z.state === 'Warning') {
+                fill = '#f97316';
+                glow = 'rgba(249, 115, 22, 0.6)';
+            } else if (z.state === 'Watch') {
+                fill = '#f59e0b';
+                glow = 'rgba(245, 158, 11, 0.5)';
+            }
+
+            // Draw particle with outer luminous glow
+            this.ctx.save();
+            this.ctx.beginPath();
+            this.ctx.arc(p.x, p.y, p.radius * (1 + 0.15 * Math.sin(now + p.phase)), 0, Math.PI * 2);
+            this.ctx.fillStyle = fill;
+            this.ctx.shadowColor = glow;
+            this.ctx.shadowBlur = 8;
+            this.ctx.fill();
+            this.ctx.restore();
+        }
+    }
+
+    renderRain() {
+        this.ctx.save();
+        this.ctx.strokeStyle = 'rgba(147, 197, 253, 0.25)';
+        this.ctx.lineWidth = 1.2;
+        if (this.rainDrops.length < 40) {
+            this.rainDrops.push({ x: Math.random() * 800, y: Math.random() * 480, len: 12 + Math.random() * 10 });
+        }
+        for (const drop of this.rainDrops) {
+            this.ctx.beginPath();
+            this.ctx.moveTo(drop.x, drop.y);
+            this.ctx.lineTo(drop.x - 3, drop.y + drop.len);
+            this.ctx.stroke();
+            drop.y += 14;
+            drop.x -= 3;
+            if (drop.y > 480) { drop.y = -10; drop.x = Math.random() * 800; }
+        }
+        this.ctx.restore();
+    }
+}
+
+// ============================================================
+// AGENTIC COGNITIVE TRACE CONTROLLER (Visual Pipeline Graph)
+// ============================================================
+class CognitivePipelineTrace {
+    constructor() {
+        this.nodes = {
+            vision: document.getElementById('node-vision'),
+            math: document.getElementById('node-math'),
+            agent: document.getElementById('node-agent'),
+            human: document.getElementById('node-human'),
+            verify: document.getElementById('node-verify'),
+        };
+        this.conduits = {
+            1: document.getElementById('conduit-1'),
+            2: document.getElementById('conduit-2'),
+            3: document.getElementById('conduit-3'),
+            4: document.getElementById('conduit-4'),
+        };
+    }
+
+    pulseNode(nodeKey) {
+        const node = this.nodes[nodeKey];
+        if (node) {
+            node.classList.add('firing');
+            setTimeout(() => node.classList.remove('firing'), 700);
+        }
+    }
+
+    pulsePerception() {
+        this.pulseNode('vision');
+        setTimeout(() => this.pulseNode('math'), 150);
+    }
+
+    pulseCognition() {
+        this.pulseNode('agent');
+        if (this.conduits[3]) this.conduits[3].classList.add('active');
+        setTimeout(() => this.pulseNode('human'), 200);
+    }
+
+    pulseHumanGate() {
+        this.pulseNode('human');
+        if (this.conduits[4]) this.conduits[4].classList.add('active');
+        setTimeout(() => this.pulseNode('verify'), 250);
+    }
+
+    pulseVerify() {
+        this.pulseNode('verify');
+    }
+}
+
+// Global engine instances
+let particleSystem = null;
+let cognitivePipeline = null;
 
 // ============================================================
 // STATE
@@ -9,10 +374,12 @@
 const state = {
     connected: false,
     muted: false,
+    sfxEnabled: true,
     venueState: null,
     recommendations: [],
     ws: null,
     reconnectTimer: null,
+    previousStatus: 'safe',
 };
 
 const STATE_COLORS = {
@@ -21,6 +388,7 @@ const STATE_COLORS = {
     Warning: { fill: 'rgba(249, 115, 22, 0.18)', stroke: '#f97316', class: 'warning' },
     Critical: { fill: 'rgba(244, 63, 94, 0.22)', stroke: '#f43f5e', class: 'critical' },
 };
+
 
 // ============================================================
 // WEBSOCKET CONNECTION
@@ -103,12 +471,34 @@ function updateDashboard(venueState) {
     if (venueState.spillover_predictions) {
         updateFlowArrows(venueState.spillover_predictions);
     }
+
+    // God-Level HUD Enhancements:
+    if (particleSystem) {
+        particleSystem.updateZones(venueState.zones);
+    }
+    if (cognitivePipeline) {
+        cognitivePipeline.pulsePerception();
+    }
 }
 
 function updateVenueStatus(status) {
     const el = document.getElementById('venue-status');
-    el.textContent = status.toUpperCase();
-    el.className = `venue-badge ${status.toLowerCase()}`;
+    if (el) {
+        el.textContent = status.toUpperCase();
+        el.className = `venue-badge ${status.toLowerCase()}`;
+    }
+
+    // Dynamic Edge Vignette
+    const vig = document.getElementById('ambient-vignette');
+    if (vig) {
+        vig.className = `ambient-vignette ${status.toLowerCase()}`;
+    }
+
+    // Tactical Alert Audio on critical transition
+    if (status === 'Critical' && state.previousStatus !== 'Critical') {
+        soundEngine.playAlertAlarm();
+    }
+    state.previousStatus = status;
 }
 
 function updateConnectionStatus(connected) {
@@ -445,6 +835,8 @@ function handleInterventionOutcome(data) {
     if (banner && text) {
         text.textContent = data.message;
         banner.classList.remove('hidden');
+        if (cognitivePipeline) cognitivePipeline.pulseVerify();
+        soundEngine.playAuthorizeChime();
         setTimeout(() => banner.classList.add('hidden'), 9000);
     }
 }
@@ -479,6 +871,7 @@ function updateFlowArrows(predictions) {
 
 function setRole(roleName) {
     state.currentRole = roleName;
+    soundEngine.playClick();
     document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
     document.getElementById(`role-${roleName}`)?.classList.add('active');
 
@@ -495,6 +888,13 @@ function setRole(roleName) {
 
 async function handleAlertAction(alertId, action) {
     try {
+        if (action === 'approved') {
+            soundEngine.playAuthorizeChime();
+            if (cognitivePipeline) cognitivePipeline.pulseHumanGate();
+        } else {
+            soundEngine.playClick();
+        }
+
         const resp = await fetch(`/api/alerts/${alertId}/action`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -959,6 +1359,137 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // ============================================================
+    // GOD-LEVEL ENGINES INITIALIZATION
+    // ============================================================
+    particleSystem = new CrowdParticleSystem('crowd-particles-canvas');
+    cognitivePipeline = new CognitivePipelineTrace();
+
+    // Map Layer Toggle Buttons
+    const btnLayerParticles = document.getElementById('layer-particles-btn');
+    const btnLayerHeatmap = document.getElementById('layer-heatmap-btn');
+    const btnLayerVectors = document.getElementById('layer-vectors-btn');
+    const transitLinesG = document.getElementById('flow-transit-lines');
+
+    if (btnLayerParticles) {
+        btnLayerParticles.addEventListener('click', () => {
+            soundEngine.playClick();
+            const isActive = btnLayerParticles.classList.toggle('active');
+            particleSystem.activeLayer = isActive ? 'particles' : 'none';
+            if (isActive && btnLayerHeatmap) btnLayerHeatmap.classList.remove('active');
+        });
+    }
+
+    if (btnLayerHeatmap) {
+        btnLayerHeatmap.addEventListener('click', () => {
+            soundEngine.playClick();
+            const isActive = btnLayerHeatmap.classList.toggle('active');
+            particleSystem.activeLayer = isActive ? 'heatmap' : 'particles';
+            if (isActive && btnLayerParticles) btnLayerParticles.classList.add('active');
+        });
+    }
+
+    if (btnLayerVectors) {
+        btnLayerVectors.addEventListener('click', () => {
+            soundEngine.playClick();
+            const isActive = btnLayerVectors.classList.toggle('active');
+            if (transitLinesG) transitLinesG.style.display = isActive ? 'block' : 'none';
+        });
+    }
+
+    // Tactical Web Audio SFX Toggle
+    const btnSfx = document.getElementById('sfx-toggle-btn');
+    if (btnSfx) {
+        btnSfx.addEventListener('click', () => {
+            state.sfxEnabled = !state.sfxEnabled;
+            soundEngine.enabled = state.sfxEnabled;
+            btnSfx.classList.toggle('active', state.sfxEnabled);
+            btnSfx.textContent = state.sfxEnabled ? '🔊 SFX ON' : '🔇 SFX MUTED';
+            if (state.sfxEnabled) soundEngine.playClick();
+        });
+    }
+
+    // Interactive Sandbox Controller Bindings
+    const sandboxSlider = document.getElementById('sandbox-slider');
+    const sandboxVal = document.getElementById('sandbox-slider-val');
+    let sliderDebounce = null;
+
+    if (sandboxSlider && sandboxVal) {
+        sandboxSlider.addEventListener('input', (e) => {
+            const count = parseInt(e.target.value);
+            const den = (count / 6.0).toFixed(2);
+            sandboxVal.textContent = `${count} Persons (${den} p/m²)`;
+            soundEngine.playClick();
+
+            clearTimeout(sliderDebounce);
+            sliderDebounce = setTimeout(async () => {
+                try {
+                    await fetch('/api/vision/ingest', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            zone_id: 'gate_a',
+                            person_count: count,
+                            density: parseFloat(den),
+                            behaviour_flag: count >= 12 ? 'surge' : (count >= 7 ? 'running' : 'normal'),
+                            sensor_status: 'ok',
+                            timestamp: new Date().toISOString()
+                        })
+                    });
+                } catch (err) {
+                    console.error('Sandbox ingest error:', err);
+                }
+            }, 120);
+        });
+    }
+
+    const btnTurnstile = document.getElementById('sandbox-turnstile-btn');
+    if (btnTurnstile) {
+        btnTurnstile.addEventListener('click', () => {
+            soundEngine.playClick();
+            particleSystem.turnstilesOpen = !particleSystem.turnstilesOpen;
+            btnTurnstile.classList.toggle('active', !particleSystem.turnstilesOpen);
+            btnTurnstile.innerHTML = particleSystem.turnstilesOpen 
+                ? '<span class="sandbox-btn-dot"></span> Turnstiles: OPEN'
+                : '<span class="sandbox-btn-dot" style="background:#ef4444"></span> Turnstiles: HELD / CLOSED';
+        });
+    }
+
+    const btnWeatherToggle = document.getElementById('sandbox-weather-btn');
+    if (btnWeatherToggle) {
+        btnWeatherToggle.addEventListener('click', async () => {
+            soundEngine.playClick();
+            try {
+                const resp = await fetch('/api/demo/scenario/weather', { method: 'POST' });
+                const res = await resp.json();
+                const isRain = res.message && res.message.includes('ENABLED');
+                particleSystem.rainActive = isRain;
+                btnWeatherToggle.classList.toggle('active', isRain);
+                btnWeatherToggle.textContent = isRain ? '🌧️ Rain Factor: ACTIVE (+15%)' : '🌧️ Rain Factor: OFF';
+            } catch (err) {
+                console.error('Weather toggle error:', err);
+            }
+        });
+    }
+
+    const btnPanic = document.getElementById('sandbox-panic-btn');
+    if (btnPanic) {
+        btnPanic.addEventListener('click', () => {
+            soundEngine.playAlertAlarm();
+            triggerScenario('running');
+        });
+    }
+
+    // Attach click audio to all buttons
+    document.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('mouseenter', () => {
+            // Subtle hover feedback
+        });
+        btn.addEventListener('click', () => {
+            soundEngine.playClick();
+        });
+    });
+
     // Spatial Monitoring View Switcher (Map / CCTV / Split Screen)
     const mapSub = document.getElementById('map-subview');
     const cctvSub = document.getElementById('cctv-subview');
@@ -1018,3 +1549,4 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, 3000);
 });
+

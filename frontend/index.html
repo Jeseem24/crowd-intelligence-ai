@@ -3,50 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Crowd Safety — Command Operations Center</title>
-    <meta name="description" content="AI-Powered Real-time Autonomous Crowd Safety & Decision Support Command Center">
+    <title>AEGIS // AI Crowd Intelligence & Autonomous Decision Support Platform</title>
+    <meta name="description" content="Defense-Grade Multi-Modal Autonomous Crowd Intelligence & Decision Support Command Center">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/style.css?v=3.0">
+    <link rel="stylesheet" href="/static/style.css?v=4.0">
 </head>
 <body>
+    <!-- Ambient Viewport Edge Vignette (Dynamic Red/Amber/Cyan Glow) -->
+    <div id="ambient-vignette" class="ambient-vignette safe"></div>
+
     <!-- ====== TOP COMMAND BAR ====== -->
     <header id="header">
         <div class="header-left">
             <div class="logo">
                 <span class="logo-badge">🛡️</span>
-                <span class="logo-text">AI CROWD SAFETY</span>
-                <span class="logo-subtitle">COMMAND OS</span>
+                <div class="logo-title-group">
+                    <span class="logo-text">AEGIS COMMAND OS</span>
+                    <span class="logo-subtitle">AI CROWD INTELLIGENCE &amp; DECISION SUPPORT PLATFORM</span>
+                </div>
             </div>
             <div id="venue-status" class="venue-badge safe">SAFE</div>
         </div>
         <div class="header-center">
             <div class="role-switcher">
-                <button id="role-chief" class="role-btn active" type="button" title="Chief Commander Master View">🛡️ Commander</button>
+                <button id="role-chief" class="role-btn active" type="button" title="Chief Commander Master View">🛡️ Commander View</button>
                 <button id="role-police" class="role-btn" type="button" title="Police & Security Tactical Egress">🚓 Police Tactical</button>
                 <button id="role-volunteer" class="role-btn" type="button" title="Field Stewards Wayfinding View">👷 Field Stewards</button>
             </div>
-            <span id="clock">Connecting telemetry...</span>
+            <span id="clock" class="hud-clock">CONNECTING TELEMETRY...</span>
         </div>
         <div class="header-right">
             <div id="connection-status" class="conn-badge offline">⚫ Offline</div>
-            <button id="mute-btn" class="btn-icon" title="Toggle Audio Alert Synthesizer">🔊</button>
-            <button id="qr-btn" class="btn-icon" title="Open Citizen Report QR Code">📱</button>
+            <button id="sfx-toggle-btn" class="btn-icon active" title="Toggle Tactical Web Audio Synthesizer">🔊 SFX ON</button>
+            <button id="mute-btn" class="btn-icon" title="Toggle Voice Alert Synthesizer">🗣️ VOICE</button>
+            <button id="qr-btn" class="btn-icon" title="Open Citizen Report QR Code">📱 QR PORTAL</button>
         </div>
     </header>
 
     <!-- ====== VERIFIED INTERVENTION FEEDBACK BANNER ====== -->
     <div id="feedback-banner" class="feedback-banner hidden">
-        <span class="feedback-badge">✓ AGENTIC VERIFICATION</span>
-        <span id="feedback-text">Evaluating operator directive outcome...</span>
+        <div class="feedback-inner">
+            <span class="feedback-badge">✓ AGENTIC VERIFICATION</span>
+            <span id="feedback-text">Evaluating operator directive outcome...</span>
+            <span id="feedback-stat" class="feedback-stat">-67% DENSITY REDUCTION CONFIRMED</span>
+        </div>
     </div>
 
     <!-- ====== DEMO SCENARIO EVALUATION DOCK ====== -->
     <div id="demo-bar" class="demo-toolbar">
         <div class="demo-title">
-            <span class="demo-pill">TACTICAL SIM</span>
-            <span class="demo-label">Live Evaluation Scenarios:</span>
+            <span class="demo-pill">TACTICAL EVAL</span>
+            <span class="demo-label">Master Scenarios (S01 - S10):</span>
         </div>
         <div class="demo-buttons">
             <button id="demo-normal" class="demo-btn btn-normal" type="button" title="S01: Safe baseline crowd density">🟢 S01: Safe</button>
@@ -54,8 +63,8 @@
             <button id="demo-running" class="demo-btn btn-surge" type="button" title="S03: Running Panic in Corridor B">🏃 S03: Running Panic</button>
             <button id="demo-reverse" class="demo-btn btn-surge" type="button" title="S04: Counter-flow at Exit C">🔄 S04: Reverse Flow</button>
             <button id="demo-citizen" class="demo-btn btn-citizen" type="button" title="S05: Citizen QR hazard report">📱 S05: Citizen Report</button>
-            <button id="demo-spillover" class="demo-btn btn-critical" type="button" title="S06: Cross-Zone Spillover Propagation">🌊 S06: Spillover ETA</button>
-            <button id="demo-weather" class="demo-btn btn-normal" type="button" title="S07: Adverse Weather (+15% outdoor risk)">🌧️ S07: Rain Weather</button>
+            <button id="demo-spillover" class="demo-btn btn-critical" type="button" title="S06: Cross-Zone Spillover Propagation">🌊 S06: Spillover Wave</button>
+            <button id="demo-weather" class="demo-btn btn-normal" type="button" title="S07: Adverse Weather (+15% outdoor risk)">🌧️ S07: Rain Storm</button>
             <button id="demo-disconnect" class="demo-btn btn-reset" type="button" title="S10: Camera Sensor Drop / Disconnect">🔌 S10: Sensor Drop</button>
             <button id="demo-critical" class="demo-btn btn-critical" type="button" title="Direct Critical Hazard + 5-Part XAI Directive">🚨 Critical Directive</button>
             <button id="demo-reset" class="demo-btn btn-reset" type="button" title="Reset all zones to baseline">🔄 Reset</button>
@@ -70,14 +79,47 @@
         <button id="alert-dismiss" class="btn-sm">Acknowledge</button>
     </div>
 
+    <!-- ====== INTERACTIVE VENUE SANDBOX CONTROLLER ====== -->
+    <section class="sandbox-strip">
+        <div class="sandbox-inner">
+            <div class="sandbox-label-group">
+                <span class="sandbox-pill">LIVE SANDBOX</span>
+                <span class="sandbox-sub">Tactile Stress Testing:</span>
+            </div>
+            
+            <div class="sandbox-control">
+                <label for="sandbox-slider">Gate A Crowd Influx:</label>
+                <input type="range" id="sandbox-slider" min="1" max="25" value="2" step="1">
+                <span id="sandbox-slider-val" class="sandbox-val">2 Persons (0.33 p/m²)</span>
+            </div>
+
+            <div class="sandbox-toggles">
+                <button id="sandbox-turnstile-btn" class="sandbox-btn" type="button">
+                    <span class="sandbox-btn-dot"></span> Turnstiles: OPEN
+                </button>
+                <button id="sandbox-weather-btn" class="sandbox-btn" type="button">
+                    🌧️ Rain Factor: OFF
+                </button>
+                <button id="sandbox-panic-btn" class="sandbox-btn panic" type="button">
+                    ⚡ Inject Panic
+                </button>
+            </div>
+        </div>
+    </section>
+
     <!-- ====== MAIN COMMAND WORKSPACE ====== -->
     <main id="main-content">
-        <!-- LEFT STAGE: Spatial Monitoring + Zone Matrix -->
+        <!-- LEFT STAGE: Spatial Monitoring + Zone Matrix + Steward Engine -->
         <div class="col-left">
-            <!-- Spatial Monitoring: Architectural Blueprint + Live CCTV -->
+            <!-- Spatial Monitoring: Architectural Blueprint + Kinetic Particles + CCTV -->
             <section class="panel" id="map-panel">
                 <div class="panel-header-tabs">
-                    <h2 class="panel-title">🗺️ Venue Spatial Intelligence</h2>
+                    <div class="panel-title-group">
+                        <h2 class="panel-title">🗺️ Venue Spatial Intelligence</h2>
+                        <span class="panel-badge-live">LIVE TELEMETRY ENGINE</span>
+                    </div>
+                    
+                    <!-- View Mode Toggle -->
                     <div class="view-toggle-group">
                         <button id="view-map-btn" class="view-btn active" type="button">🗺️ Floor Map</button>
                         <button id="view-cctv-btn" class="view-btn" type="button">📹 Live CCTV</button>
@@ -85,8 +127,16 @@
                     </div>
                 </div>
 
+                <!-- Layer Selector for Map (Particles, Heatmap, Vector Wireframe) -->
+                <div class="map-layer-dock">
+                    <span class="layer-dock-label">HUD LAYERS:</span>
+                    <button id="layer-particles-btn" class="layer-btn active" type="button" title="Autonomous Kinetic Crowd Particle Physics">✨ Kinetic Particles</button>
+                    <button id="layer-heatmap-btn" class="layer-btn" type="button" title="Thermal Infrared Density Heatmap">🔥 Infrared Heatmap</button>
+                    <button id="layer-vectors-btn" class="layer-btn active" type="button" title="Wavefront Spillover Vectors">⚡ Flow Vectors</button>
+                </div>
+
                 <div class="spatial-views-wrapper" id="spatial-wrapper">
-                    <!-- High-Tech Blueprint SVG -->
+                    <!-- High-Tech Blueprint SVG + Particle Physics Canvas -->
                     <div class="map-container" id="map-subview">
                         <svg id="venue-map" viewBox="0 0 800 480" xmlns="http://www.w3.org/2000/svg">
                             <defs>
@@ -109,7 +159,7 @@
                             <text x="750" y="20" text-anchor="end" fill="#6366f1" font-size="10" font-family="'JetBrains Mono', monospace" font-weight="600">LIVE SENSOR TELEMETRY</text>
 
                             <!-- Adjacency Transit Flow Lines -->
-                            <g stroke="#6366f1" stroke-width="1.5" stroke-dasharray="6,6" fill="none" opacity="0.35">
+                            <g id="flow-transit-lines" stroke="#6366f1" stroke-width="1.5" stroke-dasharray="6,6" fill="none" opacity="0.35">
                                 <path d="M 250 125 L 310 145" />
                                 <path d="M 160 195 L 200 250" />
                                 <path d="M 490 150 L 550 125" />
@@ -171,6 +221,9 @@
                                 </g>
                             </g>
                         </svg>
+
+                        <!-- Dynamic Kinetic Crowd Particle Canvas (Overlaid in Exact 800x480 Coordinates) -->
+                        <canvas id="crowd-particles-canvas" width="800" height="480"></canvas>
                     </div>
 
                     <!-- Live CCTV Video Stream with Military-Grade HUD -->
@@ -191,7 +244,10 @@
 
             <!-- Zone Status Tiles -->
             <section class="panel" id="tiles-panel">
-                <h2 class="panel-title">📊 Real-Time Zone Telemetry Matrix</h2>
+                <div class="panel-header-tabs">
+                    <h2 class="panel-title">📊 Real-Time Zone Telemetry Matrix</h2>
+                    <span class="panel-stat-pill">5 MONITORING SECTORS</span>
+                </div>
                 <div id="zone-tiles" class="zone-tiles-grid">
                     <!-- Populated dynamically by app.js with rich density meters -->
                 </div>
@@ -209,11 +265,82 @@
             </section>
         </div>
 
-        <!-- RIGHT STAGE: AI Decision Copilot + Executive Briefings + Chat -->
+        <!-- RIGHT STAGE: Agentic Cognitive Pipeline + AI Decision Copilot + Executive Briefings + Chat -->
         <div class="col-right">
+            <!-- 🧠 LIVE AGENTIC COGNITIVE TRACE (Interactive State Graph Visualizer) -->
+            <section class="panel" id="cognitive-pipeline-panel">
+                <div class="panel-header-tabs">
+                    <h2 class="panel-title">🧠 Agentic Cognitive Trace</h2>
+                    <span id="pipeline-status-badge" class="pipeline-badge active">⚡ LOOP ACTIVE</span>
+                </div>
+                
+                <div class="cognitive-graph-container">
+                    <!-- Node 1: Vision Telemetry -->
+                    <div class="cog-node active" id="node-vision">
+                        <div class="cog-node-header">
+                            <span class="cog-icon">👁️</span>
+                            <span class="cog-title">PERCEPTION</span>
+                        </div>
+                        <div class="cog-metric" id="cog-metric-vision">YOLOv8 (10 Hz)</div>
+                        <div class="cog-sub">Feet coordinates extracted</div>
+                    </div>
+                    <div class="cog-conduit active" id="conduit-1"></div>
+
+                    <!-- Node 2: Math & Trend -->
+                    <div class="cog-node active" id="node-math">
+                        <div class="cog-node-header">
+                            <span class="cog-icon">📐</span>
+                            <span class="cog-title">RISK MATH</span>
+                        </div>
+                        <div class="cog-metric" id="cog-metric-math">OLS Trend &amp; T_crit</div>
+                        <div class="cog-sub">Anti-flicker hysteresis</div>
+                    </div>
+                    <div class="cog-conduit active" id="conduit-2"></div>
+
+                    <!-- Node 3: Agentic Reasoning -->
+                    <div class="cog-node active" id="node-agent">
+                        <div class="cog-node-header">
+                            <span class="cog-icon">🧠</span>
+                            <span class="cog-title">COGNITION</span>
+                        </div>
+                        <div class="cog-metric" id="cog-metric-agent">5 Multi-Tools</div>
+                        <div class="cog-sub">Dijkstra &amp; NFPA 101 SOPs</div>
+                    </div>
+                    <div class="cog-conduit active" id="conduit-3"></div>
+
+                    <!-- Node 4: Human-in-the-Loop -->
+                    <div class="cog-node" id="node-human">
+                        <div class="cog-node-header">
+                            <span class="cog-icon">👨‍✈️</span>
+                            <span class="cog-title">HUMAN GATE</span>
+                        </div>
+                        <div class="cog-metric" id="cog-metric-human">Directive Authorization</div>
+                        <div class="cog-sub">Approve / Edit / Dismiss</div>
+                    </div>
+                    <div class="cog-conduit" id="conduit-4"></div>
+
+                    <!-- Node 5: Closed-Loop Verification -->
+                    <div class="cog-node" id="node-verify">
+                        <div class="cog-node-header">
+                            <span class="cog-icon">🎯</span>
+                            <span class="cog-title">VERIFY</span>
+                        </div>
+                        <div class="cog-metric" id="cog-metric-verify">Outcome Memory</div>
+                        <div class="cog-sub">Density delta validated</div>
+                    </div>
+                </div>
+
+                <!-- Live Tool Execution Chips -->
+                <div class="tool-call-chips" id="active-tool-chips">
+                    <span class="tool-chip">tool_get_evacuation_route() <b class="chip-ok">OK (18ms)</b></span>
+                    <span class="tool-chip">tool_get_steward_allocation() <b class="chip-ok">OK (12ms)</b></span>
+                    <span class="tool-chip">tool_get_sop() <b class="chip-ok">OK (9ms)</b></span>
+                </div>
+            </section>
+
             <!-- AI Recommendations (Autonomous Interventions) -->
             <section class="panel" id="rec-panel">
-                <h2 class="panel-title">🤖 AI Tactical Recommendations</h2>
+                <h2 class="panel-title">🤖 5-Part Explainable AI Tactical Directives</h2>
                 <div id="recommendations" class="rec-list">
                     <div class="empty-state">Awaiting real-time telemetry from active vision feed...</div>
                 </div>
@@ -232,11 +359,14 @@
 
             <!-- Operator Copilot Chat -->
             <section class="panel" id="chat-panel">
-                <h2 class="panel-title">💬 Operator Command Copilot</h2>
+                <div class="panel-header-tabs">
+                    <h2 class="panel-title">💬 Operator Command Copilot</h2>
+                    <span class="chat-agent-tag">⚡ Tool-Enabled Grounded AI</span>
+                </div>
                 <div id="chat-messages" class="chat-messages">
                     <div class="chat-msg agent">
                         <div class="chat-msg-header">
-                            <span class="chat-sender-name">AI Command Copilot</span>
+                            <span class="chat-sender-name">AEGIS Copilot</span>
                             <span class="chat-source-tag tag-llm">⚡ Active</span>
                         </div>
                         <div class="chat-msg-body">
@@ -309,11 +439,6 @@
         </div>
     </div>
 
-    <!-- Audio Alert Tone Generator -->
-    <audio id="alert-sound" preload="auto">
-        <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgipausJFkN0JolqyymWk0NlmJpq6xmGk0PFmHpKqwmXE7RF6JpKqsj2IzQF+Pp66wlGQ0O1eDoaiummo3RF+Pp7GymmY0OFaAnaWslWo6S2eVr7m2o3RAOlWBnaSlkmo9UG6ctr67p3c9OVF6lp2ek3VJW3ukwMO9qnY2MUlxiZKShIFzaHaXr7q5saBwRjhQbIKMj4qEfnl+jaOyuLiupXxMOE5sgIuRkIuFgH6Bj6CsuLe1rp1+WEFNa36Lk5SSjomHhoyXo62ztbGql39dS1Bte42UlpSRjYqJjZSdprCzs7Glj3VZTVRwgI2Wm5qXko6Lh4iNk5ukrLS0sKiWg2xYUlhxg46Xm5uYlJCOj42PkZWcoaqxtLKtpJZ/amFYWm+Bi5SXl5WUko+Oj5GTmJ2jq7K1tLGspJR+bGRiY3GBi5OVlZSTko+Oj5OXm6CmrbO1trSvqp2NfnJtbnV/" type="audio/wav">
-    </audio>
-
-    <script src="/static/app.js?v=3.0"></script>
+    <script src="/static/app.js?v=4.0"></script>
 </body>
 </html>

@@ -3,17 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Crowd Safety — Citizen Incident Beacon</title>
+    <title>AEGIS // Citizen Incident Beacon &amp; Tactical Wayfinder</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-dark: #080a11;
-            --surface-card: #0f172a;
-            --surface-elevated: #1e293b;
+            --bg-dark: #05070e;
+            --surface-card: #0c101c;
+            --surface-elevated: #141b2d;
             --primary-indigo: #6366f1;
-            --danger-red: #ef4444;
+            --cyan-accent: #00f0ff;
+            --danger-red: #f43f5e;
             --emerald-safe: #10b981;
             --amber-warn: #f59e0b;
             --border-subtle: rgba(255, 255, 255, 0.08);
@@ -25,6 +26,9 @@
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.15), transparent 70%),
+                radial-gradient(circle at 50% 100%, rgba(0, 240, 255, 0.08), transparent 70%);
             color: var(--text-main);
             min-height: 100vh;
             display: flex;
@@ -35,12 +39,12 @@
 
         .portal-card {
             background: var(--surface-card);
-            border: 1px solid var(--border-subtle);
-            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 28px;
             width: 100%;
-            max-width: 440px;
-            padding: 28px 22px;
-            box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7);
+            max-width: 460px;
+            padding: 24px 20px;
+            box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 40px rgba(99, 102, 241, 0.1);
             position: relative;
             overflow: hidden;
         }
@@ -49,15 +53,15 @@
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #6366f1, #ef4444, #10b981);
+            height: 3px;
+            background: linear-gradient(90deg, #6366f1, #00f0ff, #f43f5e);
         }
 
         .brand-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         .brand-pill {
@@ -67,7 +71,7 @@
             background: rgba(99, 102, 241, 0.15);
             border: 1px solid rgba(99, 102, 241, 0.35);
             color: #a5b4fc;
-            padding: 4px 10px;
+            padding: 4px 12px;
             border-radius: 9999px;
             font-family: 'JetBrains Mono', monospace;
             font-size: 10.5px;
@@ -79,7 +83,8 @@
             width: 7px;
             height: 7px;
             border-radius: 50%;
-            background: #ef4444;
+            background: #00f0ff;
+            box-shadow: 0 0 8px #00f0ff;
             animation: pulse-dot 1.5s infinite;
         }
 
@@ -88,58 +93,116 @@
             50% { opacity: 0.4; transform: scale(1.3); }
         }
 
+        /* RADAR COMPASS HUD WIDGET */
+        .radar-widget {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: rgba(15, 23, 42, 0.65);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: 16px;
+            padding: 12px 14px;
+            margin-bottom: 18px;
+        }
+        .radar-ring {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(0, 240, 255, 0.3);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle, rgba(0, 240, 255, 0.1) 0%, transparent 70%);
+        }
+        .radar-sweep {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border-top: 2px solid #00f0ff;
+            animation: radar-spin 2s linear infinite;
+        }
+        @keyframes radar-spin {
+            to { transform: rotate(360deg); }
+        }
+        .radar-center-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 6px #10b981;
+        }
+        .radar-info-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            color: #00f0ff;
+            margin-bottom: 2px;
+        }
+        .radar-info-sub {
+            font-size: 12px;
+            font-weight: 600;
+            color: #f1f5f9;
+        }
+
         h1 {
-            font-size: 21px;
+            font-size: 20px;
             font-weight: 800;
             letter-spacing: -0.02em;
             margin-bottom: 4px;
         }
 
         .tagline {
-            font-size: 12.5px;
+            font-size: 12px;
             color: var(--text-muted);
-            margin-bottom: 20px;
-            line-height: 1.45;
+            margin-bottom: 16px;
+            line-height: 1.4;
         }
 
         .section-label {
             display: block;
-            font-size: 11.5px;
+            font-size: 11px;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.06em;
+            letter-spacing: 0.05em;
             color: var(--text-muted);
             margin-bottom: 8px;
+            margin-top: 14px;
         }
 
         .category-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: 1fr 1fr;
             gap: 8px;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
 
         .cat-chip {
-            background: rgba(255, 255, 255, 0.035);
+            background: var(--surface-elevated);
             border: 1px solid var(--border-subtle);
-            border-radius: 12px;
             padding: 10px 12px;
+            border-radius: 12px;
             font-size: 12px;
             font-weight: 600;
-            color: var(--text-main);
-            display: flex;
-            align-items: center;
-            gap: 8px;
             cursor: pointer;
             transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            user-select: none;
+        }
+
+        .cat-chip:hover {
+            border-color: rgba(99, 102, 241, 0.5);
+            background: rgba(99, 102, 241, 0.1);
         }
 
         .cat-chip.selected {
-            background: rgba(99, 102, 241, 0.22);
-            border-color: #6366f1;
-            color: #c7d2fe;
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.25);
+            background: rgba(244, 63, 94, 0.15);
+            border-color: var(--danger-red);
+            color: #ffffff;
+            box-shadow: 0 0 12px rgba(244, 63, 94, 0.25);
         }
 
         .input-control {
@@ -147,62 +210,66 @@
             background: var(--surface-elevated);
             border: 1px solid var(--border-subtle);
             border-radius: 12px;
-            padding: 12px 14px;
+            padding: 12px;
             color: var(--text-main);
+            font-size: 13px;
             font-family: inherit;
-            font-size: 13.5px;
-            margin-bottom: 16px;
             outline: none;
             transition: border-color 0.2s;
         }
 
         .input-control:focus {
-            border-color: #6366f1;
+            border-color: var(--primary-indigo);
+            box-shadow: 0 0 12px rgba(99, 102, 241, 0.2);
         }
 
         textarea.input-control {
             resize: none;
-            min-height: 72px;
+            min-height: 60px;
         }
 
         .btn-submit {
             width: 100%;
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            color: #ffffff;
+            margin-top: 18px;
+            padding: 14px;
+            background: linear-gradient(135deg, #f43f5e 0%, #be123c 100%);
             border: none;
             border-radius: 14px;
-            padding: 14px;
-            font-size: 14.5px;
-            font-weight: 800;
-            letter-spacing: 0.02em;
+            color: #ffffff;
+            font-size: 13.5px;
+            font-weight: 700;
             cursor: pointer;
+            box-shadow: 0 6px 20px rgba(244, 63, 94, 0.35);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            transition: all 0.2s ease;
-            box-shadow: 0 10px 25px -5px rgba(239, 68, 68, 0.45);
         }
 
         .btn-submit:active {
             transform: scale(0.98);
         }
 
-        /* Success & Guidance Screen */
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
         .response-panel {
             display: none;
+            margin-top: 18px;
             background: rgba(16, 185, 129, 0.1);
             border: 1px solid rgba(16, 185, 129, 0.3);
             border-radius: 16px;
-            padding: 18px;
-            margin-top: 18px;
-            animation: fadeIn 0.3s ease-out;
+            padding: 16px;
+            animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .response-title {
             color: #34d399;
             font-weight: 800;
-            font-size: 14px;
+            font-size: 13px;
             display: flex;
             align-items: center;
             gap: 6px;
@@ -210,15 +277,15 @@
         }
 
         .response-body {
-            font-size: 12.5px;
+            font-size: 12px;
             color: #e2e8f0;
             line-height: 1.5;
         }
 
         .guidance-box {
-            margin-top: 12px;
-            padding: 12px;
-            background: rgba(0, 0, 0, 0.35);
+            margin-top: 10px;
+            padding: 10px 12px;
+            background: rgba(0, 0, 0, 0.4);
             border-radius: 10px;
             border-left: 3px solid #6366f1;
         }
@@ -227,13 +294,13 @@
             color: #a5b4fc;
             display: block;
             margin-bottom: 4px;
-            font-size: 11.5px;
+            font-size: 11px;
             text-transform: uppercase;
         }
 
         .footer-note {
             margin-top: 18px;
-            font-size: 10.5px;
+            font-size: 10px;
             color: #64748b;
             text-align: center;
             line-height: 1.4;
@@ -250,12 +317,24 @@
         <div class="brand-header">
             <span class="brand-pill">
                 <span class="live-dot"></span>
-                ICCC CITIZEN BEACON
+                AEGIS CITIZEN BEACON
             </span>
-            <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#64748b;">LATENCY: &lt;1s</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10.5px;color:#00f0ff;">LIVE 1-SEC INGEST</span>
         </div>
 
-        <h1>Crowd Hazard Reporting</h1>
+        <!-- Real-time Tactical Wayfinding Radar -->
+        <div class="radar-widget">
+            <div class="radar-ring">
+                <div class="radar-sweep"></div>
+                <div class="radar-center-dot"></div>
+            </div>
+            <div>
+                <div class="radar-info-title">NEAREST EVACUATION WAYPOINT</div>
+                <div class="radar-info-sub">Emergency Exit C — 45m (NE 42°)</div>
+            </div>
+        </div>
+
+        <h1>Crowd Incident Beacon</h1>
         <p class="tagline">Direct telemetry injection into the Autonomous AI Decision Center. Completely anonymous.</p>
 
         <form id="hazard-form">
@@ -291,21 +370,41 @@
                 <span>✓ TELEMETRY INJECTED INTO ICCC SYSTEM</span>
             </div>
             <div class="response-body">
-                Your report has elevated the spatial risk weighting for <strong id="reported-zone-name">this zone</strong>. AI decision loops have been notified.
+                Your report has elevated the spatial risk weighting for <strong id="reported-zone-name">this zone</strong>. Central AI cognitive loop notified.
                 <div class="guidance-box">
                     <strong>🛡️ Life Safety Egress Directive:</strong>
-                    Do not fight the crowd wave directly. Move diagonally across the flow towards the nearest marked perimeter. Maintain a wide defensive foot stance.
+                    Do not fight the crowd wave directly. Move diagonally across the flow towards Emergency Exit C. Maintain a wide defensive stance.
                 </div>
             </div>
         </div>
 
         <p class="footer-note">
-            🔒 Privacy Protocol: Zero device identifiers or phone numbers logged. Monitored under 7th Semester B.Tech IT Crowd Safety Standard.
+            🔒 Privacy Protocol: Zero device identifiers logged. Monitored under 7th Semester B.Tech IT Crowd Safety Standard.
         </p>
     </div>
 
     <script>
         let selectedCategory = "Severe Crowd Compression";
+
+        // Sound generator
+        function playChime() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                const ctx = new AudioCtx();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.08, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.2);
+            } catch (e) {}
+        }
 
         // Category chip selector
         document.querySelectorAll('.cat-chip').forEach(chip => {
@@ -327,10 +426,11 @@
             const resPanel = document.getElementById('response-panel');
 
             btn.disabled = true;
-            btn.innerHTML = '<span>⚡ Transmitting to ICCC Hub...</span>';
+            btn.innerHTML = '<span>⚡ Transmitting to Central AI...</span>';
 
-            // Haptic feedback if available on mobile
-            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+            // Haptic vibration
+            if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
+            playChime();
 
             try {
                 const resp = await fetch('/api/reports/citizen', {
@@ -343,7 +443,7 @@
                     document.getElementById('reported-zone-name').textContent = zoneName;
                     resPanel.style.display = 'block';
                     document.getElementById('notes').value = '';
-                    btn.innerHTML = '<span>✓ Report Logged by Safety AI</span>';
+                    btn.innerHTML = '<span>✓ Alert Ingested by Central Safety AI</span>';
                     btn.style.background = '#059669';
                     setTimeout(() => {
                         btn.disabled = false;
