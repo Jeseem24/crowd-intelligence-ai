@@ -7,7 +7,11 @@ if sys.platform == "win32":
     except Exception:
         pass
 
-key = "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"
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+key = os.getenv("GROQ_API_KEY", "")
 headers = {"Authorization": f"Bearer {key}", "Content-Type": "application/json"}
 
 candidate_models = [
