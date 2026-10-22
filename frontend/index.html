@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/style.css?v=6.0">
+    <link rel="stylesheet" href="/static/style.css?v=6.2">
 </head>
 <body>
     <!-- Ambient Viewport Edge Vignette (Dynamic Red/Amber/Cyan Glow) -->
@@ -17,28 +17,22 @@
     <!-- ====== TOP COMMAND BAR ====== -->
     <header id="header">
         <div class="header-left">
-            <div class="logo">
-                <span class="logo-badge">🛡️</span>
-                <div class="logo-title-group">
-                    <span class="logo-text">AEGIS COMMAND OS</span>
-                    <span class="logo-subtitle">AI CROWD INTELLIGENCE &amp; DECISION SUPPORT PLATFORM</span>
-                </div>
-            </div>
             <div id="venue-status" class="venue-badge safe">SAFE</div>
+            <span class="venue-title-subtle">Adelaide Metropolitan Transit &amp; Festival Plaza</span>
         </div>
+
         <div class="header-center">
-            <div class="role-switcher">
-                <button id="role-chief" class="role-btn active" type="button" title="Chief Commander Master View">🛡️ Commander View</button>
-                <button id="role-police" class="role-btn" type="button" title="Police & Security Tactical Egress">🚓 Police Tactical</button>
-                <button id="role-volunteer" class="role-btn" type="button" title="Field Stewards Wayfinding View">👷 Field Stewards</button>
-            </div>
-            <span id="clock" class="hud-clock">CONNECTING TELEMETRY...</span>
+            <!-- Master Tactical Crisis Toggle Switch -->
+            <button id="master-crisis-toggle" class="btn-tactical-crisis" type="button" title="Execute High-Impact Critical Crisis Sandbox Simulation">
+                <span class="crisis-beacon"></span>
+                <span id="crisis-toggle-text" class="crisis-text">🚨 TRIGGER CRITICAL CRISIS</span>
+            </button>
         </div>
+
         <div class="header-right">
+            <span id="clock" class="hud-clock">CONNECTING TELEMETRY...</span>
             <div id="connection-status" class="conn-badge offline">⚫ Offline</div>
-            <button id="sfx-toggle-btn" class="btn-icon active" title="Toggle Tactical Web Audio Synthesizer">🔊 SFX ON</button>
-            <button id="mute-btn" class="btn-icon" title="Toggle Voice Alert Synthesizer">🗣️ VOICE</button>
-            <button id="qr-btn" class="btn-icon" title="Open Citizen Report QR Code">📱 QR PORTAL</button>
+            <button id="qr-btn" class="btn-action-pill" title="Open Citizen Report QR Code">📱 Citizen QR</button>
         </div>
     </header>
 
@@ -51,47 +45,7 @@
         </div>
     </div>
 
-    <!-- ====== UNIFIED TACTICAL COMMAND RIBBON ====== -->
-    <div id="command-toolbar" class="command-toolbar">
-        <div class="cmd-group cmd-scenarios">
-            <span class="cmd-pill">TACTICAL EVAL</span>
-            <div class="cmd-scenario-buttons">
-                <button id="demo-normal" class="cmd-btn btn-normal active" type="button" title="S01: Safe baseline">🟢 S01: Safe</button>
-                <button id="demo-surge" class="cmd-btn btn-surge" type="button" title="S02: Rapid Inflow Rush at Gate A">⚠️ S02: Surge</button>
-                <button id="demo-running" class="cmd-btn btn-surge" type="button" title="S03: Running Panic in Corridor B">🏃 S03: Panic</button>
-                <button id="demo-reverse" class="cmd-btn btn-surge" type="button" title="S04: Counter-flow at Exit C">🔄 S04: Reverse</button>
-                <button id="demo-citizen" class="cmd-btn btn-citizen" type="button" title="S05: Citizen QR hazard report">📱 S05: Citizen</button>
-                <button id="demo-spillover" class="cmd-btn btn-critical" type="button" title="S06: Spillover Wave">🌊 S06: Spillover</button>
-                <button id="demo-weather" class="cmd-btn btn-normal" type="button" title="S07: Rain Storm (+15% risk)">🌧️ S07: Rain</button>
-                <button id="demo-disconnect" class="cmd-btn btn-reset" type="button" title="S10: Camera Sensor Drop">🔌 S10: Drop</button>
-                <button id="demo-critical" class="cmd-btn btn-critical" type="button" title="Direct Critical Hazard + 5-Part XAI Directive">🚨 Critical</button>
-                <button id="demo-reset" class="cmd-btn btn-reset" type="button" title="Reset all zones to baseline">🔄 Reset</button>
-            </div>
-            <div id="demo-toast" class="demo-toast hidden"></div>
-        </div>
 
-        <div class="cmd-divider"></div>
-
-        <div class="cmd-group cmd-sandbox">
-            <span class="cmd-pill pill-sandbox">SANDBOX</span>
-            <div class="cmd-slider-wrap">
-                <label for="sandbox-slider">Gate A:</label>
-                <input type="range" id="sandbox-slider" min="1" max="25" value="2" step="1">
-                <span id="sandbox-slider-val" class="cmd-val-pill">2 Pers (0.33 p/m²)</span>
-            </div>
-            <div class="cmd-toggle-wrap">
-                <button id="sandbox-turnstile-btn" class="cmd-btn btn-toggle" type="button" title="Toggle Turnstiles">
-                    <span class="sandbox-btn-dot"></span> Turnstiles: OPEN
-                </button>
-                <button id="sandbox-weather-btn" class="cmd-btn btn-toggle" type="button" title="Toggle Rain Factor">
-                    🌧️ Rain: OFF
-                </button>
-                <button id="sandbox-panic-btn" class="cmd-btn btn-panic" type="button" title="Inject Panic Crowd Run">
-                    ⚡ Panic
-                </button>
-            </div>
-        </div>
-    </div>
 
     <!-- ====== CRITICAL ALERT BANNER ====== -->
     <div id="alert-banner" class="alert-banner hidden">
@@ -114,23 +68,35 @@
                     
                     <!-- View Mode Toggle -->
                     <div class="view-toggle-group">
-                        <button id="view-split-btn" class="view-btn active" type="button">⚡ Split Screen</button>
-                        <button id="view-cctv-btn" class="view-btn" type="button">📹 CCTV Only</button>
-                        <button id="view-map-btn" class="view-btn" type="button">🗺️ Map Only</button>
+                        <button id="view-cctv-btn" class="view-btn active" type="button">📹 CCTV Surveillance</button>
+                        <button id="view-map-btn" class="view-btn" type="button">🗺️ Tactical Map</button>
+                        <button id="view-split-btn" class="view-btn" type="button">⚡ Split Screen</button>
                     </div>
                 </div>
 
-                <!-- Layer Selector for Map (Particles, Heatmap, Vector Wireframe) -->
-                <div class="map-layer-dock">
-                    <span class="layer-dock-label">HUD LAYERS:</span>
-                    <button id="layer-particles-btn" class="layer-btn active" type="button" title="Autonomous Kinetic Crowd Particle Physics">✨ Kinetic Particles</button>
-                    <button id="layer-heatmap-btn" class="layer-btn" type="button" title="Thermal Infrared Density Heatmap">🔥 Infrared Heatmap</button>
-                    <button id="layer-vectors-btn" class="layer-btn active" type="button" title="Wavefront Spillover Vectors">⚡ Flow Vectors</button>
+                <!-- Unified Dynamic Dock for Camera Selection or Map Layers -->
+                <div class="spatial-control-dock">
+                    <div class="cctv-cam-selector" id="cctv-cam-selector">
+                        <span class="dock-label">SOURCE:</span>
+                        <button class="cctv-cam-btn active" data-cam="cam1" type="button">CAM 01: Concourse</button>
+                        <button class="cctv-cam-btn" data-cam="cam2" type="button">CAM 02: Boulevard</button>
+                        <button class="cctv-cam-btn" data-cam="cam3" type="button">CAM 03: Platform Surge</button>
+                        <button class="cctv-cam-btn" data-cam="cam4" type="button">CAM 04: Festival Plaza</button>
+                        <button class="cctv-cam-btn quad" data-cam="quad" type="button">🎛️ QUAD</button>
+                        <button class="cctv-cam-btn webcam" id="btn-webcam-toggle" data-cam="webcam" type="button" title="Capture live video from laptop camera with real-time detection">📹 LIVE WEBCAM</button>
+                    </div>
+
+                    <div class="map-layer-dock hidden" id="map-layer-dock">
+                        <span class="dock-label">MAP LAYERS:</span>
+                        <button id="layer-particles-btn" class="layer-btn active" type="button" title="Autonomous Kinetic Crowd Particle Physics">✨ Particles</button>
+                        <button id="layer-heatmap-btn" class="layer-btn" type="button" title="Thermal Infrared Density Heatmap">🔥 Heatmap</button>
+                        <button id="layer-vectors-btn" class="layer-btn active" type="button" title="Wavefront Spillover Vectors">⚡ Flow Vectors</button>
+                    </div>
                 </div>
 
-                <div class="spatial-views-wrapper split" id="spatial-wrapper">
+                <div class="spatial-views-wrapper" id="spatial-wrapper">
                     <!-- High-Tech Blueprint SVG + Particle Physics Canvas -->
-                    <div class="map-container" id="map-subview">
+                    <div class="map-container hidden" id="map-subview">
                         <svg id="venue-map" viewBox="0 0 800 480" xmlns="http://www.w3.org/2000/svg">
                             <defs>
                                 <!-- Clean CAD Blueprint Grid Patterns -->
@@ -174,8 +140,8 @@
                             <rect x="0" y="0" width="800" height="480" fill="url(#cad-grid-fine)"/>
                             <rect x="0" y="0" width="800" height="480" fill="url(#cad-grid-major)"/>
 
-                            <!-- AUTHENTIC GRAND CENTRAL TERMINAL FLOOR PLAN BASEMAP (OFFICIAL MTA BLUEPRINT) -->
-                            <image href="/static/grand_central_floorplan.png" x="18" y="32" width="764" height="432" preserveAspectRatio="none" opacity="0.32" style="filter: brightness(0.9) contrast(1.15);"/>
+                            <!-- AUTHENTIC ADELAIDE RAILWAY STATION & FESTIVAL PLAZA INTERCHANGE BASEMAP -->
+                            <image href="/static/adelaide_station_dark_map.png" x="18" y="32" width="764" height="432" preserveAspectRatio="none" opacity="0.35" style="filter: brightness(0.85) contrast(1.2);"/>
 
                             <!-- Architectural Outer Perimeter Border -->
                             <rect x="18" y="32" width="764" height="432" fill="none" stroke="rgba(255, 255, 255, 0.08)" stroke-width="1.2"/>
@@ -183,102 +149,102 @@
                             <!-- CAD Header (Clear of all rooms, y=20) -->
                             <g class="cad-header-title">
                                 <text x="24" y="22" fill="#64748b" font-size="9" font-family="'JetBrains Mono', monospace" font-weight="700" letter-spacing="0.08em">
-                                    GRAND CENTRAL TERMINAL // NYC MTA PASSENGER CONCOURSE BLUEPRINT
+                                    ADELAIDE METROPOLITAN TRANSIT &amp; FESTIVAL PLAZA INTERCHANGE
                                 </text>
                                 <text x="776" y="22" text-anchor="end" fill="#00f0ff" font-size="9" font-family="'JetBrains Mono', monospace" font-weight="600">
-                                    MTA SURVEY MAP · NFPA 101 COMPLIANT
+                                    HIGH-DENSITY CCTV MATRIX · NFPA 101 COMPLIANT
                                 </text>
                             </g>
 
                             <!-- ==================== CAMERA FRUSTUM SIGHTLINE CONES ==================== -->
                             <g id="camera-frustums" class="cctv-frustums">
                                 <g id="cam1-cone-group" class="cam-cone-group active">
-                                    <polygon id="cam1-fov" points="230,155 450,165 450,290 250,290" fill="url(#cam1-fov-grad)" stroke="#00f0ff" stroke-width="0.8" stroke-dasharray="3,3" opacity="0.4"/>
+                                    <polygon id="cam1-fov" points="270,160 480,165 480,310 280,310" fill="url(#cam1-fov-grad)" stroke="#00f0ff" stroke-width="0.8" stroke-dasharray="3,3" opacity="0.4"/>
                                 </g>
                                 <g id="cam2-cone-group" class="cam-cone-group">
-                                    <polygon id="cam2-fov" points="490,145 750,150 750,250 510,250" fill="url(#cam2-fov-grad)" stroke="#6366f1" stroke-width="0.8" stroke-dasharray="3,3" opacity="0.1"/>
+                                    <polygon id="cam2-fov" points="495,150 765,155 765,270 515,270" fill="url(#cam2-fov-grad)" stroke="#6366f1" stroke-width="0.8" stroke-dasharray="3,3" opacity="0.1"/>
                                 </g>
                                 <g id="cam3-cone-group" class="cam-cone-group">
-                                    <polygon id="cam3-fov" points="30,270 190,285 190,430 45,430" fill="url(#cam3-fov-grad)" stroke="#f43f5e" stroke-width="0.8" stroke-dasharray="3,3" opacity="0.1"/>
+                                    <polygon id="cam3-fov" points="30,260 250,275 250,440 45,440" fill="url(#cam3-fov-grad)" stroke="#f43f5e" stroke-width="0.8" stroke-dasharray="3,3" opacity="0.1"/>
                                 </g>
                                 <g id="cam4-cone-group" class="cam-cone-group">
-                                    <polygon id="cam4-fov" points="235,325 530,335 530,435 245,435" fill="url(#cam4-fov-grad)" stroke="#10b981" stroke-width="0.8" stroke-dasharray="3,3" opacity="0.1"/>
+                                    <polygon id="cam4-fov" points="275,325 580,335 580,440 285,440" fill="url(#cam4-fov-grad)" stroke="#10b981" stroke-width="0.8" stroke-dasharray="3,3" opacity="0.1"/>
                                 </g>
                             </g>
 
                             <!-- Transit Flow Dynamic Vector Curves -->
                             <g id="flow-transit-lines" stroke="#6366f1" stroke-width="1.2" stroke-dasharray="5,5" fill="none" opacity="0.35">
-                                <path d="M 470 200 L 490 200" marker-end="url(#arrow-flow)"/>
-                                <path d="M 230 230 L 205 230" marker-end="url(#arrow-flow)"/>
-                                <path d="M 350 310 L 350 325" marker-end="url(#arrow-flow)"/>
-                                <path d="M 120 255 L 120 270" marker-end="url(#arrow-flow)"/>
+                                <path d="M 480 230 L 495 230" marker-end="url(#arrow-flow)"/>
+                                <path d="M 270 230 L 250 230" marker-end="url(#arrow-flow)"/>
+                                <path d="M 375 310 L 375 325" marker-end="url(#arrow-flow)"/>
+                                <path d="M 135 245 L 135 260" marker-end="url(#arrow-flow)"/>
                             </g>
 
                             <!-- ==================== ARCHITECTURAL SECTORS & TELEMETRY ==================== -->
                             <g id="zone-polygons">
                                 <!-- SECTOR 1: Gate A (Main Concourse) -->
                                 <g class="zone-group" data-zone="gate_a">
-                                    <rect x="230" y="155" width="240" height="150" rx="6" class="zone-poly" id="poly-gate_a" fill="rgba(16, 185, 129, 0.05)" stroke="#10b981" stroke-width="1.2"/>
-                                    <text x="350" y="175" text-anchor="middle" fill="#ffffff" font-size="11" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700">MAIN CONCOURSE [CAM 01]</text>
-                                    <text x="350" y="189" text-anchor="middle" fill="#818cf8" font-size="8.5" font-family="'JetBrains Mono', monospace">CENTRAL CLOCK &amp; UPPER SHED</text>
+                                    <rect x="270" y="160" width="210" height="150" rx="6" class="zone-poly" id="poly-gate_a" fill="rgba(16, 185, 129, 0.05)" stroke="#10b981" stroke-width="1.2"/>
+                                    <text x="375" y="180" text-anchor="middle" fill="#ffffff" font-size="11" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700">MAIN CONCOURSE [CAM 01]</text>
+                                    <text x="375" y="194" text-anchor="middle" fill="#818cf8" font-size="8.5" font-family="'JetBrains Mono', monospace">CENTRAL INFLOW &amp; TICKETING</text>
 
                                     <!-- Telemetry Badge -->
-                                    <rect x="285" y="245" width="130" height="48" rx="6" fill="rgba(6, 10, 18, 0.9)" stroke="rgba(255, 255, 255, 0.08)"/>
-                                    <text x="350" y="267" text-anchor="middle" fill="#ffffff" font-size="18" font-family="'JetBrains Mono', monospace" font-weight="800" id="map-count-gate_a">0</text>
-                                    <text x="350" y="283" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="'JetBrains Mono', monospace" id="map-density-gate_a">0.00 p/m²</text>
-                                    <text x="350" y="299" text-anchor="middle" fill="#f59e0b" font-size="8.5" font-family="'JetBrains Mono', monospace" font-weight="700" id="map-ttc-gate_a"></text>
+                                    <rect x="310" y="250" width="130" height="48" rx="6" fill="rgba(6, 10, 18, 0.9)" stroke="rgba(255, 255, 255, 0.08)"/>
+                                    <text x="375" y="272" text-anchor="middle" fill="#ffffff" font-size="18" font-family="'JetBrains Mono', monospace" font-weight="800" id="map-count-gate_a">0</text>
+                                    <text x="375" y="288" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="'JetBrains Mono', monospace" id="map-density-gate_a">0.00 p/m²</text>
+                                    <text x="375" y="304" text-anchor="middle" fill="#f59e0b" font-size="8.5" font-family="'JetBrains Mono', monospace" font-weight="700" id="map-ttc-gate_a"></text>
                                 </g>
 
-                                <!-- SECTOR 2: Corridor B (Graybar Passage) -->
+                                <!-- SECTOR 2: Corridor B (North Passage) -->
                                 <g class="zone-group" data-zone="corridor_b">
-                                    <rect x="490" y="145" width="280" height="115" rx="6" class="zone-poly" id="poly-corridor_b" fill="rgba(16, 185, 129, 0.05)" stroke="#10b981" stroke-width="1.2"/>
-                                    <text x="630" y="165" text-anchor="middle" fill="#ffffff" font-size="11" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700">GRAYBAR PASSAGE [CAM 02]</text>
-                                    <text x="630" y="179" text-anchor="middle" fill="#818cf8" font-size="8.5" font-family="'JetBrains Mono', monospace">EAST ARTERY TO LEXINGTON (w=1.75)</text>
+                                    <rect x="495" y="150" width="270" height="120" rx="6" class="zone-poly" id="poly-corridor_b" fill="rgba(16, 185, 129, 0.05)" stroke="#10b981" stroke-width="1.2"/>
+                                    <text x="630" y="170" text-anchor="middle" fill="#ffffff" font-size="11" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700">NORTH PASSAGE [CAM 02]</text>
+                                    <text x="630" y="184" text-anchor="middle" fill="#818cf8" font-size="8.5" font-family="'JetBrains Mono', monospace">PLATFORM GATES CORRIDOR (w=1.75)</text>
 
                                     <!-- Telemetry Badge -->
-                                    <rect x="565" y="200" width="130" height="48" rx="6" fill="rgba(6, 10, 18, 0.9)" stroke="rgba(255, 255, 255, 0.08)"/>
-                                    <text x="630" y="222" text-anchor="middle" fill="#ffffff" font-size="18" font-family="'JetBrains Mono', monospace" font-weight="800" id="map-count-corridor_b">0</text>
-                                    <text x="630" y="238" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="'JetBrains Mono', monospace" id="map-density-corridor_b">0.00 p/m²</text>
-                                    <text x="630" y="254" text-anchor="middle" fill="#f59e0b" font-size="8.5" font-family="'JetBrains Mono', monospace" font-weight="700" id="map-ttc-corridor_b"></text>
+                                    <rect x="565" y="205" width="130" height="48" rx="6" fill="rgba(6, 10, 18, 0.9)" stroke="rgba(255, 255, 255, 0.08)"/>
+                                    <text x="630" y="227" text-anchor="middle" fill="#ffffff" font-size="18" font-family="'JetBrains Mono', monospace" font-weight="800" id="map-count-corridor_b">0</text>
+                                    <text x="630" y="243" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="'JetBrains Mono', monospace" id="map-density-corridor_b">0.00 p/m²</text>
+                                    <text x="630" y="259" text-anchor="middle" fill="#f59e0b" font-size="8.5" font-family="'JetBrains Mono', monospace" font-weight="700" id="map-ttc-corridor_b"></text>
                                 </g>
 
-                                <!-- SECTOR 3: Exit C (Shuttle Passage) -->
+                                <!-- SECTOR 3: Exit C (Platform Surge Gates) -->
                                 <g class="zone-group" data-zone="exit_c">
-                                    <rect x="25" y="270" width="185" height="175" rx="6" class="zone-poly" id="poly-exit_c" fill="rgba(16, 185, 129, 0.05)" stroke="#10b981" stroke-width="1.2"/>
-                                    <text x="117" y="292" text-anchor="middle" fill="#ffffff" font-size="11" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700">SHUTTLE PASSAGE [CAM 03]</text>
-                                    <text x="117" y="306" text-anchor="middle" fill="#818cf8" font-size="8.5" font-family="'JetBrains Mono', monospace">SUBWAY &amp; 42ND ST EGRESS (w=2.0)</text>
+                                    <rect x="25" y="260" width="225" height="185" rx="6" class="zone-poly" id="poly-exit_c" fill="rgba(16, 185, 129, 0.05)" stroke="#10b981" stroke-width="1.2"/>
+                                    <text x="137" y="282" text-anchor="middle" fill="#ffffff" font-size="11" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700">PLATFORM SURGE [CAM 03]</text>
+                                    <text x="137" y="296" text-anchor="middle" fill="#818cf8" font-size="8.5" font-family="'JetBrains Mono', monospace">SURGE CHOKEPOINT &amp; EGRESS (w=2.0)</text>
 
                                     <!-- Telemetry Badge -->
-                                    <rect x="52" y="380" width="130" height="48" rx="6" fill="rgba(6, 10, 18, 0.9)" stroke="rgba(255, 255, 255, 0.08)"/>
-                                    <text x="117" y="402" text-anchor="middle" fill="#ffffff" font-size="18" font-family="'JetBrains Mono', monospace" font-weight="800" id="map-count-exit_c">0</text>
-                                    <text x="117" y="418" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="'JetBrains Mono', monospace" id="map-density-exit_c">0.00 p/m²</text>
-                                    <text x="117" y="434" text-anchor="middle" fill="#f59e0b" font-size="8.5" font-family="'JetBrains Mono', monospace" font-weight="700" id="map-ttc-exit_c"></text>
+                                    <rect x="72" y="380" width="130" height="48" rx="6" fill="rgba(6, 10, 18, 0.9)" stroke="rgba(255, 255, 255, 0.08)"/>
+                                    <text x="137" y="402" text-anchor="middle" fill="#ffffff" font-size="18" font-family="'JetBrains Mono', monospace" font-weight="800" id="map-count-exit_c">0</text>
+                                    <text x="137" y="418" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="'JetBrains Mono', monospace" id="map-density-exit_c">0.00 p/m²</text>
+                                    <text x="137" y="434" text-anchor="middle" fill="#f59e0b" font-size="8.5" font-family="'JetBrains Mono', monospace" font-weight="700" id="map-ttc-exit_c"></text>
                                 </g>
 
-                                <!-- SECTOR 4: Ground E (Vanderbilt Hall) -->
+                                <!-- SECTOR 4: Ground E (Festival Plaza) -->
                                 <g class="zone-group" data-zone="ground_e">
-                                    <rect x="230" y="325" width="310" height="120" rx="6" class="zone-poly" id="poly-ground_e" fill="rgba(16, 185, 129, 0.05)" stroke="#10b981" stroke-width="1.2"/>
-                                    <text x="385" y="348" text-anchor="middle" fill="#ffffff" font-size="11.5" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700">VANDERBILT HALL [CAM 04]</text>
-                                    <text x="385" y="362" text-anchor="middle" fill="#818cf8" font-size="8.5" font-family="'JetBrains Mono', monospace">PUBLIC BUFFER &amp; ONASSIS FOYER (w=1.0)</text>
+                                    <rect x="270" y="325" width="310" height="120" rx="6" class="zone-poly" id="poly-ground_e" fill="rgba(16, 185, 129, 0.05)" stroke="#10b981" stroke-width="1.2"/>
+                                    <text x="425" y="348" text-anchor="middle" fill="#ffffff" font-size="11.5" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700">FESTIVAL PLAZA [CAM 04]</text>
+                                    <text x="425" y="362" text-anchor="middle" fill="#818cf8" font-size="8.5" font-family="'JetBrains Mono', monospace">ARENA CONNECTOR &amp; BUFFER (w=1.0)</text>
 
                                     <!-- Telemetry Badge -->
-                                    <rect x="320" y="385" width="130" height="48" rx="6" fill="rgba(6, 10, 18, 0.9)" stroke="rgba(255, 255, 255, 0.08)"/>
-                                    <text x="385" y="407" text-anchor="middle" fill="#ffffff" font-size="18" font-family="'JetBrains Mono', monospace" font-weight="800" id="map-count-ground_e">0</text>
-                                    <text x="385" y="423" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="'JetBrains Mono', monospace" id="map-density-ground_e">0.00 p/m²</text>
-                                    <text x="385" y="439" text-anchor="middle" fill="#f59e0b" font-size="8.5" font-family="'JetBrains Mono', monospace" font-weight="700" id="map-ttc-ground_e"></text>
+                                    <rect x="360" y="385" width="130" height="48" rx="6" fill="rgba(6, 10, 18, 0.9)" stroke="rgba(255, 255, 255, 0.08)"/>
+                                    <text x="425" y="407" text-anchor="middle" fill="#ffffff" font-size="18" font-family="'JetBrains Mono', monospace" font-weight="800" id="map-count-ground_e">0</text>
+                                    <text x="425" y="423" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="'JetBrains Mono', monospace" id="map-density-ground_e">0.00 p/m²</text>
+                                    <text x="425" y="439" text-anchor="middle" fill="#f59e0b" font-size="8.5" font-family="'JetBrains Mono', monospace" font-weight="700" id="map-ttc-ground_e"></text>
                                 </g>
 
-                                <!-- SECTOR 5: Counter D (Biltmore Concourse) -->
+                                <!-- SECTOR 5: Counter D (SkyCity & InfoCentre) -->
                                 <g class="zone-group" data-zone="counter_d">
-                                    <rect x="25" y="55" width="185" height="200" rx="6" class="zone-poly" id="poly-counter_d" fill="rgba(16, 185, 129, 0.05)" stroke="#10b981" stroke-width="1.2"/>
-                                    <text x="117" y="78" text-anchor="middle" fill="#ffffff" font-size="11" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700">BILTMORE CONCOURSE</text>
-                                    <text x="117" y="92" text-anchor="middle" fill="#818cf8" font-size="8.5" font-family="'JetBrains Mono', monospace">COMMUTER GATES 38-42 (w=1.5)</text>
+                                    <rect x="25" y="55" width="225" height="190" rx="6" class="zone-poly" id="poly-counter_d" fill="rgba(16, 185, 129, 0.05)" stroke="#10b981" stroke-width="1.2"/>
+                                    <text x="137" y="78" text-anchor="middle" fill="#ffffff" font-size="11" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700">SKYCITY &amp; INFOCENTRE</text>
+                                    <text x="137" y="92" text-anchor="middle" fill="#818cf8" font-size="8.5" font-family="'JetBrains Mono', monospace">TICKETING WICKETS 1-8 (w=1.5)</text>
 
                                     <!-- Telemetry Badge -->
-                                    <rect x="52" y="195" width="130" height="48" rx="6" fill="rgba(6, 10, 18, 0.9)" stroke="rgba(255, 255, 255, 0.08)"/>
-                                    <text x="117" y="217" text-anchor="middle" fill="#ffffff" font-size="18" font-family="'JetBrains Mono', monospace" font-weight="800" id="map-count-counter_d">0</text>
-                                    <text x="117" y="233" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="'JetBrains Mono', monospace" id="map-density-counter_d">0.00 p/m²</text>
-                                    <text x="117" y="249" text-anchor="middle" fill="#f59e0b" font-size="8.5" font-family="'JetBrains Mono', monospace" font-weight="700" id="map-ttc-counter_d"></text>
+                                    <rect x="72" y="185" width="130" height="48" rx="6" fill="rgba(6, 10, 18, 0.9)" stroke="rgba(255, 255, 255, 0.08)"/>
+                                    <text x="137" y="207" text-anchor="middle" fill="#ffffff" font-size="18" font-family="'JetBrains Mono', monospace" font-weight="800" id="map-count-counter_d">0</text>
+                                    <text x="137" y="223" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="'JetBrains Mono', monospace" id="map-density-counter_d">0.00 p/m²</text>
+                                    <text x="137" y="239" text-anchor="middle" fill="#f59e0b" font-size="8.5" font-family="'JetBrains Mono', monospace" font-weight="700" id="map-ttc-counter_d"></text>
                                 </g>
                             </g>
 
@@ -321,28 +287,11 @@
                         <canvas id="crowd-particles-canvas" width="800" height="480"></canvas>
                     </div>
 
-                    <!-- Live CCTV Video Stream with Military-Grade HUD -->
+                    <!-- Live CCTV Video Stream with Built-in Military HUD -->
                     <div class="cctv-container" id="cctv-subview">
-                        <div class="cctv-hud-header">
-                            <div class="cctv-header-top">
-                                <span class="cctv-rec-dot"></span>
-                                <span class="cctv-cam-title" id="cctv-cam-title">CAM 01 // [SEC-01] MAIN CONCOURSE CENTRAL CLOCK</span>
-                                <span class="cctv-badge">25 FPS LIVE</span>
-                            </div>
-                            <!-- Multi-Camera Tactical Channel Selector -->
-                            <div class="cctv-cam-selector">
-                                <button class="cctv-cam-btn active" data-cam="cam1" type="button">CAM 01: Main Concourse</button>
-                                <button class="cctv-cam-btn" data-cam="cam2" type="button">CAM 02: Graybar Passage</button>
-                                <button class="cctv-cam-btn" data-cam="cam3" type="button">CAM 03: Shuttle Passage</button>
-                                <button class="cctv-cam-btn" data-cam="cam4" type="button">CAM 04: Vanderbilt Hall</button>
-                                <button class="cctv-cam-btn quad" data-cam="quad" type="button">🎛️ QUAD MATRIX</button>
-                            </div>
-                        </div>
                         <img id="cctv-stream-img" src="/api/video/feed?channel=cam1" alt="Live CCTV Analytics Stream" class="cctv-stream-img">
-                        <div class="cctv-hud-footer">
-                            <span>VENUE: GRAND CENTRAL TERMINAL // NYC METROPOLITAN TRANSIT</span>
-                            <span id="cctv-status-indicator">STATUS: CONNECTED (AUTONOMOUS MULTI-CAM MATRIX)</span>
-                        </div>
+                        <video id="webcam-video" playsinline muted autoplay style="display:none;"></video>
+                        <canvas id="webcam-capture-canvas" width="640" height="360" style="display:none;"></canvas>
                     </div>
                 </div>
             </section>
@@ -357,118 +306,153 @@
                     <!-- Populated dynamically by app.js with rich density meters -->
                 </div>
             </section>
-
-            <!-- Dynamic Steward & Security Optimizer (Phase 2 F15) -->
-            <section class="panel" id="steward-panel">
-                <div class="panel-header-tabs">
-                    <h2 class="panel-title">👮‍♂️ Dynamic Steward Deployment Optimization</h2>
-                    <span class="steward-pool-badge">Pool: 12 Active Responders</span>
-                </div>
-                <div id="steward-allocations" class="steward-grid">
-                    <!-- Populated dynamically by app.js -->
-                </div>
-            </section>
         </div>
 
-        <!-- RIGHT STAGE: Tactical AI Directives + Executive Briefings + Operator Copilot -->
+        <!-- RIGHT STAGE: Tabbed Tactical Operations Rail (Copilot, Briefings, Stewards) -->
         <div class="col-right">
-            <!-- Sleek 1-Line Tactical Autonomous Pipeline Conduit -->
-            <div class="agentic-status-ribbon" id="agentic-pipeline-ribbon">
-                <div class="ribbon-brand">
-                    <span class="ribbon-pulse-dot"></span>
-                    <span class="ribbon-title">AUTONOMOUS OODA LOOP</span>
-                </div>
-                <div class="ribbon-nodes">
-                    <div class="ribbon-node active" id="node-vision" title="YOLOv8 Pedestrian Detection (10 Hz)">
-                        <span class="r-icon">👁️</span>
-                        <span class="r-name">PERCEPTION</span>
-                        <span class="r-stat">10 FPS</span>
-                    </div>
-                    <span class="r-arrow">➔</span>
-                    <div class="ribbon-node active" id="node-math" title="Navier-Stokes Density Calculus &amp; OLS Trend">
-                        <span class="r-icon">📐</span>
-                        <span class="r-name">RISK MATH</span>
-                        <span class="r-stat">ACTIVE</span>
-                    </div>
-                    <span class="r-arrow">➔</span>
-                    <div class="ribbon-node active" id="node-agent" title="Agentic Multi-Tools (Dijkstra Evacuation, SOPs, Stewards)">
-                        <span class="r-icon">🧠</span>
-                        <span class="r-name">5 MULTI-TOOLS</span>
-                        <span class="r-stat">READY</span>
-                    </div>
-                    <span class="r-arrow">➔</span>
-                    <div class="ribbon-node" id="node-human" title="Human-in-the-Loop Directive Gate">
-                        <span class="r-icon">👨‍✈️</span>
-                        <span class="r-name">HUMAN GATE</span>
-                        <span class="r-stat">STANDBY</span>
-                    </div>
-                    <span class="r-arrow">➔</span>
-                    <div class="ribbon-node" id="node-verify" title="Closed-Loop Verification &amp; Outcome Delta">
-                        <span class="r-icon">🎯</span>
-                        <span class="r-name">VERIFY</span>
-                        <span class="r-stat">CLOSED-LOOP</span>
-                    </div>
-                </div>
+
+            <!-- Tactical Operations Tab Navigation -->
+            <div class="tactical-tabs-nav" id="tactical-tabs-nav">
+                <button class="tactical-tab-btn active" data-tab="tab-copilot" type="button">
+                    <span class="tab-icon">🤖</span>
+                    <span class="tab-title">Copilot &amp; Directives</span>
+                    <span class="tab-badge" id="tab-rec-count">Active</span>
+                </button>
+                <button class="tactical-tab-btn" data-tab="tab-briefings" type="button">
+                    <span class="tab-icon">📋</span>
+                    <span class="tab-title">Executive Briefings</span>
+                </button>
+                <button class="tactical-tab-btn" data-tab="tab-stewards" type="button">
+                    <span class="tab-icon">👮‍♂️</span>
+                    <span class="tab-title">Stewards &amp; Dispatch</span>
+                    <span class="tab-badge-subtle">12 Pool</span>
+                </button>
+                <button class="tactical-tab-btn" data-tab="tab-citizen-reports" type="button" id="tab-btn-reports">
+                    <span class="tab-icon">📢</span>
+                    <span class="tab-title">Citizen Incident Reports</span>
+                    <span class="tab-badge-subtle" id="tab-reports-badge" style="display:none;background:rgba(244,63,94,0.2);color:#f43f5e;border-color:rgba(244,63,94,0.4);">0</span>
+                </button>
             </div>
 
-            <!-- AI Recommendations (Autonomous Interventions) - NOW RIGHT AT THE TOP! -->
-            <section class="panel" id="rec-panel">
-                <div class="panel-header-tabs">
-                    <h2 class="panel-title">🤖 5-Part Explainable AI Tactical Directives</h2>
-                    <span class="rec-badge-active">AUTONOMOUS COPILOT</span>
-                </div>
-                <div id="recommendations" class="rec-list">
-                    <div class="empty-state">Awaiting real-time telemetry from active vision feed...</div>
-                </div>
-            </section>
-
-            <!-- Safety Briefings -->
-            <section class="panel" id="briefing-panel">
-                <div class="panel-header-tabs">
-                    <h2 class="panel-title">📋 Executive Safety Briefings</h2>
-                    <button id="force-briefing-btn" class="btn-sm" title="Synthesize Incident Briefing Now">⚡ Generate</button>
-                </div>
-                <div id="briefings" class="briefing-content">
-                    <div class="empty-state">Autonomous briefing synthesizer active. Reports generate upon critical state shift.</div>
-                </div>
-            </section>
-
-            <!-- Operator Copilot Chat -->
-            <section class="panel" id="chat-panel">
-                <div class="panel-header-tabs">
-                    <h2 class="panel-title">💬 Operator Command Copilot</h2>
-                    <span class="chat-agent-tag">⚡ Tool-Enabled Grounded AI</span>
-                </div>
-                <div id="chat-messages" class="chat-messages">
-                    <div class="chat-msg agent">
-                        <div class="chat-msg-header">
-                            <span class="chat-sender-name">AEGIS Copilot</span>
-                            <span class="chat-source-tag tag-llm">⚡ Active</span>
-                        </div>
-                        <div class="chat-msg-body">
-                            <div class="chat-line">Ready, Operator. Continuous monitoring is active across all venue zones. Ask me about zone safety, risk factors, or tactical egress recommendations.</div>
+            <!-- Tab Pane 1: AI Tactical Directives & Operator Copilot -->
+            <div class="tactical-tab-pane active" id="tab-copilot">
+                <!-- AI Recommendations (Autonomous Interventions) -->
+                <section class="panel" id="rec-panel">
+                    <div class="panel-header-tabs">
+                        <h2 class="panel-title">🤖 5-Part Explainable AI Tactical Directives</h2>
+                        <span class="rec-badge-active">AUTONOMOUS COPILOT</span>
+                    </div>
+                    <div id="recommendations" class="rec-list">
+                        <div class="nominal-state">
+                            <span class="nominal-icon">🟢</span>
+                            <div class="nominal-text">
+                                <strong>ALL VENUE SECTORS NOMINAL</strong>
+                                <p>Real-time pedestrian densities are well within NFPA safety limits (&lt; 0.50 p/m²). Autonomous directive engine in active sentinel mode.</p>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="chat-input-row">
-                    <input type="text" id="chat-input" placeholder="Ask: Which gate is safest right now?" autocomplete="off">
-                    <button id="chat-send" class="btn-primary">Send</button>
-                </div>
-                <div class="chat-suggestions">
-                    <button class="btn-suggestion" data-q="Which gate is safest right now?">Safest gate?</button>
-                    <button class="btn-suggestion" data-q="Give me a venue status summary">Status summary</button>
-                    <button class="btn-suggestion" data-q="How should we deploy our 12 stewards right now?">Steward deployment?</button>
-                    <button class="btn-suggestion" data-q="Show emergency evacuation route for Gate A">Evacuation plan?</button>
-                </div>
-            </section>
+                </section>
 
-            <!-- Agent Activity Feed -->
-            <section class="panel" id="activity-panel">
-                <h2 class="panel-title">📡 Autonomous Loop Telemetry</h2>
-                <div id="agent-feed" class="agent-feed">
-                    <div class="empty-state">Agent perception loop initializing...</div>
-                </div>
-            </section>
+                <!-- Operator Copilot Chat -->
+                <section class="panel" id="chat-panel">
+                    <div class="panel-header-tabs">
+                        <h2 class="panel-title">💬 Operator Command Copilot</h2>
+                        <span class="chat-agent-tag">⚡ Tool-Enabled Grounded AI</span>
+                    </div>
+                    <div id="chat-messages" class="chat-messages">
+                        <div class="chat-msg agent">
+                            <div class="chat-msg-header">
+                                <span class="chat-sender-name">AEGIS Copilot</span>
+                                <span class="chat-source-tag tag-llm">⚡ Active</span>
+                            </div>
+                            <div class="chat-msg-body">
+                                <div class="chat-line">Ready, Operator. Continuous monitoring is active across all venue zones. Ask me about zone safety, risk factors, or tactical egress recommendations.</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chat-input-row">
+                        <input type="text" id="chat-input" placeholder="Ask: Which gate is safest right now?" autocomplete="off">
+                        <button id="chat-send" class="btn-primary">Send</button>
+                    </div>
+                    <div class="chat-suggestions">
+                        <button class="btn-suggestion" data-q="Which gate is safest right now?">Safest gate?</button>
+                        <button class="btn-suggestion" data-q="Give me a venue status summary">Status summary</button>
+                        <button class="btn-suggestion" data-q="How should we deploy our 12 stewards right now?">Steward deployment?</button>
+                        <button class="btn-suggestion" data-q="Show emergency evacuation route for Gate A">Evacuation plan?</button>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Tab Pane 2: Executive Safety Briefings & Telemetry Feed -->
+            <div class="tactical-tab-pane hidden" id="tab-briefings">
+                <!-- Safety Briefings -->
+                <section class="panel" id="briefing-panel">
+                    <div class="panel-header-tabs">
+                        <h2 class="panel-title">📋 Executive Safety Briefings</h2>
+                        <button id="force-briefing-btn" class="btn-sm" title="Synthesize Incident Briefing Now">⚡ Generate</button>
+                    </div>
+                    <div id="briefings" class="briefing-content">
+                        <div class="empty-state">Autonomous briefing synthesizer active. Reports generate upon critical state shift.</div>
+                    </div>
+                </section>
+
+                <!-- Agent Activity Feed -->
+                <section class="panel" id="activity-panel">
+                    <h2 class="panel-title">📡 Autonomous Loop Telemetry</h2>
+                    <div id="agent-feed" class="agent-feed">
+                        <div class="empty-state">Agent perception loop initializing...</div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Tab Pane 3: Dynamic Steward & Security Optimizer -->
+            <div class="tactical-tab-pane hidden" id="tab-stewards">
+                <section class="panel" id="steward-panel">
+                    <div class="panel-header-tabs">
+                        <h2 class="panel-title">👮‍♂️ Dynamic Steward Deployment Optimization</h2>
+                        <span class="steward-pool-badge">Pool: 12 Active Responders</span>
+                    </div>
+                    <div id="steward-allocations" class="steward-grid">
+                        <!-- Populated dynamically by app.js -->
+                    </div>
+                </section>
+            </div>
+
+            <!-- Tab Pane 4: Dedicated Citizen Incident Beacon Reports Hub -->
+            <div class="tactical-tab-pane hidden" id="tab-citizen-reports">
+                <section class="panel" id="citizen-reports-panel">
+                    <div class="panel-header-tabs" style="justify-content: space-between; align-items: center;">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <h2 class="panel-title">📢 Citizen Incident Beacon Intelligence</h2>
+                            <span class="panel-stat-pill" id="panel-reports-count">0 ACTIVE BEACONS</span>
+                        </div>
+                        <button class="btn-action-pill" id="btn-show-qr-from-tab" onclick="document.getElementById('qr-modal')?.classList.remove('hidden')" style="font-size:11px;">
+                            <span>📱 Mobile QR Beacon</span>
+                        </button>
+                    </div>
+
+                    <!-- Sector Filter & Status Bar -->
+                    <div class="citizen-panel-controls">
+                        <div class="citizen-filter-pills" id="panel-report-filters">
+                            <button class="citizen-tab-filter-btn active" data-filter="all" onclick="filterTabReports('all')">All Sectors</button>
+                            <button class="citizen-tab-filter-btn" data-filter="gate_a" onclick="filterTabReports('gate_a')">Gate A</button>
+                            <button class="citizen-tab-filter-btn" data-filter="corridor_b" onclick="filterTabReports('corridor_b')">Corridor B</button>
+                            <button class="citizen-tab-filter-btn" data-filter="exit_c" onclick="filterTabReports('exit_c')">Exit C</button>
+                            <button class="citizen-tab-filter-btn" data-filter="counter_d" onclick="filterTabReports('counter_d')">Counter D</button>
+                            <button class="citizen-tab-filter-btn" data-filter="ground_e" onclick="filterTabReports('ground_e')">Plaza E</button>
+                        </div>
+                        <div class="panel-status-toggle">
+                            <button class="status-toggle-btn active" id="btn-status-all" onclick="toggleReportStatusFilter('all')">All</button>
+                            <button class="status-toggle-btn" id="btn-status-active" onclick="toggleReportStatusFilter('active')">🚨 Active Only</button>
+                        </div>
+                    </div>
+
+                    <!-- Dedicated Incident Stream Feed -->
+                    <div id="dedicated-reports-stream" class="dedicated-reports-stream">
+                        <!-- Populated dynamically by app.js -->
+                    </div>
+                </section>
+            </div>
         </div>
     </main>
 
@@ -515,6 +499,46 @@
         </div>
     </div>
 
-    <script src="/static/app.js?v=6.0"></script>
+    <!-- Citizen Incident Reports Live Feed Modal -->
+    <div id="citizen-reports-modal" class="modal hidden">
+        <div class="modal-content citizen-modal-content">
+            <div class="modal-header">
+                <div class="modal-header-left">
+                    <span class="citizen-modal-icon">📢</span>
+                    <div>
+                        <span class="modal-title">CITIZEN INCIDENT INTEL FEED</span>
+                        <div class="citizen-modal-subtitle">Field Telemetry from Mobile QR Beacon Ingest (FR10)</div>
+                    </div>
+                </div>
+                <button id="citizen-modal-close" class="btn-icon" onclick="closeCitizenReportsModal()">✕</button>
+            </div>
+            
+            <!-- Filter Bar -->
+            <div class="citizen-modal-filter-bar">
+                <button class="citizen-filter-btn active" data-filter="all" onclick="filterCitizenReports('all')">All Sectors</button>
+                <button class="citizen-filter-btn" data-filter="gate_a" onclick="filterCitizenReports('gate_a')">Gate A</button>
+                <button class="citizen-filter-btn" data-filter="corridor_b" onclick="filterCitizenReports('corridor_b')">Corridor B</button>
+                <button class="citizen-filter-btn" data-filter="exit_c" onclick="filterCitizenReports('exit_c')">Exit C</button>
+                <button class="citizen-filter-btn" data-filter="counter_d" onclick="filterCitizenReports('counter_d')">Counter D</button>
+                <button class="citizen-filter-btn" data-filter="ground_e" onclick="filterCitizenReports('ground_e')">Plaza E</button>
+            </div>
+
+            <!-- Scrollable Report Cards List -->
+            <div id="citizen-reports-list" class="citizen-reports-list">
+                <!-- Rendered dynamically by app.js -->
+            </div>
+
+            <div class="modal-footer" style="justify-content: space-between; align-items: center;">
+                <span id="citizen-report-total" style="font-size:11px; color:#94a3b8; font-family:'JetBrains Mono', monospace;">0 INCIDENTS RECORDED</span>
+                <button class="btn-primary" onclick="closeCitizenReportsModal()">Close Intel Feed</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Ambient Real-Time Incident Toast Container -->
+    <div id="citizen-toast-container" class="citizen-toast-container"></div>
+
+    <script src="/static/app.js?v=9.3"></script>
 </body>
 </html>
+

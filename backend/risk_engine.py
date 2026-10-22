@@ -71,10 +71,35 @@ class ZoneState:
         self.previous_state = "Safe"
         self.active_reports = 0
 
-        # Asymmetric Hysteresis Counters (Section 5.4: N_up = 2, N_down = 3)
         self.escalation_counter = 0
         self.deescalation_counter = 0
         self._target_state = "Safe"
+
+    def force_telemetry(self, person_count, density, risk_score, state, behaviour_flag="surge", trend_slope=0.035, timestamp=None):
+        """Immediately sets explicit zone telemetry bypassing hysteresis (used by master scenarios)."""
+        if timestamp is None:
+            timestamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        self.person_count = int(person_count)
+        self.density = float(density)
+        self.risk_score = round(float(risk_score), 3)
+        self.previous_state = self.state
+        self.state = state
+        self._target_state = state
+        self.behaviour_flag = behaviour_flag
+        self.trend_slope = float(trend_slope)
+        self.last_timestamp = timestamp
+        self.escalation_counter = 0
+        self.deescalation_counter = 0
+        now_sec = time.time()
+        self.density_buffer.append((now_sec, self.density))
+        try:
+            log_risk(
+                self.zone_id, timestamp, self.person_count, self.density,
+                self.behaviour_flag, self.risk_score, self.state,
+                self.trend_slope, self.time_to_critical_s
+            )
+        except Exception:
+            pass
 
     def ingest(self, person_count, density, behaviour_flag="normal", sensor_status="ok", timestamp=None, weather_multiplier=1.0):
         """Ingest a new reading and compute all spatial metrics."""
@@ -294,6 +319,18 @@ class RiskEngine:
             timestamp=timestamp,
             weather_multiplier=multiplier
         )
+
+    def force_zone_state(self, zone_id, person_count, density, risk_score, state, behaviour_flag="surge", trend_slope=0.035):
+        """Immediately sets explicit zone telemetry bypassing hysteresis."""
+        if zone_id in self.trackers:
+            self.trackers[zone_id].force_telemetry(
+                person_count=person_count,
+                density=density,
+                risk_score=risk_score,
+                state=state,
+                behaviour_flag=behaviour_flag,
+                trend_slope=trend_slope
+            )
 
     def get_zone_state(self, zone_id):
         if zone_id in self.trackers:

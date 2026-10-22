@@ -35,7 +35,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from backend.database import (
     init_db, save_citizen_report, get_alerts, update_alert_action,
-    get_briefings, save_chat, get_chat, save_alert, get_zones
+    get_briefings, save_chat, get_chat, save_alert, get_zones,
+    get_citizen_reports, acknowledge_citizen_report
 )
 from backend.risk_engine import RiskEngine
 from backend.models import (
@@ -72,11 +73,14 @@ class ConnectionManager:
             self.disconnect(conn)
 
 
+from backend.resource_engine import ResourceOptimizationEngine
+
 # Global instances
 manager = ConnectionManager()
 risk_engine: Optional[RiskEngine] = None
 agent_daemon: Optional[SafetyAgentDaemon] = None
 video_streamer = None
+resource_engine = ResourceOptimizationEngine()
 
 
 # --- Background Tasks ---
@@ -86,6 +90,11 @@ async def broadcast_venue_state_periodically():
         if risk_engine and manager.active_connections:
             state = risk_engine.get_venue_state()
             state["type"] = "venue_state"
+            if resource_engine:
+                try:
+                    state["steward_distribution"] = resource_engine.optimize_allocation(state.get("zones", []), total_pool=12)
+                except Exception:
+                    pass
             await manager.broadcast(state)
         await asyncio.sleep(1.0)
 
@@ -224,6 +233,7 @@ async def submit_citizen_report(report: CitizenReport):
     """
     POST /api/reports/citizen (Section 2 FR10)
     Saves citizen hazard report and immediately elevates zone risk score.
+    Broadcasts real-time alert payload with full incident message to operator console.
     """
     if not risk_engine:
         raise HTTPException(status_code=503, detail="Risk Engine not initialized")
@@ -241,16 +251,54 @@ async def submit_citizen_report(report: CitizenReport):
             sensor_status=z["sensor_status"]
         )
 
-    # Broadcast update
+    # Broadcast real-time citizen alert notification to operator dashboard
+    zone_name = z.get("zone_name", report.zone_id.replace("_", " ").title()) if z else report.zone_id
+    now_iso = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    await manager.broadcast({
+        "type": "citizen_report_alert",
+        "report": {
+            "zone_id": report.zone_id,
+            "zone_name": zone_name,
+            "message": report.message,
+            "submitted_at": now_iso
+        }
+    })
+
+    # Broadcast updated venue state
     state = risk_engine.get_venue_state()
     state["type"] = "venue_state"
     await manager.broadcast(state)
 
+    print(f"📢 [CITIZEN REPORT INGESTED]: {report.zone_id.upper()} — '{report.message}'")
     return {
         "status": "ok",
         "message": f"Hazard report logged for {report.zone_id}",
         "zone_id": report.zone_id
     }
+
+
+@app.get("/api/reports/citizen")
+async def list_citizen_reports(zone_id: str = None, limit: int = 30):
+    """
+    GET /api/reports/citizen
+    Retrieves recent citizen incident beacon reports with zone metadata.
+    """
+    return get_citizen_reports(zone_id=zone_id, limit=limit)
+
+
+@app.post("/api/reports/citizen/{report_id}/acknowledge")
+async def mark_citizen_report_acknowledged(report_id: int):
+    """
+    POST /api/reports/citizen/{report_id}/acknowledge
+    Allows operator to mark a citizen hazard report as acknowledged.
+    """
+    acknowledge_citizen_report(report_id)
+    await manager.broadcast({
+        "type": "citizen_report_acknowledged",
+        "report_id": report_id
+    })
+    return {"status": "ok", "report_id": report_id}
+
 
 
 # --- Alerts & Human-in-the-Loop Actions ---
@@ -277,6 +325,35 @@ async def create_alert(alert_payload: dict):
     return {"alert_id": alert_id}
 
 
+async def simulate_ground_relief(zone_id: str, baseline_density: float):
+    """
+    Simulates on-ground steward execution after operator authorization:
+    Crowd begins to ease and disperse over 4-8 seconds.
+    """
+    try:
+        await asyncio.sleep(4.0)
+        # Step 1: Inflow halted, partial diversion
+        risk_engine.force_zone_state(zone_id, 120, 1.00, 0.48, "Watch", "normal", -0.02)
+        if zone_id == "gate_a":
+            risk_engine.force_zone_state("corridor_b", 45, 0.56, 0.32, "Safe", "normal", -0.01)
+        await broadcast_state_now()
+
+        await asyncio.sleep(3.5)
+        # Step 2: Dispersion complete - safe operating baseline restored
+        risk_engine.force_zone_state(zone_id, 45, 0.38, 0.15, "Safe", "normal", 0.0)
+        if zone_id == "gate_a":
+            risk_engine.force_zone_state("corridor_b", 20, 0.25, 0.10, "Safe", "normal", 0.0)
+        await broadcast_state_now()
+
+        # Step 3: Trigger agent verification cycle to confirm resolution
+        if agent_daemon:
+            await agent_daemon.run_cycle(force=True, trigger="relief_verification")
+    except asyncio.CancelledError:
+        pass
+    except Exception as e:
+        print(f"Error in simulate_ground_relief: {e}")
+
+
 @app.post("/api/alerts/{alert_id}/action")
 async def record_alert_action(alert_id: int, action: AlertAction):
     """
@@ -297,6 +374,8 @@ async def record_alert_action(alert_id: int, action: AlertAction):
             z = risk_engine.get_zone_state(z_id)
             if z:
                 agent_daemon.record_operator_approval(alert_id, z_id, z["density"])
+                if video_streamer and video_streamer.scenario_active:
+                    asyncio.create_task(simulate_ground_relief(z_id, z["density"]))
 
     await manager.broadcast({
         "type": "alert_action",
@@ -441,12 +520,91 @@ def generate_standby_frame() -> bytes:
 
 
 @app.post("/api/vision/frame")
-async def upload_frame(request: Request):
+@app.post("/api/webcam/frame")
+async def process_webcam_frame(request: Request):
+    """
+    Ingests live laptop camera frames, executes YOLOv8 object detection,
+    renders tactical bounding brackets, foot contact reticles, and defense HUD,
+    ingests live telemetry into the risk engine, and returns annotated frame.
+    """
     global latest_frame_jpeg, last_frame_time, latest_frame_seq
-    latest_frame_jpeg = await request.body()
-    last_frame_time = time.time()
-    latest_frame_seq += 1
-    return {"status": "ok"}
+    import cv2
+    import numpy as np
+    import datetime
+    from fastapi import Response
+
+    body = await request.body()
+    if not body:
+        return {"status": "empty"}
+
+    try:
+        nparr = np.frombuffer(body, np.uint8)
+        frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+        if frame is None:
+            return {"status": "decode_error"}
+
+        frame = cv2.resize(frame, (640, 360))
+
+        # Run YOLOv8 detection
+        detector = video_streamer.detector if video_streamer else None
+        if detector:
+            readings, detections, count, density, behaviour = detector.process_inference_only(frame)
+            annotated = detector.render_tactical_hud(frame, detections, count, density, behaviour)
+        else:
+            detections, count, density, behaviour = [], 1, 0.01, "normal"
+            annotated = frame
+
+        # Apply Unified Military CCTV HUD
+        now_dt = datetime.datetime.now(datetime.timezone.utc)
+        timecode_str = now_dt.strftime("%Y-%m-%d %H:%M:%S.%f")[:-4] + " UTC"
+        hud_info = {
+            "tag": "LIVE WEBCAM",
+            "location": "LOCAL OPERATOR TERMINAL",
+            "optical": "INTEGRATED HD",
+            "sensor": "WEBCAM-01"
+        }
+        if video_streamer:
+            final_frame = video_streamer._apply_unified_cctv_hud(annotated, hud_info, count, timecode_str)
+        else:
+            final_frame = annotated
+
+        # Encode to JPEG
+        _, enc_buf = cv2.imencode(".jpg", final_frame, [cv2.IMWRITE_JPEG_QUALITY, 80])
+        annotated_bytes = enc_buf.tobytes()
+
+        # Update cache for video streaming
+        latest_frame_jpeg = annotated_bytes
+        last_frame_time = time.time()
+        latest_frame_seq += 1
+
+        if video_streamer:
+            with video_streamer.lock:
+                video_streamer.latest_frames["webcam"] = annotated_bytes
+                video_streamer.latest_seq["webcam"] = video_streamer.latest_seq.get("webcam", 0) + 1
+
+        # Closed-loop ingestion into risk engine for real-time dashboard reactivity
+        if risk_engine:
+            risk_engine.ingest(
+                zone_id="gate_a",
+                person_count=count,
+                density=density,
+                behaviour_flag=behaviour,
+                sensor_status="ok",
+                timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+            )
+
+        return Response(
+            content=annotated_bytes,
+            media_type="image/jpeg",
+            headers={
+                "X-Person-Count": str(count),
+                "X-Density": str(density),
+                "X-Behaviour": behaviour,
+                "Cache-Control": "no-cache, no-store, must-revalidate"
+            }
+        )
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 
 @app.get("/api/video/feed")
@@ -454,13 +612,15 @@ async def video_feed(channel: str = "cam1"):
     """Streams live CCTV MJPEG feed with minimal latency."""
     async def frame_generator():
         standby_bytes = generate_standby_frame()
-        last_sent_seq = -1
         while True:
             now = time.time()
-            if latest_frame_seq != last_sent_seq and latest_frame_jpeg and (now - last_frame_time) < 3.0:
-                data = latest_frame_jpeg
-                last_sent_seq = latest_frame_seq
-                yield (b"--frame\r\nContent-Type: image/jpeg\r\n\r\n" + data + b"\r\n")
+            if channel == "webcam":
+                if video_streamer and "webcam" in video_streamer.latest_frames:
+                    yield (b"--frame\r\nContent-Type: image/jpeg\r\n\r\n" + video_streamer.latest_frames["webcam"] + b"\r\n")
+                elif latest_frame_jpeg and (now - last_frame_time) < 4.0:
+                    yield (b"--frame\r\nContent-Type: image/jpeg\r\n\r\n" + latest_frame_jpeg + b"\r\n")
+                else:
+                    yield (b"--frame\r\nContent-Type: image/jpeg\r\n\r\n" + standby_bytes + b"\r\n")
             elif video_streamer:
                 frame_data = video_streamer.get_latest_frame(channel)
                 if frame_data:
@@ -527,22 +687,35 @@ async def get_qr_code():
 demo_scenario_task: Optional[asyncio.Task] = None
 
 
+async def broadcast_state_now():
+    """Immediately broadcasts current venue state across WebSocket."""
+    if risk_engine:
+        state = risk_engine.get_venue_state()
+        state["type"] = "venue_state"
+        if resource_engine:
+            try:
+                state["steward_distribution"] = resource_engine.optimize_allocation(state.get("zones", []), total_pool=12)
+            except Exception:
+                pass
+        await manager.broadcast(state)
+
+
 async def run_surge_simulation():
-    """S02: Simulates Gate A sudden influx 2 -> 12 persons."""
+    """S02: Simulates Gate A rapid inflow rush 140 -> 210 persons."""
     try:
-        for count in [3, 5, 8, 10, 12]:
-            den = round(count / 6.0, 3)
-            beh = "surge" if count >= 8 else ("running" if count >= 5 else "normal")
+        for count in [140, 175, 205, 220]:
+            den = round(count / 120.0, 3)
             risk_engine.ingest(
                 zone_id="gate_a",
                 person_count=count,
                 density=den,
-                behaviour_flag=beh,
+                behaviour_flag="surge",
                 sensor_status="ok"
             )
+            await broadcast_state_now()
             if agent_daemon:
                 asyncio.create_task(agent_daemon.run_cycle(force=True, trigger="surge_sim"))
-            await asyncio.sleep(2.0)
+            await asyncio.sleep(2.5)
     except asyncio.CancelledError:
         pass
 
@@ -558,48 +731,69 @@ async def trigger_demo_scenario(scenario_id: str):
 
     if scenario_id in ("normal", "s01", "reset"):
         # S01: Steady State Baseline (all zones Safe, risk < 0.35)
-        for zid, area in [("gate_a", 6.0), ("corridor_b", 8.0), ("exit_c", 6.0), ("counter_d", 6.0), ("ground_e", 20.0)]:
-            cnt = 1 if zid != "ground_e" else 3
-            risk_engine.ingest(
-                zone_id=zid,
-                person_count=cnt,
-                density=round(cnt / area, 3),
-                behaviour_flag="normal",
-                sensor_status="ok",
-                timestamp=now_iso,
-            )
+        if video_streamer:
+            video_streamer.scenario_active = False
+
+        for zid, area, cnt in [
+            ("gate_a", 120.0, 18),
+            ("corridor_b", 80.0, 6),
+            ("exit_c", 65.0, 6),
+            ("counter_d", 75.0, 6),
+            ("ground_e", 300.0, 12),
+        ]:
+            den = round(cnt / area, 3)
+            risk_engine.force_zone_state(zid, cnt, den, 0.12, "Safe", "normal", 0.0)
+
         risk_engine.set_weather(condition="fair", active=False)
+        await broadcast_state_now()
         return {"status": "ok", "message": "S01: Venue reset to Safe baseline"}
 
-    elif scenario_id in ("surge", "s02"):
-        # S02: Rapid Inflow Surge at Gate A
+    # For all active scenarios, lock out background video streamer from overwriting risk values
+    if video_streamer:
+        video_streamer.scenario_active = True
+
+    if scenario_id in ("surge", "s02"):
+        # S02: Rapid Inflow Surge at Gate A - Instant high-impact trigger
+        risk_engine.ingest(
+            zone_id="gate_a",
+            person_count=145,
+            density=1.21,
+            behaviour_flag="surge",
+            sensor_status="ok",
+            timestamp=now_iso
+        )
+        await broadcast_state_now()
+        if agent_daemon:
+            asyncio.create_task(agent_daemon.run_cycle(force=True, trigger="surge_sim"))
         demo_scenario_task = asyncio.create_task(run_surge_simulation())
-        return {"status": "ok", "message": "S02: Rapid Inflow Surge at Gate A initiated (escalating over 10s)"}
+        return {"status": "ok", "message": "S02: Rapid Inflow Surge at Gate A activated (145+ Persons)"}
 
     elif scenario_id in ("running", "s03"):
         # S03: Running Panic in Corridor B
         risk_engine.ingest(
             zone_id="corridor_b",
-            person_count=6,
-            density=round(6 / 8.0, 3),
+            person_count=65,
+            density=0.81,
             behaviour_flag="running",
             sensor_status="ok",
             timestamp=now_iso
         )
+        await broadcast_state_now()
         if agent_daemon:
             asyncio.create_task(agent_daemon.run_cycle(force=True, trigger="running_sim"))
-        return {"status": "ok", "message": "S03: Running Panic flag active in Corridor B (elevates to Warning)"}
+        return {"status": "ok", "message": "S03: Running Panic flag active in Corridor B"}
 
     elif scenario_id in ("reverse_flow", "s04"):
         # S04: Counter-flow at Exit C
         risk_engine.ingest(
             zone_id="exit_c",
-            person_count=5,
-            density=round(5 / 6.0, 3),
+            person_count=52,
+            density=0.80,
             behaviour_flag="counter_flow",
             sensor_status="ok",
             timestamp=now_iso
         )
+        await broadcast_state_now()
         if agent_daemon:
             asyncio.create_task(agent_daemon.run_cycle(force=True, trigger="counter_flow_sim"))
         return {"status": "ok", "message": "S04: Reverse Flow detected at Exit C"}
@@ -607,14 +801,24 @@ async def trigger_demo_scenario(scenario_id: str):
     elif scenario_id in ("citizen", "s05"):
         # S05: Citizen Report
         save_citizen_report("ground_e", "Severe crowd congestion developing near central stage!")
-        z = risk_engine.get_zone_state("ground_e")
-        if z:
-            risk_engine.ingest("ground_e", z["person_count"], z["density"], z["behaviour_flag"])
+        risk_engine.ingest(
+            zone_id="ground_e",
+            person_count=85,
+            density=0.28,
+            behaviour_flag="surge",
+            sensor_status="ok",
+            timestamp=now_iso
+        )
+        await broadcast_state_now()
+        if agent_daemon:
+            asyncio.create_task(agent_daemon.run_cycle(force=True, trigger="citizen_report"))
         return {"status": "ok", "message": "S05: Citizen hazard report injected for Ground E"}
 
     elif scenario_id in ("spillover", "s06"):
         # S06: Cross-Zone Spillover Propagation
-        risk_engine.ingest("gate_a", 12, 2.0, "surge", "ok")
+        risk_engine.ingest("gate_a", 160, 1.33, "surge", "ok")
+        risk_engine.ingest("corridor_b", 75, 0.94, "surge", "ok")
+        await broadcast_state_now()
         if agent_daemon:
             asyncio.create_task(agent_daemon.run_cycle(force=True, trigger="spillover_sim"))
         return {"status": "ok", "message": "S06: Cross-Zone Spillover projected from Gate A -> Corridor B"}
@@ -623,24 +827,29 @@ async def trigger_demo_scenario(scenario_id: str):
         # S07: Adverse Weather (Rain)
         is_active = not risk_engine.rain_active
         risk_engine.set_weather(condition="rain" if is_active else "fair", active=is_active)
-        state = risk_engine.get_venue_state()
-        state["type"] = "venue_state"
-        await manager.broadcast(state)
+        await broadcast_state_now()
         return {"status": "ok", "message": f"S07: Adverse Weather {'ENABLED (+15% outdoor risk)' if is_active else 'DISABLED'}"}
 
     elif scenario_id in ("disconnect", "s10"):
         # S10: Sensor Disconnect
         risk_engine.ingest("gate_a", 0, 0.0, "normal", sensor_status="unavailable")
-        state = risk_engine.get_venue_state()
-        state["type"] = "venue_state"
-        await manager.broadcast(state)
+        await broadcast_state_now()
         return {"status": "ok", "message": "S10: Gate A Camera sensor disconnected (system remains stable)"}
 
     elif scenario_id in ("critical", "emergency"):
-        risk_engine.ingest("gate_a", 12, 2.0, "surge", "ok")
+        # S09: Critical Hazard & Directives Sandbox
+        if video_streamer:
+            video_streamer.scenario_active = True
+
+        risk_engine.force_zone_state("gate_a", 215, 1.79, 0.92, "Critical", "surge", 0.045)
+        risk_engine.force_zone_state("corridor_b", 88, 1.10, 0.68, "Warning", "surge", 0.025)
+        risk_engine.force_zone_state("exit_c", 25, 0.38, 0.18, "Safe", "normal", 0.0)
+        risk_engine.force_zone_state("counter_d", 30, 0.40, 0.15, "Safe", "normal", 0.0)
+        risk_engine.force_zone_state("ground_e", 45, 0.15, 0.08, "Safe", "normal", 0.0)
+        await broadcast_state_now()
         if agent_daemon:
             asyncio.create_task(agent_daemon.run_cycle(force=True, trigger="critical_sim"))
-        return {"status": "ok", "message": "Gate A Critical state & 5-part XAI Recommendation triggered"}
+        return {"status": "ok", "message": "🚨 Critical Crisis Activated: Gate A [CRITICAL 0.92] & Corridor B [WARNING 0.68]"}
 
     else:
         raise HTTPException(status_code=400, detail=f"Unknown scenario ID: {scenario_id}")

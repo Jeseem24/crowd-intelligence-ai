@@ -451,6 +451,12 @@ function handleMessage(data) {
         case 'intervention_outcome':
             handleInterventionOutcome(data);
             break;
+        case 'citizen_report_alert':
+            handleCitizenReportAlert(data.report);
+            break;
+        case 'citizen_report_acknowledged':
+            handleCitizenReportAcknowledged(data.report_id);
+            break;
         case 'heartbeat':
         case 'pong':
             break;
@@ -513,62 +519,93 @@ function updateConnectionStatus(connected) {
 }
 
 // ============================================================
-// ZONE TILES
+// ZONE TILES (High-End Real-Time Command Telemetry Matrix)
 // ============================================================
 function updateZoneTiles(zones) {
     const container = document.getElementById('zone-tiles');
+    if (!container) return;
     container.innerHTML = '';
 
-    // Sort by risk (highest first)
-    const sorted = [...zones].sort((a, b) => b.risk_score - a.risk_score);
+    const ZONE_METAS = {
+        gate_a: { tag: 'CAM 01', shortName: 'Main Concourse', subtitle: 'Central Inflow & Ticketing', maxCap: 240 },
+        corridor_b: { tag: 'CAM 02', shortName: 'North Passage', subtitle: 'Platform Access Artery', maxCap: 160 },
+        exit_c: { tag: 'CAM 03', shortName: 'Platform Surge', subtitle: 'Surge Chokepoint & Egress', maxCap: 130 },
+        ground_e: { tag: 'CAM 04', shortName: 'Festival Plaza', subtitle: 'Arena Buffer & Assembly', maxCap: 600 },
+        counter_d: { tag: 'CAM 05', shortName: 'SkyCity Wickets', subtitle: 'Ticketing & Info Hall', maxCap: 150 },
+    };
+
+    // Prioritize Critical & Warning zones first, then highest risk score
+    const sorted = [...zones].sort((a, b) => {
+        const priority = { 'Critical': 4, 'Warning': 3, 'Watch': 2, 'Safe': 1 };
+        const pDiff = (priority[b.state] || 0) - (priority[a.state] || 0);
+        return pDiff !== 0 ? pDiff : b.risk_score - a.risk_score;
+    });
 
     for (const z of sorted) {
+        const meta = ZONE_METAS[z.zone_id] || { tag: 'ZONE', shortName: z.zone_name, subtitle: `${z.zone_type} · ${z.floor_area_sqm} m²`, maxCap: 200 };
         const stateClass = z.state.toLowerCase();
-        const densityPct = Math.min(100, Math.max(6, Math.round((z.density / 2.5) * 100)));
+        const densityVal = z.density.toFixed(2);
+        const densityPct = Math.min(100, Math.max(5, Math.round((z.density / 2.5) * 100)));
+        const occupancyPct = Math.min(100, Math.round((z.person_count / meta.maxCap) * 100));
         const trendSymbol = z.trend_slope > 0.005 ? '↑' : z.trend_slope < -0.005 ? '↓' : '→';
         const trendSign = z.trend_slope >= 0 ? '+' : '';
+        const trendFormatted = `${trendSymbol} ${trendSign}${z.trend_slope.toFixed(3)}`;
+
+        let stateText = z.state.toUpperCase();
+        if (z.state === 'Critical') stateText = 'CRITICAL';
+        else if (z.state === 'Warning') stateText = 'SURGE';
+        else if (z.state === 'Watch') stateText = 'WATCH';
+        else stateText = 'NOMINAL';
+
         const tile = document.createElement('div');
         tile.className = `zone-tile ${stateClass}`;
         tile.innerHTML = `
-            <div class="tile-header">
-                <div>
-                    <div class="tile-name">${z.zone_name}</div>
-                    <div class="tile-type">${z.zone_type}</div>
+            <div class="tile-top-bar">
+                <div class="tile-tag-wrap">
+                    <span class="tile-cam-tag">${meta.tag}</span>
+                    <span class="tile-title-clean">${meta.shortName}</span>
                 </div>
-                <div class="tile-badges">
-                    <span class="badge badge-priority">w=${z.priority_weight}</span>
-                    ${z.behaviour_flag !== 'normal' ? `<span class="badge badge-behaviour ${z.behaviour_flag}">${z.behaviour_flag}</span>` : ''}
-                    ${z.active_reports > 0 ? `<span class="badge badge-report">📢 ${z.active_reports} report${z.active_reports > 1 ? 's' : ''}</span>` : ''}
-                    ${z.sensor_status !== 'ok' ? `<span class="badge badge-sensor">⚠ Sensor</span>` : ''}
+                <div class="tile-status-pill ${stateClass}">
+                    <span class="status-dot"></span>
+                    <span>${stateText}</span>
                 </div>
             </div>
-            <div class="density-progress-wrap">
-                <div class="density-bar-track">
-                    <div class="density-bar-fill ${stateClass}" style="width: ${densityPct}%"></div>
+
+            <div class="tile-subtitle-clean">${meta.subtitle}</div>
+
+            <div class="tile-hero-metric">
+                <div class="hero-metric-left">
+                    <div class="hero-density-val">${densityVal}<span class="hero-density-unit"> p/m²</span></div>
+                    <div class="hero-density-label">DENSITY</div>
+                </div>
+                <div class="hero-metric-right">
+                    <div class="hero-occupancy-val">${z.person_count}<span class="hero-occupancy-max">/${meta.maxCap}</span></div>
+                    <div class="hero-occupancy-label">${occupancyPct}% CAP</div>
                 </div>
             </div>
-            <div class="tile-metrics">
-                <div class="metric">
-                    <div class="metric-value">${z.person_count}</div>
-                    <div class="metric-label">Occupancy</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-value">${z.density.toFixed(2)}</div>
-                    <div class="metric-label">p/m² Density</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-value">${z.risk_score.toFixed(3)}</div>
-                    <div class="metric-label">Risk Index</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-value">${trendSymbol} ${trendSign}${z.trend_slope.toFixed(3)}</div>
-                    <div class="metric-label">Velocity (/s)</div>
+
+            <div class="tile-gauge-wrap">
+                <div class="tile-gauge-track">
+                    <div class="tile-gauge-fill ${stateClass}" style="width: ${densityPct}%"></div>
                 </div>
             </div>
-            <div class="tile-state">
-                <span class="state-label ${stateClass}">${z.state}</span>
-                ${z.time_to_critical_s ? `<span class="ttc-badge">⚠ Critical in ~${z.time_to_critical_s}s</span>` : ''}
+
+            <div class="tile-footer-kpis">
+                <div class="kpi-item">
+                    <span class="kpi-lbl">RISK</span>
+                    <span class="kpi-val ${stateClass}">${z.risk_score.toFixed(2)}</span>
+                </div>
+                <div class="kpi-item">
+                    <span class="kpi-lbl">FLOW</span>
+                    <span class="kpi-val">${trendFormatted}</span>
+                </div>
+                <div class="kpi-item kpi-report-item" onclick="switchToReportsTab('${z.zone_id}')" title="Click to view & manage citizen hazard reports for ${meta.shortName}" style="cursor: pointer;">
+                    <span class="kpi-lbl">REPORTS ↗</span>
+                    <span class="kpi-val ${z.active_reports > 0 ? 'alert' : ''}">${z.active_reports > 0 ? `📢 ${z.active_reports}` : '0'}</span>
+                </div>
             </div>
+
+            ${z.time_to_critical_s ? `<div class="tile-ttc-warning">⚠️ TTC Escalation ~${Math.round(z.time_to_critical_s)}s</div>` : ''}
         `;
         container.appendChild(tile);
     }
@@ -718,14 +755,29 @@ function renderRecommendations() {
     const recPanelHeader = document.querySelector('#rec-panel .panel-title');
 
     if (!state.recommendations || state.recommendations.length === 0) {
-        container.innerHTML = '<div class="empty-state">Awaiting real-time telemetry from active vision feed...</div>';
+        container.innerHTML = `
+            <div class="nominal-state">
+                <span class="nominal-icon">🟢</span>
+                <div class="nominal-text">
+                    <strong>ALL VENUE SECTORS NOMINAL</strong>
+                    <p>Real-time pedestrian densities are well within NFPA safety limits (&lt; 0.50 p/m²). Autonomous directive engine in active sentinel mode.</p>
+                </div>
+            </div>`;
         if (recPanelHeader) {
-            recPanelHeader.innerHTML = '🤖 AI Tactical Recommendations <span class="badge" style="background:rgba(255,255,255,0.06);color:var(--text-muted)">0 PENDING</span>';
+            recPanelHeader.innerHTML = '🤖 AI Tactical Directives <span class="badge" style="background:rgba(16,185,129,0.15);color:#10b981;border:1px solid rgba(16,185,129,0.3)">🟢 ALL SAFE</span>';
         }
         return;
     }
 
     const openCount = state.recommendations.filter(r => r.status === 'open').length;
+    const tabRecBadge = document.getElementById('tab-rec-count');
+    if (tabRecBadge) {
+        tabRecBadge.textContent = openCount > 0 ? `${openCount} Action${openCount > 1 ? 's' : ''}` : 'Clear';
+        tabRecBadge.style.background = openCount > 0 ? 'rgba(249,115,22,0.2)' : 'rgba(16,185,129,0.18)';
+        tabRecBadge.style.color = openCount > 0 ? '#f97316' : '#10b981';
+        tabRecBadge.style.borderColor = openCount > 0 ? 'rgba(249,115,22,0.4)' : 'rgba(16,185,129,0.3)';
+    }
+
     if (recPanelHeader) {
         const badgeStyle = openCount > 0 
             ? 'background:rgba(249,115,22,0.18);color:#f97316;border:1px solid rgba(249,115,22,0.4);font-family:\'JetBrains Mono\',monospace;' 
@@ -918,6 +970,7 @@ async function handleAlertAction(alertId, action) {
         console.error('Failed to update alert:', e);
     }
 }
+window.handleAlertAction = handleAlertAction;
 
 function updateAlertAction(data) {
     const rec = state.recommendations.find(r => r.alert_id === data.alert_id);
@@ -1198,21 +1251,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 for (const a of latestPerZone) {
-                    const normStatus = (a.operator_action === 'approved' || a.operator_action === 'rejected')
-                        ? a.operator_action
-                        : 'open';
+                    const isClosed = a.resolved_at || ['approved', 'rejected', 'resolved'].includes(a.operator_action);
+                    if (isClosed) continue; // Skip resolved historical alerts
 
                     addRecommendation({
                         alert_id: a.alert_id,
                         zone_id: a.zone_id,
-                        zone_name: a.zone_id === 'gate_a' ? 'Main Entry Gate A' : (a.zone_id === 'corridor_b' ? 'Corridor B' : a.zone_id),
+                        zone_name: a.zone_id === 'gate_a' ? 'Main Concourse' : (a.zone_id === 'corridor_b' ? 'North Passage' : a.zone_id),
                         severity: a.level,
                         observation: a.observation,
                         trend: a.trend,
                         prediction: a.prediction,
                         recommendation: a.recommendation,
                         expected_benefit: a.expected_benefit,
-                        status: normStatus,
+                        status: 'open',
                         source: a.source
                     });
                 }
@@ -1238,26 +1290,39 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Mute
-    document.getElementById('mute-btn').addEventListener('click', () => {
-        state.muted = !state.muted;
-        document.getElementById('mute-btn').textContent = state.muted ? '🔇' : '🔊';
-    });
+    // Mute (if button exists)
+    const muteBtn = document.getElementById('mute-btn');
+    if (muteBtn) {
+        muteBtn.addEventListener('click', () => {
+            state.muted = !state.muted;
+            muteBtn.textContent = state.muted ? '🔇' : '🔊';
+        });
+    }
 
     // Alert dismiss
-    document.getElementById('alert-dismiss').addEventListener('click', () => {
-        document.getElementById('alert-banner').classList.add('hidden');
-    });
+    const alertDismissBtn = document.getElementById('alert-dismiss');
+    if (alertDismissBtn) {
+        alertDismissBtn.addEventListener('click', () => {
+            document.getElementById('alert-banner')?.classList.add('hidden');
+        });
+    }
 
     // QR modal
-    document.getElementById('qr-btn').addEventListener('click', () => {
-        document.getElementById('qr-modal').classList.remove('hidden');
-        // Fetch QR URL
-        fetch('/api/qr').then(r => {
-            const url = r.headers.get('X-QR-URL') || `http://${location.hostname}:${location.port}/report.html`;
-            document.getElementById('qr-url').textContent = url;
-        }).catch(() => {});
-    });
+    const qrBtn = document.getElementById('qr-btn');
+    if (qrBtn) {
+        qrBtn.addEventListener('click', () => {
+            soundEngine.playClick();
+            const qrModal = document.getElementById('qr-modal');
+            const qrImg = document.getElementById('qr-image');
+            if (qrImg) qrImg.src = `/api/qr?t=${Date.now()}`;
+            if (qrModal) qrModal.classList.remove('hidden');
+            fetch('/api/qr').then(r => {
+                const url = r.headers.get('X-QR-URL') || `${window.location.protocol}//${window.location.hostname}:${window.location.port}/report.html`;
+                const qrUrlEl = document.getElementById('qr-url');
+                if (qrUrlEl) qrUrlEl.innerHTML = `<a href="${url}" target="_blank" style="color:#38bdf8;text-decoration:underline;">${url}</a>`;
+            }).catch(() => {});
+        });
+    }
     document.getElementById('qr-close').addEventListener('click', () => {
         document.getElementById('qr-modal').classList.add('hidden');
     });
@@ -1279,6 +1344,37 @@ document.addEventListener('DOMContentLoaded', () => {
                 toast.textContent = data.message || `Scenario ${scenarioId} executed`;
                 setTimeout(() => toast.classList.add('hidden'), 4500);
             }
+
+            // Immediately pull new state and render without waiting for next tick
+            try {
+                const sResp = await fetch('/api/state');
+                if (sResp.ok) {
+                    const sData = await sResp.json();
+                    sData.type = 'venue_state';
+                    handleMessage(sData);
+                }
+                const aResp = await fetch('/api/alerts?limit=10');
+                if (aResp.ok) {
+                    const alerts = await aResp.json();
+                    if (Array.isArray(alerts) && alerts.length > 0) {
+                        for (const a of alerts) {
+                            addRecommendation({
+                                alert_id: a.alert_id,
+                                zone_id: a.zone_id,
+                                zone_name: a.zone_id === 'gate_a' ? 'Main Concourse' : (a.zone_id === 'corridor_b' ? 'North Passage' : (a.zone_id === 'exit_c' ? 'Platform Surge Gates' : a.zone_id)),
+                                severity: a.level,
+                                observation: a.observation,
+                                trend: a.trend,
+                                prediction: a.prediction,
+                                recommendation: a.recommendation,
+                                expected_benefit: a.expected_benefit,
+                                status: 'open',
+                                source: a.source
+                            });
+                        }
+                    }
+                }
+            } catch (err) {}
         } catch (e) {
             if (toast) {
                 toast.textContent = `Scenario trigger error: ${e.message}`;
@@ -1299,9 +1395,42 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnCritical = document.getElementById('demo-critical');
     const btnReset = document.getElementById('demo-reset');
 
-    function highlightScenarioButton(btn) {
-        document.querySelectorAll('.cmd-scenario-buttons .cmd-btn').forEach(b => b.classList.remove('active'));
-        if (btn) btn.classList.add('active');
+    // Master Tactical Crisis Toggle Switch
+    const masterCrisisToggle = document.getElementById('master-crisis-toggle');
+    const crisisToggleText = document.getElementById('crisis-toggle-text');
+    let isCrisisActive = false;
+
+    window.setCrisisActiveState = function(active) {
+        isCrisisActive = active;
+        if (masterCrisisToggle) {
+            if (active) {
+                masterCrisisToggle.classList.add('active');
+                if (crisisToggleText) crisisToggleText.textContent = '🟢 RESET TO SAFE BASELINE';
+                masterCrisisToggle.title = 'Reset venue to safe operational baseline';
+            } else {
+                masterCrisisToggle.classList.remove('active');
+                if (crisisToggleText) crisisToggleText.textContent = '🚨 TRIGGER CRITICAL CRISIS';
+                masterCrisisToggle.title = 'Execute High-Impact Critical Crisis Sandbox Simulation';
+            }
+        }
+    };
+
+    if (masterCrisisToggle) {
+        masterCrisisToggle.addEventListener('click', async () => {
+            soundEngine.playClick();
+            if (!isCrisisActive) {
+                // Activate Critical Crisis
+                window.setCrisisActiveState(true);
+                await triggerScenario('critical');
+                soundEngine.playAlert();
+                if (cognitivePipeline) cognitivePipeline.pulseObservation();
+            } else {
+                // Return to Safe Baseline
+                window.setCrisisActiveState(false);
+                await triggerScenario('reset');
+                soundEngine.playClick();
+            }
+        });
     }
 
     if (btnNormal) btnNormal.addEventListener('click', () => { highlightScenarioButton(btnNormal); triggerScenario('normal'); });
@@ -1388,9 +1517,9 @@ document.addEventListener('DOMContentLoaded', () => {
         generated_at: new Date().toISOString(),
         content: `### Executive Operational Summary
 - **Venue Operational Status**: **NORMAL / GREEN**
-- **Venue**: **Grand Central Terminal, NYC (MTA Transit Interchange)**
-- **Sectors Monitored**: 5 Integrated Sectors under active YOLOv8 computer vision & hydrodynamic density calculus.
-- **Egress & Safety Margin**: **100% NFPA 101 Compliant**. Shuttle Passage & Graybar arteries clear; free-flow capacity across all Main Concourse gates.
+- **Venue**: **Adelaide Metropolitan Transit & Festival Plaza Interchange**
+- **Sectors Monitored**: 5 Integrated Sectors under active YOLOv8 stationary CCTV perception & hydrodynamic density calculus.
+- **Egress & Safety Margin**: **100% NFPA 101 Compliant**. North Platform Passage & Festival Plaza arteries clear; free-flow capacity across all Concourse turnstiles.
 - **Dynamic Stewards**: 12 Active Responders stationed across all key strategic choke points. Zero active critical directives.`
     };
     updateBriefing(DEFAULT_SAFETY_BRIEFING);
@@ -1531,18 +1660,145 @@ document.addEventListener('DOMContentLoaded', () => {
     // Multi-Camera Tactical Channel Selector & Blueprint FOV Frustum Synchronizer
     const camButtons = document.querySelectorAll('.cctv-cam-btn');
     const camTitleEl = document.getElementById('cctv-cam-title');
+    const webcamBtn = document.getElementById('btn-webcam-toggle');
     let currentChannel = 'cam1';
 
     const CAM_TITLES = {
-        cam1: 'CAM 01 // [SEC-01] MAIN CONCOURSE CENTRAL CLOCK & PLATFORMS',
-        cam2: 'CAM 02 // [SEC-02] GRAYBAR PASSAGE EAST ARTERY',
-        cam3: 'CAM 03 // [SEC-03] SHUTTLE PASSAGE & LOWER EGRESS',
-        cam4: 'CAM 04 // [SEC-04] VANDERBILT HALL & 42ND ST PASSAGE',
-        quad: 'AEGIS C2 // GRAND CENTRAL TERMINAL QUAD CCTV MATRIX // 4 FEEDS',
+        cam1: 'CAM 01 // [SEC-01] CONCOURSE MEZZANINE CEILING SURVEILLANCE',
+        cam2: 'CAM 02 // [SEC-02] NORTH PLATFORM PASSAGE ARTERY',
+        cam3: 'CAM 03 // [SEC-03] PLATFORM SURGE GATES & WICKETS',
+        cam4: 'CAM 04 // [SEC-04] FESTIVAL PLAZA MAST DOME (EXTERIOR)',
+        quad: 'AEGIS C2 // ADELAIDE METROPOLITAN TRANSIT 4-CHANNEL CCTV MATRIX',
+        webcam: 'LIVE WEBCAM // LOCAL OPERATOR TERMINAL (REAL-TIME YOLOV8 DETECTION)',
     };
 
+    // Laptop Webcam Live Streaming Engine
+    let webcamStream = null;
+    let webcamInterval = null;
+    let isWebcamActive = false;
+    let webcamActiveBlobUrl = null;
+
+    async function startWebcam() {
+        const video = document.getElementById('webcam-video');
+        const canvas = document.getElementById('webcam-capture-canvas');
+        const streamImg = document.getElementById('cctv-stream-img');
+
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            alert('Webcam access not supported in this browser environment.');
+            return;
+        }
+
+        try {
+            if (webcamBtn) {
+                webcamBtn.textContent = '⏳ INITIATING CAM...';
+            }
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { width: { ideal: 640 }, height: { ideal: 360 } }
+            });
+            webcamStream = stream;
+            if (video) {
+                video.srcObject = stream;
+                await video.play();
+            }
+
+            isWebcamActive = true;
+            currentChannel = 'webcam';
+
+            camButtons.forEach(b => b.classList.toggle('active', b.dataset.cam === 'webcam'));
+            if (webcamBtn) {
+                webcamBtn.innerHTML = '🔴 STOP LIVE WEBCAM';
+                webcamBtn.classList.add('active', 'webcam-streaming');
+            }
+            if (camTitleEl) {
+                camTitleEl.textContent = CAM_TITLES.webcam;
+            }
+
+            const ctx = canvas ? canvas.getContext('2d') : null;
+            let isPosting = false;
+
+            webcamInterval = setInterval(() => {
+                if (!isWebcamActive || isPosting) return;
+                if (!video || video.readyState < 2 || !ctx || !canvas) return;
+
+                ctx.drawImage(video, 0, 0, 640, 360);
+                isPosting = true;
+
+                canvas.toBlob(async (blob) => {
+                    if (!blob || !isWebcamActive) {
+                        isPosting = false;
+                        return;
+                    }
+                    try {
+                        const resp = await fetch('/api/webcam/frame', {
+                            method: 'POST',
+                            body: blob
+                        });
+                        if (resp.ok && isWebcamActive) {
+                            const annotatedBlob = await resp.blob();
+                            if (webcamActiveBlobUrl) {
+                                URL.revokeObjectURL(webcamActiveBlobUrl);
+                            }
+                            webcamActiveBlobUrl = URL.createObjectURL(annotatedBlob);
+                            if (streamImg && currentChannel === 'webcam') {
+                                streamImg.src = webcamActiveBlobUrl;
+                            }
+                        }
+                    } catch (err) {
+                        console.error('Webcam frame upload error:', err);
+                    } finally {
+                        isPosting = false;
+                    }
+                }, 'image/jpeg', 0.8);
+            }, 90); // ~11-12 FPS real-time YOLOv8 bounding overlay
+        } catch (e) {
+            console.error('Webcam permission error:', e);
+            alert('Camera access denied or device unavailable: ' + e.message);
+            stopWebcam();
+        }
+    }
+
+    function stopWebcam() {
+        isWebcamActive = false;
+        if (webcamInterval) {
+            clearInterval(webcamInterval);
+            webcamInterval = null;
+        }
+        if (webcamStream) {
+            webcamStream.getTracks().forEach(t => t.stop());
+            webcamStream = null;
+        }
+        if (webcamActiveBlobUrl) {
+            URL.revokeObjectURL(webcamActiveBlobUrl);
+            webcamActiveBlobUrl = null;
+        }
+        const video = document.getElementById('webcam-video');
+        if (video) video.srcObject = null;
+
+        if (webcamBtn) {
+            webcamBtn.innerHTML = '📹 LIVE WEBCAM';
+            webcamBtn.classList.remove('active', 'webcam-streaming');
+        }
+    }
+
     function selectCameraChannel(camId) {
+        if (!camId) return;
         soundEngine.playClick();
+
+        if (camId === 'webcam') {
+            if (!isWebcamActive) {
+                startWebcam();
+            } else {
+                stopWebcam();
+                selectCameraChannel('cam1');
+            }
+            return;
+        }
+
+        // If currently in webcam mode, deactivate webcam before switching feeds
+        if (isWebcamActive) {
+            stopWebcam();
+        }
+
         currentChannel = camId;
 
         // Update CCTV button states
@@ -1574,7 +1830,6 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         if (camId === 'quad') {
-            // In Quad mode, light up all 4 sightlines simultaneously!
             Object.values(allCones).forEach(c => c && c.classList.add('active'));
             Object.values(allGlyphs).forEach(g => g && g.classList.add('active'));
         } else {
@@ -1588,7 +1843,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     camButtons.forEach(btn => {
-        btn.addEventListener('click', () => selectCameraChannel(btn.dataset.cam));
+        btn.addEventListener('click', () => {
+            const cam = btn.dataset.cam || (btn.id === 'btn-webcam-toggle' ? 'webcam' : 'cam1');
+            selectCameraChannel(cam);
+        });
     });
 
     // Also bind camera glyphs on the architectural map
@@ -1613,20 +1871,28 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btnSplit) btnSplit.classList.toggle('active', mode === 'split');
 
         const streamImg = document.getElementById('cctv-stream-img');
+        const camDock = document.getElementById('cctv-cam-selector');
+        const mapDock = document.getElementById('map-layer-dock');
 
         if (mode === 'map') {
             if (mapSub) mapSub.classList.remove('hidden');
             if (cctvSub) cctvSub.classList.add('hidden');
             if (spatialWrap) spatialWrap.classList.remove('split');
+            if (camDock) camDock.classList.add('hidden');
+            if (mapDock) mapDock.classList.remove('hidden');
         } else if (mode === 'cctv') {
             if (mapSub) mapSub.classList.add('hidden');
             if (cctvSub) cctvSub.classList.remove('hidden');
             if (spatialWrap) spatialWrap.classList.remove('split');
+            if (camDock) camDock.classList.remove('hidden');
+            if (mapDock) mapDock.classList.add('hidden');
             if (streamImg) streamImg.src = `/api/video/feed?channel=${currentChannel}&t=` + Date.now();
         } else if (mode === 'split') {
             if (mapSub) mapSub.classList.remove('hidden');
             if (cctvSub) cctvSub.classList.remove('hidden');
             if (spatialWrap) spatialWrap.classList.add('split');
+            if (camDock) camDock.classList.remove('hidden');
+            if (mapDock) mapDock.classList.remove('hidden');
             if (streamImg) streamImg.src = `/api/video/feed?channel=${currentChannel}&t=` + Date.now();
         }
     }
@@ -1644,6 +1910,47 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnCctv) btnCctv.addEventListener('click', () => setActiveView('cctv'));
     if (btnSplit) btnSplit.addEventListener('click', () => setActiveView('split'));
 
+    // Collapsible Simulation Drawer
+    const toggleSimBtn = document.getElementById('toggle-sim-btn');
+    const cmdToolbar = document.getElementById('command-toolbar');
+    const simToggleText = document.getElementById('sim-toggle-text');
+    const simToggleArrow = document.getElementById('sim-toggle-arrow');
+
+    if (toggleSimBtn && cmdToolbar) {
+        toggleSimBtn.addEventListener('click', () => {
+            soundEngine.playClick();
+            const isCollapsed = cmdToolbar.classList.toggle('collapsed');
+            if (simToggleText) {
+                simToggleText.textContent = isCollapsed ? 'Simulation Drawer' : 'Hide Simulation Drawer';
+            }
+            if (simToggleArrow) {
+                simToggleArrow.textContent = isCollapsed ? '▾' : '▴';
+            }
+        });
+    }
+
+    // Tactical Operations Tab Switcher
+    const tacticalTabBtns = document.querySelectorAll('.tactical-tab-btn');
+    const tacticalTabPanes = document.querySelectorAll('.tactical-tab-pane');
+
+    tacticalTabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            soundEngine.playClick();
+            const targetTab = btn.dataset.tab;
+            tacticalTabBtns.forEach(b => b.classList.toggle('active', b === btn));
+            tacticalTabPanes.forEach(pane => {
+                pane.classList.toggle('hidden', pane.id !== targetTab);
+                pane.classList.toggle('active', pane.id === targetTab);
+            });
+            if (targetTab === 'tab-citizen-reports') {
+                refreshCitizenReportsList();
+            }
+        });
+    });
+
+    // Default to spacious CCTV view on load
+    setActiveView('cctv');
+
     // Fallback polling if WebSocket fails
     setInterval(async () => {
         if (!state.connected) {
@@ -1657,5 +1964,387 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (e) {}
         }
     }, 3000);
+
+    // Initial load of citizen reports
+    refreshCitizenReportsList();
 });
+
+// ============================================================
+// DEDICATED CITIZEN INCIDENT REPORTS TAB & MODAL SYSTEM
+// ============================================================
+state.citizenReports = [];
+state.currentReportFilter = 'all';
+state.tabReportFilter = 'all';
+state.tabStatusFilter = 'all';
+
+const ZONE_READABLE_NAMES = {
+    gate_a: 'Main Concourse (CAM 01)',
+    corridor_b: 'North Passage (CAM 02)',
+    exit_c: 'Platform Surge (CAM 03)',
+    ground_e: 'Festival Plaza (CAM 04)',
+    counter_d: 'SkyCity Wickets (CAM 05)'
+};
+
+// --- Switch Directly to Dedicated Tab Rail ---
+window.switchToReportsTab = function(zoneFilter = 'all') {
+    soundEngine.playClick();
+    
+    // Switch active tactical tab button
+    document.querySelectorAll('.tactical-tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === 'tab-citizen-reports');
+    });
+
+    // Switch active tactical tab pane
+    document.querySelectorAll('.tactical-tab-pane').forEach(pane => {
+        pane.classList.toggle('hidden', pane.id !== 'tab-citizen-reports');
+        pane.classList.toggle('active', pane.id === 'tab-citizen-reports');
+    });
+
+    // Apply zone filter
+    filterTabReports(zoneFilter);
+
+    // Smooth scroll into view
+    const panel = document.getElementById('citizen-reports-panel');
+    if (panel) panel.scrollIntoView({ behavior: 'smooth' });
+};
+
+window.filterTabReports = function(zoneId) {
+    state.tabReportFilter = zoneId;
+    soundEngine.playClick();
+
+    document.querySelectorAll('.citizen-tab-filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.filter === zoneId);
+    });
+
+    renderDedicatedReportsStream();
+};
+
+window.toggleReportStatusFilter = function(status) {
+    state.tabStatusFilter = status;
+    soundEngine.playClick();
+
+    document.getElementById('btn-status-all')?.classList.toggle('active', status === 'all');
+    document.getElementById('btn-status-active')?.classList.toggle('active', status === 'active');
+
+    renderDedicatedReportsStream();
+};
+
+window.openCitizenReportsModal = async function(zoneFilter = 'all') {
+    state.currentReportFilter = zoneFilter;
+    const modal = document.getElementById('citizen-reports-modal');
+    if (modal) modal.classList.remove('hidden');
+    soundEngine.playClick();
+    
+    document.querySelectorAll('.citizen-filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.filter === zoneFilter);
+    });
+
+    await refreshCitizenReportsList();
+};
+
+window.closeCitizenReportsModal = function() {
+    const modal = document.getElementById('citizen-reports-modal');
+    if (modal) modal.classList.add('hidden');
+    soundEngine.playClick();
+};
+
+window.filterCitizenReports = function(zoneId) {
+    state.currentReportFilter = zoneId;
+    soundEngine.playClick();
+    document.querySelectorAll('.citizen-filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.filter === zoneId);
+    });
+    renderCitizenReportsList();
+};
+
+async function refreshCitizenReportsList() {
+    try {
+        const resp = await fetch('/api/reports/citizen?limit=60');
+        if (resp.ok) {
+            state.citizenReports = await resp.json();
+            renderCitizenReportsList();
+            renderDedicatedReportsStream();
+            updateReportsBadges();
+        }
+    } catch (e) {
+        console.error('Failed to fetch citizen reports:', e);
+    }
+}
+
+function updateReportsBadges() {
+    const activeReports = (state.citizenReports || []).filter(r => r.processed === 0);
+    const badge = document.getElementById('tab-reports-badge');
+    const panelCount = document.getElementById('panel-reports-count');
+
+    if (badge) {
+        if (activeReports.length > 0) {
+            badge.style.display = 'inline-block';
+            badge.textContent = `${activeReports.length} NEW`;
+            badge.style.background = 'rgba(244, 63, 94, 0.25)';
+            badge.style.color = '#f43f5e';
+            badge.style.borderColor = 'rgba(244, 63, 94, 0.5)';
+        } else {
+            badge.style.display = 'inline-block';
+            badge.textContent = 'Nominal';
+            badge.style.background = 'rgba(16, 185, 129, 0.15)';
+            badge.style.color = '#34d399';
+            badge.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+        }
+    }
+
+    if (panelCount) {
+        panelCount.textContent = `${activeReports.length} ACTIVE BEACONS (${state.citizenReports.length} TOTAL ARCHIVE)`;
+        panelCount.className = activeReports.length > 0 ? 'panel-stat-pill alert' : 'panel-stat-pill';
+    }
+}
+
+// --- Render Dedicated Tab Stream ---
+function renderDedicatedReportsStream() {
+    const container = document.getElementById('dedicated-reports-stream');
+    if (!container) return;
+
+    let items = state.citizenReports || [];
+
+    // Filter by Zone
+    if (state.tabReportFilter && state.tabReportFilter !== 'all') {
+        items = items.filter(r => r.zone_id === state.tabReportFilter);
+    }
+
+    // Filter by Status
+    if (state.tabStatusFilter === 'active') {
+        items = items.filter(r => r.processed === 0);
+    }
+
+    if (items.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state" style="padding: 40px 16px; text-align: center;">
+                <span style="font-size: 32px; display: block; margin-bottom: 8px;">🕊️</span>
+                <span style="color: #94a3b8; font-weight: 700;">No ${state.tabStatusFilter === 'active' ? 'active' : ''} reports for ${state.tabReportFilter === 'all' ? 'any sector' : state.tabReportFilter.toUpperCase()}</span>
+                <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Citizen beacon telemetry reporting nominal conditions. Scan QR code to submit field observations.</div>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = items.map(r => {
+        const zoneTitle = ZONE_READABLE_NAMES[r.zone_id] || (r.zone_name ? `${r.zone_name} (${r.zone_id})` : r.zone_id.toUpperCase());
+        const timeFormatted = r.submitted_at ? r.submitted_at.replace('T', ' ').replace('Z', ' UTC') : 'Just now';
+        const isProcessed = r.processed === 1;
+
+        return `
+            <div class="dedicated-report-item ${isProcessed ? 'processed' : ''}" id="ded-report-${r.report_id}">
+                <div class="item-top-row">
+                    <span class="item-zone-tag">📍 ${zoneTitle}</span>
+                    <span class="item-time-tag">⏱️ ${timeFormatted}</span>
+                </div>
+                <div class="item-msg-text">"${escapeHtml(r.message || 'Hazard alert transmitted by field attendee')}"</div>
+                <div class="item-bottom-actions">
+                    <span class="report-status-badge ${isProcessed ? 'acknowledged' : 'active'}">
+                        ${isProcessed ? '✓ ACKNOWLEDGED BY OPERATOR' : '🚨 ACTIVE FIELD INCIDENT'}
+                    </span>
+                    <div class="item-action-btns">
+                        ${!isProcessed ? `
+                            <button class="btn-report-action btn-report-ack" onclick="acknowledgeReport(${r.report_id})">
+                                ✓ Acknowledge
+                            </button>
+                        ` : ''}
+                        <button class="btn-report-action" onclick="dispatchStewardsToZone('${r.zone_id}')" title="Allocate stewards to this chokepoint">
+                            👮 Stewards
+                        </button>
+                        <button class="btn-report-action" onclick="askCopilotAboutIncident('${r.zone_id}', '${escapeQuotes(r.message)}')" title="Ask AI Copilot for tactical assessment">
+                            💬 Ask Copilot
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Quick action to allocate stewards to reported zone
+window.dispatchStewardsToZone = function(zoneId) {
+    soundEngine.playClick();
+    // Switch to stewards tab
+    document.querySelectorAll('.tactical-tab-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.tab === 'tab-stewards');
+    });
+    document.querySelectorAll('.tactical-tab-pane').forEach(p => {
+        p.classList.toggle('hidden', p.id !== 'tab-stewards');
+        p.classList.toggle('active', p.id === 'tab-stewards');
+    });
+    const panel = document.getElementById('steward-panel');
+    if (panel) panel.scrollIntoView({ behavior: 'smooth' });
+
+    // Flash highlight on the corresponding zone card
+    setTimeout(() => {
+        document.querySelectorAll('.steward-card').forEach(card => {
+            const zName = (ZONE_READABLE_NAMES[zoneId] || zoneId).toLowerCase();
+            if (card.textContent.toLowerCase().includes(zoneId) || card.textContent.toLowerCase().includes('concourse') && zoneId === 'gate_a' || card.textContent.toLowerCase().includes('plaza') && zoneId === 'ground_e') {
+                card.style.borderColor = '#00f0ff';
+                card.style.boxShadow = '0 0 24px rgba(0, 240, 255, 0.45)';
+                setTimeout(() => {
+                    card.style.borderColor = '';
+                    card.style.boxShadow = '';
+                }, 3500);
+            }
+        });
+    }, 150);
+};
+
+// Quick action to send incident query to Copilot
+window.askCopilotAboutIncident = function(zoneId, reportMessage) {
+    soundEngine.playClick();
+    // Switch to copilot tab
+    document.querySelectorAll('.tactical-tab-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.tab === 'tab-copilot');
+    });
+    document.querySelectorAll('.tactical-tab-pane').forEach(p => {
+        p.classList.toggle('hidden', p.id !== 'tab-copilot');
+        p.classList.toggle('active', p.id === 'tab-copilot');
+    });
+    const panel = document.getElementById('chat-panel');
+    if (panel) panel.scrollIntoView({ behavior: 'smooth' });
+
+    const chatInput = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('chat-send');
+    if (chatInput) {
+        chatInput.value = `Analyze citizen report at ${zoneId.toUpperCase()}: "${reportMessage}". What immediate tactical measures should be deployed?`;
+        if (sendBtn) sendBtn.click();
+    }
+};
+
+// --- Render Modal List ---
+function renderCitizenReportsList() {
+    const listEl = document.getElementById('citizen-reports-list');
+    const totalEl = document.getElementById('citizen-report-total');
+    if (!listEl) return;
+
+    let filtered = state.citizenReports || [];
+    if (state.currentReportFilter && state.currentReportFilter !== 'all') {
+        filtered = filtered.filter(r => r.zone_id === state.currentReportFilter);
+    }
+
+    if (totalEl) {
+        totalEl.textContent = `${filtered.length} INCIDENT${filtered.length === 1 ? '' : 'S'} DISPLAYED (${state.citizenReports.length} ARCHIVED)`;
+    }
+
+    if (filtered.length === 0) {
+        listEl.innerHTML = `
+            <div class="empty-state" style="padding: 40px 20px; text-align: center;">
+                <span style="font-size: 32px; display: block; margin-bottom: 8px;">🕊️</span>
+                <span style="color: #94a3b8; font-weight: 600;">No incident reports logged for ${state.currentReportFilter === 'all' ? 'any sector' : state.currentReportFilter.toUpperCase()}</span>
+                <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Field sensors and citizen QR beacons reporting nominal safety conditions.</div>
+            </div>
+        `;
+        return;
+    }
+
+    listEl.innerHTML = filtered.map(r => {
+        const zoneTitle = ZONE_READABLE_NAMES[r.zone_id] || (r.zone_name ? `${r.zone_name} (${r.zone_id})` : r.zone_id.toUpperCase());
+        const timeFormatted = r.submitted_at ? r.submitted_at.replace('T', ' ').replace('Z', ' UTC') : 'Just now';
+        const isProcessed = r.processed === 1;
+
+        return `
+            <div class="citizen-report-card ${isProcessed ? 'processed' : ''}" id="report-card-${r.report_id}">
+                <div class="report-card-top">
+                    <span class="report-zone-pill">📍 ${zoneTitle}</span>
+                    <span class="report-time-pill">${timeFormatted}</span>
+                </div>
+                <div class="report-message-text">"${escapeHtml(r.message || 'Hazard alert transmitted by field attendee')}"</div>
+                <div class="report-card-bottom">
+                    <span class="report-status-badge ${isProcessed ? 'acknowledged' : 'active'}">
+                        ${isProcessed ? '✓ ACKNOWLEDGED BY OPERATOR' : '🚨 ACTIVE FIELD BEACON'}
+                    </span>
+                    ${!isProcessed ? `
+                        <button class="btn-ack-report" onclick="acknowledgeReport(${r.report_id})">
+                            ✓ Mark Acknowledged
+                        </button>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+window.acknowledgeReport = async function(reportId) {
+    try {
+        const resp = await fetch(`/api/reports/citizen/${reportId}/acknowledge`, { method: 'POST' });
+        if (resp.ok) {
+            const report = state.citizenReports.find(r => r.report_id === reportId);
+            if (report) report.processed = 1;
+            renderCitizenReportsList();
+            renderDedicatedReportsStream();
+            updateReportsBadges();
+            soundEngine.playAuthorizeChime();
+        }
+    } catch (e) {
+        console.error('Failed to acknowledge report:', e);
+    }
+};
+
+function handleCitizenReportAlert(report) {
+    soundEngine.playAlertAlarm();
+    showCitizenToast(report);
+    refreshCitizenReportsList();
+}
+
+function handleCitizenReportAcknowledged(reportId) {
+    const report = (state.citizenReports || []).find(r => r.report_id === reportId);
+    if (report) {
+        report.processed = 1;
+        renderCitizenReportsList();
+        renderDedicatedReportsStream();
+        updateReportsBadges();
+    }
+}
+
+function showCitizenToast(report) {
+    const container = document.getElementById('citizen-toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = 'citizen-toast';
+    const zoneTitle = report.zone_name || report.zone_id.replace('_', ' ').toUpperCase();
+    
+    toast.innerHTML = `
+        <div class="toast-header">
+            <span class="toast-title">📢 CITIZEN BEACON INGEST</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#f43f5e;font-weight:700;">LIVE</span>
+        </div>
+        <div class="toast-msg"><strong>[${escapeHtml(zoneTitle)}]:</strong> ${escapeHtml(report.message || 'Hazard incident reported')}</div>
+        <div class="toast-cta">👆 Click to open Reports Section & Dispatch</div>
+    `;
+
+    toast.onclick = () => {
+        switchToReportsTab(report.zone_id);
+        toast.remove();
+    };
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        if (toast.parentNode) {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(100%)';
+            setTimeout(() => toast.remove(), 400);
+        }
+    }, 9000);
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function escapeQuotes(str) {
+    if (!str) return '';
+    return String(str).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
+
 

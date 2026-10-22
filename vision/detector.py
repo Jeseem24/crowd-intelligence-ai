@@ -119,24 +119,23 @@ class CrowdDetector:
 
     def detect_persons(self, frame):
         """
-        Detect people across full depth of field (both foreground and distant crowd).
-        Combines primary full-frame inference with a focused background perspective slice.
+        High-Speed Pedestrian Detection (optimized for smooth real-time 20+ FPS streaming).
+        Runs fast single-pass inference at 480 imgsz.
         """
         if frame is None:
             return []
 
-        h, w = frame.shape[:2]
         all_dets = []
 
         if self.yolo_model is not None:
             try:
-                # 1. Full-frame pass (catches foreground and mid-range attendees)
+                # Fast single-pass inference at 384 imgsz (optimized for real-time CPU throughput)
                 res_full = self.yolo_model.predict(
                     source=frame,
                     classes=[0],
-                    conf=0.15,
+                    conf=0.20,
                     verbose=False,
-                    imgsz=640
+                    imgsz=384
                 )
                 if res_full and len(res_full) > 0:
                     for box in res_full[0].boxes:
@@ -150,39 +149,7 @@ class CrowdDetector:
                             "center": (int((x1 + x2) / 2), int((y1 + y2) / 2))
                         })
 
-                # 2. Deep-field perspective slice (focuses on far-distance pedestrian corridor)
-                cy1, cy2 = int(h * 0.28), int(h * 0.72)
-                cx1, cx2 = int(w * 0.22), int(w * 0.62)
-                crop = frame[cy1:cy2, cx1:cx2]
-
-                res_crop = self.yolo_model.predict(
-                    source=crop,
-                    classes=[0],
-                    conf=0.12,
-                    verbose=False,
-                    imgsz=480
-                )
-                if res_crop and len(res_crop) > 0:
-                    for box in res_crop[0].boxes:
-                        coords = box.xyxy[0].cpu().numpy()
-                        conf = float(box.conf[0].cpu().numpy())
-                        x1, y1, x2, y2 = map(int, coords)
-                        gx1, gy1, gx2, gy2 = x1 + cx1, y1 + cy1, x2 + cx1, y2 + cy1
-                        all_dets.append({
-                            "bbox": (gx1, gy1, gx2, gy2),
-                            "conf": conf,
-                            "foot": (int((gx1 + gx2) / 2), gy2),
-                            "center": (int((gx1 + gx2) / 2), int((gy1 + gy2) / 2))
-                        })
-
-                # Deduplicate overlapping detections with IoU
-                keep = []
-                all_dets.sort(key=lambda d: d["conf"], reverse=True)
-                for d in all_dets:
-                    if not any(self._box_iou(d["bbox"], k["bbox"]) > 0.45 for k in keep):
-                        keep.append(d)
-
-                return keep
+                return all_dets
             except Exception as e:
                 print(f"[Detector] YOLO error during inference: {e}")
 
@@ -236,8 +203,8 @@ class CrowdDetector:
         detections = self.detect_persons(frame)
         person_count = len(detections)
 
-        # Gate A floor area: 15.0 m² for the extended entrance walkway corridor
-        gate_a_area = 15.0
+        # Gate A floor area: 120.0 m² for the central railway station concourse
+        gate_a_area = 120.0
         gate_a_density = round(person_count / gate_a_area, 3)
 
         # Track history for Gate A velocity / surge detection
@@ -247,14 +214,15 @@ class CrowdDetector:
 
         hist = self.history["gate_a"]
         gate_a_behaviour = "normal"
-        if len(hist) >= 3:
+        if len(hist) >= 4:
             old_count = hist[0][1]
             time_diff = hist[-1][0] - hist[0][0]
             if time_diff > 0:
                 rate = (person_count - old_count) / time_diff
-                if rate >= 1.2 or person_count >= 10:
+                # Only flag surge if sudden rapid mass inflow (> 3.0 p/s) or high density (> 1.5 p/m²)
+                if rate >= 3.0 or gate_a_density >= 1.5:
                     gate_a_behaviour = "surge"
-                elif rate >= 0.6 or person_count >= 7:
+                elif rate >= 1.8 or gate_a_density >= 1.0:
                     gate_a_behaviour = "running"
 
         readings = [
@@ -269,8 +237,8 @@ class CrowdDetector:
             {
                 "zone_id": "corridor_b",
                 "timestamp": iso_time,
-                "person_count": max(1, int(person_count * 0.4)),
-                "density": round(max(1, int(person_count * 0.4)) / 10.0, 3),
+                "person_count": max(1, int(person_count * 0.35)),
+                "density": round(max(1, int(person_count * 0.35)) / 80.0, 3),
                 "behaviour_flag": "normal",
                 "sensor_status": "ok"
             },
@@ -278,7 +246,7 @@ class CrowdDetector:
                 "zone_id": "exit_c",
                 "timestamp": iso_time,
                 "person_count": 2,
-                "density": 0.25,
+                "density": round(2 / 65.0, 3),
                 "behaviour_flag": "normal",
                 "sensor_status": "ok"
             },
@@ -286,7 +254,7 @@ class CrowdDetector:
                 "zone_id": "counter_d",
                 "timestamp": iso_time,
                 "person_count": 3,
-                "density": 0.5,
+                "density": round(3 / 75.0, 3),
                 "behaviour_flag": "normal",
                 "sensor_status": "ok"
             },
@@ -294,7 +262,7 @@ class CrowdDetector:
                 "zone_id": "ground_e",
                 "timestamp": iso_time,
                 "person_count": 5,
-                "density": 0.15,
+                "density": round(5 / 300.0, 3),
                 "behaviour_flag": "normal",
                 "sensor_status": "ok"
             }
@@ -311,14 +279,14 @@ class CrowdDetector:
         out = frame.copy()
 
         # Risk level color scheme (BGR)
-        if behaviour == "surge" or density > 1.2:
+        if behaviour == "surge" or density > 1.5:
             theme_color = (40, 50, 240)    # Crimson Red
             status_text = "SURGE ESCALATION"
-        elif behaviour == "running" or density > 0.8:
+        elif behaviour in ("running", "counter_flow") or density > 0.9:
             theme_color = (20, 140, 255)   # Amber Orange
             status_text = "ELEVATED FLOW"
         else:
-            theme_color = (80, 220, 100)   # Emerald Green
+            theme_color = (80, 220, 100)   # Emerald Green (Normal Safe baseline)
             status_text = "NORMAL INFLOW"
 
         # 1. Subtle Ingress ROI Corridor
@@ -394,40 +362,7 @@ class CrowdDetector:
             cv2.circle(out, (foot_x, foot_y), 3, theme_color, -1, cv2.LINE_AA)
             cv2.circle(out, (foot_x, foot_y), 6, (255, 255, 255), 1, cv2.LINE_AA)
 
-        # 3. TOP HUD BAR (Clean, Dark, Glassmorphic, Zero Text Overlap)
-        hud_h = 34
-        hud_bg = out.copy()
-        cv2.rectangle(hud_bg, (0, 0), (w, hud_h), (12, 15, 24), -1)
-        cv2.addWeighted(hud_bg, 0.88, out, 0.12, 0, out)
-        cv2.line(out, (0, hud_h), (w, hud_h), (50, 60, 85), 1)
-
-        # Live indicator dot & camera title
-        cv2.circle(out, (14, 17), 5, (0, 0, 240), -1, cv2.LINE_AA)
-        cv2.putText(out, "LIVE", (24, 21), cv2.FONT_HERSHEY_SIMPLEX, 0.38, (240, 240, 250), 1, cv2.LINE_AA)
-        cv2.putText(out, "CAM 01 // MAIN ENTRY GATE A", (60, 21), cv2.FONT_HERSHEY_SIMPLEX, 0.42, (200, 210, 230), 1, cv2.LINE_AA)
-
-        # Model pill in center
-        model_tag = "YOLOv8n | 25 FPS"
-        (mw, _), _ = cv2.getTextSize(model_tag, cv2.FONT_HERSHEY_SIMPLEX, 0.35, 1)
-        mx = int(w * 0.52 - mw / 2)
-        cv2.putText(out, model_tag, (mx, 21), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (140, 160, 190), 1, cv2.LINE_AA)
-
-        # Right telemetry pills (Count, Density, Status)
-        right_text = f"COUNT: {person_count:02d}  |  {density:.2f} p/m2  |  {status_text}"
-        (rw, _), _ = cv2.getTextSize(right_text, cv2.FONT_HERSHEY_SIMPLEX, 0.38, 1)
-        cv2.putText(out, right_text, (w - rw - 14, 21), cv2.FONT_HERSHEY_SIMPLEX, 0.38, theme_color, 1, cv2.LINE_AA)
-
-        # 4. BOTTOM HUD BAR
-        bot_h = 24
-        bot_bg = out.copy()
-        cv2.rectangle(bot_bg, (0, h - bot_h), (w, h), (12, 15, 24), -1)
-        cv2.addWeighted(bot_bg, 0.88, out, 0.12, 0, out)
-        cv2.line(out, (0, h - bot_h), (w, h - bot_h), (50, 60, 85), 1)
-
-        ts_str = time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime())
-        cv2.putText(out, f"INFLOW PASSAGE CHOKEPOINT ROI  |  {ts_str}", (12, h - 8), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (130, 145, 170), 1, cv2.LINE_AA)
-        cv2.putText(out, "EDGE AI INGESTION ACTIVE", (w - 180, h - 8), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (80, 220, 120), 1, cv2.LINE_AA)
-
+        # Return frame with clean tactical bounding brackets and detections
         return out
 
     def process_frame(self, frame):

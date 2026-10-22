@@ -123,8 +123,8 @@ class CognitiveEngine:
                 continue
 
             elapsed = now - record["approved_at"]
-            # After 12-40s, evaluate efficacy
-            if elapsed >= 12.0:
+            # After 6-30s, evaluate efficacy
+            if elapsed >= 6.0:
                 base_den = record["baseline_density"]
                 curr_den = z["density"]
                 pct_change = ((curr_den - base_den) / max(0.1, base_den)) * 100.0

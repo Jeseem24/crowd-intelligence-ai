@@ -142,6 +142,11 @@ def init_db():
         )
     """)
 
+    cursor.execute("PRAGMA table_info(citizen_reports)")
+    existing_rep_cols = [row[1] for row in cursor.fetchall()]
+    if "processed" not in existing_rep_cols:
+        cursor.execute("ALTER TABLE citizen_reports ADD COLUMN processed INTEGER NOT NULL DEFAULT 0")
+
     # Seed zones from config
     if CONFIG_PATH.exists():
         with open(CONFIG_PATH, "r") as f:
@@ -196,13 +201,18 @@ def log_risk(zone_id, timestamp, person_count, density, behaviour_flag, risk_sco
 def save_alert(zone_id, level, recommendation="", observation="", trend="",
                prediction="", expected_benefit="", source="template"):
     """Save an alert/recommendation to the database. Returns alert_id."""
+    def _s(val):
+        if isinstance(val, (dict, list)):
+            return json.dumps(val)
+        return str(val) if val is not None else ""
+
     conn = get_db()
     cursor = conn.execute("""
         INSERT INTO alerts (zone_id, triggered_at, level, recommendation, observation,
                            trend, prediction, expected_benefit, source)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (zone_id, time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-          level, recommendation, observation, trend, prediction, expected_benefit, source))
+          _s(level), _s(recommendation), _s(observation), _s(trend), _s(prediction), _s(expected_benefit), _s(source)))
     alert_id = cursor.lastrowid
     conn.commit()
     conn.close()
@@ -294,5 +304,38 @@ def get_active_reports(zone_id, window_seconds=120):
     return row["cnt"] if row else 0
 
 
+def get_citizen_reports(zone_id=None, limit=30):
+    """Retrieve detailed citizen incident reports with zone metadata."""
+    conn = get_db()
+    if zone_id:
+        rows = conn.execute("""
+            SELECT r.*, z.zone_name, z.zone_type
+            FROM citizen_reports r
+            LEFT JOIN zones z ON r.zone_id = z.zone_id
+            WHERE r.zone_id = ?
+            ORDER BY r.submitted_at DESC
+            LIMIT ?
+        """, (zone_id, limit)).fetchall()
+    else:
+        rows = conn.execute("""
+            SELECT r.*, z.zone_name, z.zone_type
+            FROM citizen_reports r
+            LEFT JOIN zones z ON r.zone_id = z.zone_id
+            ORDER BY r.submitted_at DESC
+            LIMIT ?
+        """, (limit,)).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+def acknowledge_citizen_report(report_id: int):
+    """Mark a citizen report as acknowledged/processed."""
+    conn = get_db()
+    conn.execute("UPDATE citizen_reports SET processed = 1 WHERE report_id = ?", (report_id,))
+    conn.commit()
+    conn.close()
+
+
 if __name__ == "__main__":
     init_db()
+

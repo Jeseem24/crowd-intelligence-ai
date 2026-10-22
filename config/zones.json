@@ -2,58 +2,58 @@
   "zones": [
     {
       "zone_id": "gate_a",
-      "zone_name": "Main Concourse (Central Clock)",
+      "zone_name": "Main Concourse (Central Inflow)",
       "zone_type": "Concourse",
-      "priority_weight": 2.0,
-      "floor_area_sqm": 6.0,
-      "watch_threshold": 0.35,
-      "warning_threshold": 0.60,
+      "priority_weight": 1.25,
+      "floor_area_sqm": 120.0,
+      "watch_threshold": 0.40,
+      "warning_threshold": 0.65,
       "critical_threshold": 0.85,
-      "polygon": [[230, 155], [470, 155], [470, 305], [230, 305]]
+      "polygon": [[270, 160], [480, 160], [480, 310], [270, 310]]
     },
     {
       "zone_id": "corridor_b",
-      "zone_name": "Graybar Passage (East Artery)",
+      "zone_name": "North Passage (Platform Corridors)",
       "zone_type": "Passage",
-      "priority_weight": 1.75,
-      "floor_area_sqm": 8.0,
-      "watch_threshold": 0.35,
-      "warning_threshold": 0.60,
+      "priority_weight": 1.20,
+      "floor_area_sqm": 80.0,
+      "watch_threshold": 0.40,
+      "warning_threshold": 0.65,
       "critical_threshold": 0.85,
-      "polygon": [[490, 145], [770, 145], [770, 260], [490, 260]]
+      "polygon": [[495, 150], [765, 150], [765, 270], [495, 270]]
     },
     {
       "zone_id": "exit_c",
-      "zone_name": "Shuttle Passage (Subway Egress)",
+      "zone_name": "Platform Surge Gates",
       "zone_type": "Egress",
-      "priority_weight": 2.0,
-      "floor_area_sqm": 6.0,
-      "watch_threshold": 0.35,
-      "warning_threshold": 0.60,
+      "priority_weight": 1.25,
+      "floor_area_sqm": 65.0,
+      "watch_threshold": 0.40,
+      "warning_threshold": 0.65,
       "critical_threshold": 0.85,
-      "polygon": [[25, 270], [210, 270], [210, 445], [25, 445]]
+      "polygon": [[25, 260], [250, 260], [250, 445], [25, 445]]
     },
     {
       "zone_id": "counter_d",
-      "zone_name": "Biltmore Concourse Gates",
-      "zone_type": "Gates",
-      "priority_weight": 1.5,
-      "floor_area_sqm": 6.0,
-      "watch_threshold": 0.35,
-      "warning_threshold": 0.60,
+      "zone_name": "SkyCity & InfoCentre Wickets",
+      "zone_type": "Wickets",
+      "priority_weight": 1.10,
+      "floor_area_sqm": 75.0,
+      "watch_threshold": 0.40,
+      "warning_threshold": 0.65,
       "critical_threshold": 0.85,
-      "polygon": [[25, 55], [210, 55], [210, 255], [25, 255]]
+      "polygon": [[25, 55], [250, 55], [250, 245], [25, 245]]
     },
     {
       "zone_id": "ground_e",
-      "zone_name": "Vanderbilt Hall (Public Atrium)",
-      "zone_type": "Atrium",
+      "zone_name": "Festival Plaza Egress (Arena Buffer)",
+      "zone_type": "Plaza",
       "priority_weight": 1.0,
-      "floor_area_sqm": 20.0,
-      "watch_threshold": 0.35,
-      "warning_threshold": 0.60,
+      "floor_area_sqm": 300.0,
+      "watch_threshold": 0.40,
+      "warning_threshold": 0.65,
       "critical_threshold": 0.85,
-      "polygon": [[230, 325], [540, 325], [540, 445], [230, 445]]
+      "polygon": [[270, 325], [580, 325], [580, 445], [270, 445]]
     }
   ],
   "adjacency": [

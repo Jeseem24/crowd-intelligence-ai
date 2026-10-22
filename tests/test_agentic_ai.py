@@ -57,9 +57,9 @@ class TestAgenticAI(unittest.IsolatedAsyncioTestCase):
 
     async def test_cognitive_cycle_alert_dispatch(self):
         """Verifies that the agent automatically generates an advisory for Critical zones."""
-        # Inject critical surge at Gate A
-        self.risk_engine.ingest("gate_a", 12, 2.0, "surge", "ok")
-        self.risk_engine.ingest("gate_a", 12, 2.0, "surge", "ok")
+        # Inject critical surge at Gate A (density 5.0 reaches Critical state with 1.25 priority weight)
+        self.risk_engine.ingest("gate_a", 600, 5.0, "surge", "ok")
+        self.risk_engine.ingest("gate_a", 600, 5.0, "surge", "ok")
 
         # Run cognitive cycle
         await self.engine.run_cycle(force=True, trigger="test")

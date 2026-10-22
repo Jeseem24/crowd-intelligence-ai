@@ -32,41 +32,41 @@ class AutonomousVideoStreamer:
         self.running = False
         self.thread: Optional[threading.Thread] = None
 
-        self.venue_name = "GRAND CENTRAL TERMINAL // NYC METROPOLITAN TRANSIT"
+        self.venue_name = "ADELAIDE METROPOLITAN TRANSIT & FESTIVAL PLAZA"
         self.base_dir = Path(__file__).resolve().parent.parent / "data"
 
         self.channels = {
             "cam1": {
-                "file": "gct_cam1_main_concourse.mp4",
+                "file": "cctv_cam1.mp4",
                 "zone": "gate_a",
                 "tag": "CAM 01",
-                "location": "MAIN CONCOURSE // CENTRAL CLOCK & PLATFORMS",
-                "sensor": "PTZ-4K-01",
-                "optical": "FL: 4.8mm | FOV: 84° | ELEV: -24°",
+                "location": "MAIN CONCOURSE",
+                "sensor": "FIXED-01",
+                "optical": "6.0mm f/1.8",
             },
             "cam2": {
-                "file": "gct_cam2_graybar_passage.mp4",
+                "file": "cctv_cam2.mp4",
                 "zone": "corridor_b",
                 "tag": "CAM 02",
-                "location": "GRAYBAR PASSAGE // EAST EGRESS & STAIRS",
-                "sensor": "DOME-4K-02",
-                "optical": "FL: 6.2mm | FOV: 72° | ELEV: -18°",
+                "location": "NORTH PASSAGE",
+                "sensor": "FIXED-02",
+                "optical": "8.0mm f/2.0",
             },
             "cam3": {
-                "file": "gct_cam3_shuttle_passage.mp4",
+                "file": "cctv_cam3.mp4",
                 "zone": "exit_c",
                 "tag": "CAM 03",
-                "location": "SHUTTLE PASSAGE // LOWER CONCOURSE EGRESS",
-                "sensor": "FIXED-WIDE-03",
-                "optical": "FL: 2.8mm | FOV: 110° | ELEV: -12°",
+                "location": "PLATFORM GATES",
+                "sensor": "GANTRY-03",
+                "optical": "4.5mm f/1.6",
             },
             "cam4": {
-                "file": "gct_cam4_vanderbilt_hall.mp4",
+                "file": "cctv_cam4.mp4",
                 "zone": "ground_e",
                 "tag": "CAM 04",
-                "location": "VANDERBILT HALL // 42ND ST PASSAGE ARCHWAYS",
-                "sensor": "DOME-360-04",
-                "optical": "FL: 3.6mm | FOV: 96° | ELEV: -30°",
+                "location": "FESTIVAL PLAZA",
+                "sensor": "MAST-04",
+                "optical": "3.2mm f/2.2",
             },
         }
 
@@ -121,53 +121,52 @@ class AutonomousVideoStreamer:
         return img
 
     def _apply_unified_cctv_hud(self, frame: np.ndarray, info: dict, detected_count: int, timecode_str: str) -> np.ndarray:
-        """Overlays standardized defense CCTV surveillance HUD on every camera channel."""
+        """Overlays standardized defense CCTV surveillance HUD with strict non-overlapping offsets."""
         h, w = frame.shape[:2]
         out = frame.copy()
 
-        # Top Bar Background
-        cv2.rectangle(out, (0, 0), (w, 30), (8, 10, 16), -1)
-        cv2.line(out, (0, 30), (w, 30), (45, 55, 75), 1)
+        # Top Bar (Compact 26px, dark slate)
+        cv2.rectangle(out, (0, 0), (w, 26), (10, 12, 18), -1)
+        cv2.line(out, (0, 26), (w, 26), (40, 50, 70), 1)
 
-        # Bottom Bar Background
-        cv2.rectangle(out, (0, h - 26), (w, h), (8, 10, 16), -1)
-        cv2.line(out, (0, h - 26), (w, h - 26), (45, 55, 75), 1)
+        # Bottom Bar (Compact 22px, dark slate)
+        cv2.rectangle(out, (0, h - 22), (w, h), (10, 12, 18), -1)
+        cv2.line(out, (0, h - 22), (w, h - 22), (40, 50, 70), 1)
 
-        # REC Dot & Camera Header
-        cv2.circle(out, (16, 15), 5, (0, 0, 240), -1)
-        cv2.putText(out, "REC", (26, 19), cv2.FONT_HERSHEY_SIMPLEX, 0.38, (240, 240, 255), 1, cv2.LINE_AA)
+        # Top Left: REC dot + Camera Tag & Location
+        cv2.circle(out, (14, 13), 4, (0, 0, 240), -1)
+        cv2.putText(out, "REC", (22, 17), cv2.FONT_HERSHEY_SIMPLEX, 0.36, (240, 240, 255), 1, cv2.LINE_AA)
         
-        header_text = f"[{info['tag']}] {info['location']} // {info['sensor']}"
-        cv2.putText(out, header_text, (65, 19), cv2.FONT_HERSHEY_SIMPLEX, 0.40, (0, 230, 255), 1, cv2.LINE_AA)
+        cam_label = f"[{info['tag']}] {info['location']}"
+        cv2.putText(out, cam_label, (58, 17), cv2.FONT_HERSHEY_SIMPLEX, 0.38, (0, 230, 255), 1, cv2.LINE_AA)
 
-        # Synchronized UTC Timecode (Top Right)
-        cv2.putText(out, timecode_str, (w - 185, 19), cv2.FONT_HERSHEY_SIMPLEX, 0.40, (200, 220, 255), 1, cv2.LINE_AA)
+        # Top Right: UTC Timecode (right-aligned safely at w - 175)
+        cv2.putText(out, timecode_str, (w - 175, 17), cv2.FONT_HERSHEY_SIMPLEX, 0.37, (180, 210, 240), 1, cv2.LINE_AA)
 
-        # Bottom Left: Venue Name & Optics
-        venue_text = f"{self.venue_name} // {info['optical']}"
-        cv2.putText(out, venue_text, (14, h - 9), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (140, 160, 190), 1, cv2.LINE_AA)
+        # Bottom Left: Venue & Optical Specs
+        venue_text = f"ADELAIDE METRO // {info['optical']}"
+        cv2.putText(out, venue_text, (12, h - 7), cv2.FONT_HERSHEY_SIMPLEX, 0.34, (130, 150, 175), 1, cv2.LINE_AA)
 
         # Bottom Right: Analytics Count
-        count_color = (80, 230, 140) if detected_count < 10 else ((0, 200, 255) if detected_count < 18 else (60, 70, 255))
-        analytics_text = f"YOLOv8 LIVE: {detected_count:02d} PERSONS DETECTED"
-        cv2.putText(out, analytics_text, (w - 230, h - 9), cv2.FONT_HERSHEY_SIMPLEX, 0.36, count_color, 1, cv2.LINE_AA)
+        count_color = (80, 230, 140) if detected_count < 40 else ((0, 200, 255) if detected_count < 75 else (60, 70, 255))
+        analytics_text = f"YOLOv8: {detected_count:02d} DETECTED"
+        cv2.putText(out, analytics_text, (w - 165, h - 7), cv2.FONT_HERSHEY_SIMPLEX, 0.36, count_color, 1, cv2.LINE_AA)
 
-        # Optical Reticle / Crosshair in Center
+        # Center Optical Crosshair (Subtle, professional)
         cx, cy = w // 2, h // 2
-        cv2.line(out, (cx - 14, cy), (cx + 14, cy), (0, 220, 255), 1)
-        cv2.line(out, (cx, cy - 14), (cx, cy + 14), (0, 220, 255), 1)
-        cv2.circle(out, (cx, cy), 5, (0, 220, 255), 1)
+        cv2.line(out, (cx - 10, cy), (cx + 10, cy), (0, 200, 230), 1)
+        cv2.line(out, (cx, cy - 10), (cx, cy + 10), (0, 200, 230), 1)
 
         # Tactical Corner Crop Brackets
-        c_len = 12
-        cv2.line(out, (12, 38), (12 + c_len, 38), (80, 120, 160), 1)
-        cv2.line(out, (12, 38), (12, 38 + c_len), (80, 120, 160), 1)
-        cv2.line(out, (w - 12, 38), (w - 12 - c_len, 38), (80, 120, 160), 1)
-        cv2.line(out, (w - 12, 38), (w - 12, 38 + c_len), (80, 120, 160), 1)
-        cv2.line(out, (12, h - 34), (12 + c_len, h - 34), (80, 120, 160), 1)
-        cv2.line(out, (12, h - 34), (12, h - 34 - c_len), (80, 120, 160), 1)
-        cv2.line(out, (w - 12, h - 34), (w - 12 - c_len, h - 34), (80, 120, 160), 1)
-        cv2.line(out, (w - 12, h - 34), (w - 12, h - 34 - c_len), (80, 120, 160), 1)
+        c_len = 10
+        cv2.line(out, (10, 34), (10 + c_len, 34), (70, 100, 130), 1)
+        cv2.line(out, (10, 34), (10, 34 + c_len), (70, 100, 130), 1)
+        cv2.line(out, (w - 10, 34), (w - 10 - c_len, 34), (70, 100, 130), 1)
+        cv2.line(out, (w - 10, 34), (w - 10, 34 + c_len), (70, 100, 130), 1)
+        cv2.line(out, (10, h - 30), (10 + c_len, h - 30), (70, 100, 130), 1)
+        cv2.line(out, (10, h - 30), (10, h - 30 - c_len), (70, 100, 130), 1)
+        cv2.line(out, (w - 10, h - 30), (w - 10 - c_len, h - 30), (70, 100, 130), 1)
+        cv2.line(out, (w - 10, h - 30), (w - 10, h - 30 - c_len), (70, 100, 130), 1)
 
         return out
 
@@ -205,60 +204,53 @@ class AutonomousVideoStreamer:
                 frame = cv2.resize(frame, (640, 360))
                 current_raw_frames[cam_id] = frame
 
-            # Process CAM 01 with YOLOv8 Deep Field Detector
-            cam1_raw = current_raw_frames.get("cam1")
-            annotated_cam1 = cam1_raw
-            if cam1_raw is not None:
+            # Multi-Camera High-Speed YOLOv8 Inference Pipeline (All 4 Cameras)
+            zone_areas = {"cam1": 120.0, "cam2": 80.0, "cam3": 65.0, "cam4": 300.0}
+            cam_keys = ["cam1", "cam2", "cam3", "cam4"]
+
+            # Interleaved round-robin neural inference: 1 camera per tick for maximum 25 FPS smoothness
+            infer_cid = cam_keys[tick % len(cam_keys)]
+            raw_target = current_raw_frames.get(infer_cid)
+
+            if not hasattr(self, '_cached_annotations'):
+                self._cached_annotations = {}
+
+            if raw_target is not None and self.detector is not None:
                 try:
-                    readings, annotated = self.detector.process_frame(cam1_raw)
-                    if annotated is not None:
-                        annotated_cam1 = annotated
-                    if readings:
-                        camera_counts["cam1"] = readings[0].get("person_count", 8)
+                    dets = self.detector.detect_persons(raw_target)
+                    count = len(dets)
+                    camera_counts[infer_cid] = count
+                    area = zone_areas.get(infer_cid, 100.0)
+                    density = round(count / area, 3)
+                    beh = "surge" if density > 1.2 else ("running" if density > 0.8 else "normal")
+                    ann = self.detector.render_tactical_hud(raw_target, dets, count, density, beh)
+                    self._cached_annotations[infer_cid] = ann
 
-                    # Periodic telemetry ingestion into risk engine
+                    # Ingest into risk engine only when demo scenario is not active
                     now_ts = time.time()
-                    if self.risk_engine and (now_ts - last_ingest_time >= 1.0):
+                    if self.risk_engine and not getattr(self, 'scenario_active', False) and (now_ts - last_ingest_time >= 0.5):
                         last_ingest_time = now_ts
-                        for r in readings:
-                            self.risk_engine.ingest(
-                                zone_id=r["zone_id"],
-                                person_count=r["person_count"],
-                                density=r["density"],
-                                behaviour_flag=r["behaviour_flag"],
-                                sensor_status=r["sensor_status"],
-                                timestamp=r["timestamp"]
-                            )
+                        self.risk_engine.ingest(
+                            zone_id=self.channels[infer_cid]["zone"],
+                            person_count=count,
+                            density=density,
+                            behaviour_flag=beh,
+                            sensor_status="ok",
+                            timestamp=now_dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+                        )
                 except Exception:
-                    annotated_cam1 = cam1_raw
+                    pass
 
-            # Apply standardized HUD to CAM 01
-            annotated_cam1 = self._apply_unified_cctv_hud(
-                annotated_cam1, self.channels["cam1"], camera_counts["cam1"], timecode_str
-            )
-
-            processed_frames = {"cam1": annotated_cam1}
-
-            # Process CAM 02, CAM 03, CAM 04 with HUD + Pedestrian Analytics
-            for cid in ("cam2", "cam3", "cam4"):
-                cf = current_raw_frames.get(cid)
-                if cf is not None:
-                    # Alternating lightweight pedestrian detection
-                    if tick % 3 == 0:
-                        try:
-                            reads, ann = self.detector.process_frame(cf)
-                            if ann is not None:
-                                cf = ann
-                            if reads:
-                                camera_counts[cid] = reads[0].get("person_count", camera_counts[cid])
-                        except Exception:
-                            pass
-
-                    # Apply unified HUD
-                    cf_annotated = self._apply_unified_cctv_hud(
-                        cf, self.channels[cid], camera_counts[cid], timecode_str
+            # Apply standardized HUD to all 4 cameras using their latest annotated frame
+            processed_frames = {}
+            for cid in cam_keys:
+                ann_frame = self._cached_annotations.get(cid)
+                if ann_frame is None:
+                    ann_frame = current_raw_frames.get(cid)
+                if ann_frame is not None:
+                    processed_frames[cid] = self._apply_unified_cctv_hud(
+                        ann_frame, self.channels[cid], camera_counts[cid], timecode_str
                     )
-                    processed_frames[cid] = cf_annotated
 
             # Build 2x2 QUAD-VIEW composite matrix (800x450)
             try:
@@ -291,10 +283,10 @@ class AutonomousVideoStreamer:
             except Exception:
                 pass
 
-            # Encode frames to JPEG bytes
+            # Encode frames to JPEG bytes (fast compression)
             with self.lock:
                 for k, img in processed_frames.items():
-                    _, buf = cv2.imencode(".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, 78])
+                    _, buf = cv2.imencode(".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, 70])
                     self.latest_frames[k] = buf.tobytes()
                     self.latest_seq[k] += 1
 
